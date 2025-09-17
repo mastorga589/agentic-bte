@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "agentic-bte": {
+      "command": "python",
+      "args": ["-m", "agentic_bte.servers.mcp.server"],
+      "cwd": "/Users/mastorga/Documents/agentic-bte",
+      "env": {
+        "PYTHONPATH": "/Users/mastorga/Documents/agentic-bte",
+        "AGENTIC_BTE_OPENAI_API_KEY": "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",
+        "AGENTIC_BTE_OPENAI_MODEL": "gpt-4o",
+        "AGENTIC_BTE_DEBUG_MODE": "false",
+        "AGENTIC_BTE_LOG_LEVEL": "INFO",
+        "AGENTIC_BTE_ENABLE_SEMANTIC_CLASSIFICATION": "true",
+        "AGENTIC_BTE_ENABLE_ENTITY_NAME_RESOLUTION": "true",
+        "AGENTIC_BTE_ENABLE_QUERY_OPTIMIZATION": "true",
+        "AGENTIC_BTE_MAX_SUBQUERIES": "10",
+        "AGENTIC_BTE_CONFIDENCE_THRESHOLD": "0.7",
+        "AGENTIC_BTE_MAX_RESULTS_PER_QUERY": "50"
+      }
+    }
+  }
+}
