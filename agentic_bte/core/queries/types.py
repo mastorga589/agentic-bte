@@ -1,4 +1,138 @@
 """
+Query Types - Shared query type definitions
+
+This module provides query type enums and related functionality for
+biomedical query classification and optimization.
+
+Migrated from original BTE-LLM implementation.
+"""
+
+from enum import Enum
+from typing import Dict, List, Optional
+
+
+class QueryType(Enum):
+    """Types of biomedical queries for strategic planning and optimization"""
+    DRUG_MECHANISM = "drug_mechanism"
+    DISEASE_TREATMENT = "disease_treatment" 
+    GENE_FUNCTION = "gene_function"
+    PATHWAY_ANALYSIS = "pathway_analysis"
+    DRUG_TARGET = "drug_target"
+    DISEASE_GENE = "disease_gene"
+    PHENOTYPE_GENE = "phenotype_gene"
+    DRUG_DISCOVERY = "drug_discovery"
+    BIOMARKER_DISCOVERY = "biomarker_discovery"
+    UNKNOWN = "unknown"
+
+    def __str__(self) -> str:
+        return self.value
+    
+    @classmethod
+    def from_string(cls, query_type_str: str) -> 'QueryType':
+        """Convert string to QueryType enum"""
+        for query_type in cls:
+            if query_type.value == query_type_str.lower():
+                return query_type
+        return cls.UNKNOWN
+    
+    @classmethod
+    def get_all_types(cls) -> List[str]:
+        """Get all query type values as strings"""
+        return [qt.value for qt in cls if qt != cls.UNKNOWN]
+
+
+class QueryComplexity(Enum):
+    """Query complexity levels for optimization strategies"""
+    SIMPLE = "simple"        # Single-hop queries
+    MODERATE = "moderate"    # 2-3 hop queries
+    COMPLEX = "complex"      # Multi-step, requires decomposition
+    VERY_COMPLEX = "very_complex"  # Requires advanced planning
+
+
+class OptimizationStrategy(Enum):
+    """Query optimization strategies"""
+    DIRECT = "direct"                    # Direct single query
+    DECOMPOSITION = "decomposition"      # Break into subqueries
+    BIDIRECTIONAL = "bidirectional"      # Forward and backward search
+    SEMANTIC_CLUSTERING = "semantic_clustering"  # Group related entities
+    PARALLEL = "parallel"                # Execute subqueries in parallel
+    ITERATIVE = "iterative"              # Iterative refinement
+
+
+# Query type to typical complexity mapping
+QUERY_COMPLEXITY_MAP: Dict[QueryType, QueryComplexity] = {
+    QueryType.DRUG_TARGET: QueryComplexity.SIMPLE,
+    QueryType.DISEASE_GENE: QueryComplexity.MODERATE,
+    QueryType.GENE_FUNCTION: QueryComplexity.MODERATE,
+    QueryType.DISEASE_TREATMENT: QueryComplexity.MODERATE,
+    QueryType.DRUG_MECHANISM: QueryComplexity.COMPLEX,
+    QueryType.PATHWAY_ANALYSIS: QueryComplexity.COMPLEX,
+    QueryType.PHENOTYPE_GENE: QueryComplexity.COMPLEX,
+    QueryType.DRUG_DISCOVERY: QueryComplexity.VERY_COMPLEX,
+    QueryType.BIOMARKER_DISCOVERY: QueryComplexity.VERY_COMPLEX,
+    QueryType.UNKNOWN: QueryComplexity.MODERATE,
+}
+
+# Optimization strategy recommendations by complexity
+COMPLEXITY_STRATEGY_MAP: Dict[QueryComplexity, List[OptimizationStrategy]] = {
+    QueryComplexity.SIMPLE: [OptimizationStrategy.DIRECT],
+    QueryComplexity.MODERATE: [OptimizationStrategy.DECOMPOSITION, OptimizationStrategy.PARALLEL],
+    QueryComplexity.COMPLEX: [
+        OptimizationStrategy.DECOMPOSITION, 
+        OptimizationStrategy.BIDIRECTIONAL,
+        OptimizationStrategy.SEMANTIC_CLUSTERING
+    ],
+    QueryComplexity.VERY_COMPLEX: [
+        OptimizationStrategy.DECOMPOSITION,
+        OptimizationStrategy.BIDIRECTIONAL, 
+        OptimizationStrategy.SEMANTIC_CLUSTERING,
+        OptimizationStrategy.ITERATIVE
+    ]
+}
+
+
+def get_recommended_strategies(query_type: QueryType) -> List[OptimizationStrategy]:
+    """
+    Get recommended optimization strategies for a query type
+    
+    Args:
+        query_type: The classified query type
+        
+    Returns:
+        List of recommended optimization strategies
+    """
+    complexity = QUERY_COMPLEXITY_MAP.get(query_type, QueryComplexity.MODERATE)
+    return COMPLEXITY_STRATEGY_MAP.get(complexity, [OptimizationStrategy.DIRECT])
+
+
+def estimate_query_complexity(query_type: QueryType, num_entities: int = 0) -> QueryComplexity:
+    """
+    Estimate query complexity based on type and entity count
+    
+    Args:
+        query_type: The classified query type
+        num_entities: Number of entities in the query
+        
+    Returns:
+        Estimated query complexity
+    """
+    base_complexity = QUERY_COMPLEXITY_MAP.get(query_type, QueryComplexity.MODERATE)
+    
+    # Adjust complexity based on entity count
+    if num_entities > 10:
+        if base_complexity == QueryComplexity.SIMPLE:
+            return QueryComplexity.MODERATE
+        elif base_complexity == QueryComplexity.MODERATE:
+            return QueryComplexity.COMPLEX
+        elif base_complexity == QueryComplexity.COMPLEX:
+            return QueryComplexity.VERY_COMPLEX
+    elif num_entities > 5:
+        if base_complexity == QueryComplexity.SIMPLE:
+            return QueryComplexity.MODERATE
+    
+    return base_complexity
+
+"""
 Query Types - Biomedical Query Classification
 
 This module provides query type definitions and enums for categorizing

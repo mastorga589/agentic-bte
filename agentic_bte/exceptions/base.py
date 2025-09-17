@@ -96,3 +96,29 @@ class ProcessingTimeoutError(AgenticBTEError):
         """
         super().__init__(message, details, original_error)
         self.timeout_seconds = timeout_seconds
+
+
+class KnowledgeRetrievalError(AgenticBTEError):
+    """Raised when knowledge retrieval operations fail"""
+    
+    def __init__(
+        self,
+        message: str,
+        query: Optional[str] = None,
+        service: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        original_error: Optional[Exception] = None
+    ):
+        """
+        Initialize knowledge retrieval error
+        
+        Args:
+            message: Error message
+            query: The query that failed (if applicable)
+            service: The service that failed (if applicable)
+            details: Optional additional error details
+            original_error: Optional original exception
+        """
+        super().__init__(message, details, original_error)
+        self.query = query
+        self.service = service

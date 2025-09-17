@@ -97,7 +97,7 @@ all = [
 "Bug Reports" = "https://github.com/example/agentic-bte/issues"
 
 [project.scripts]
-agentic-bte-mcp = "agentic_bte.servers.mcp.server:main"
+agentic-bte-mcp = "agentic_bte.servers.mcp.server:run_server"
 agentic-bte-setup = "agentic_bte.scripts.setup:main"
 
 [tool.setuptools.packages.find]
