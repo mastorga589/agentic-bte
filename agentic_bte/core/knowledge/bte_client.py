@@ -48,12 +48,27 @@ class BTEClient:
         
         # Setup session with retry strategy
         self.session = requests.Session()
-        retry_strategy = Retry(
-            total=3,
-            status_forcelist=[429, 500, 502, 503, 504],
-            method_whitelist=["HEAD", "GET", "OPTIONS", "POST"],
-            backoff_factor=1
-        )
+        
+        # Handle urllib3 version compatibility for Retry parameters
+        retry_kwargs = {
+            "total": 3,
+            "status_forcelist": [429, 500, 502, 503, 504],
+            "backoff_factor": 1
+        }
+        
+        # Use allowed_methods for urllib3 >= 1.26, method_whitelist for older versions
+        try:
+            # Try with the new parameter name first
+            retry_strategy = Retry(
+                allowed_methods=["HEAD", "GET", "OPTIONS", "POST"],
+                **retry_kwargs
+            )
+        except TypeError:
+            # Fallback to old parameter name for backward compatibility
+            retry_strategy = Retry(
+                method_whitelist=["HEAD", "GET", "OPTIONS", "POST"],
+                **retry_kwargs
+            )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
