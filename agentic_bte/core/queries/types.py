@@ -8,7 +8,8 @@ Migrated from original BTE-LLM implementation.
 """
 
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
+from dataclasses import dataclass
 
 
 class QueryType(Enum):
@@ -20,6 +21,9 @@ class QueryType(Enum):
     DRUG_TARGET = "drug_target"
     DISEASE_GENE = "disease_gene"
     PHENOTYPE_GENE = "phenotype_gene"
+    PROTEIN_FUNCTION = "protein_function"
+    GENE_DISEASE = "gene_disease"
+    DRUG_DISEASE = "drug_disease"
     DRUG_DISCOVERY = "drug_discovery"
     BIOMARKER_DISCOVERY = "biomarker_discovery"
     UNKNOWN = "unknown"
@@ -132,38 +136,7 @@ def estimate_query_complexity(query_type: QueryType, num_entities: int = 0) -> Q
     
     return base_complexity
 
-"""
-Query Types - Biomedical Query Classification
-
-This module provides query type definitions and enums for categorizing
-different types of biomedical research questions for optimal processing.
-"""
-
-from enum import Enum
-from typing import Dict, List, Set
-from dataclasses import dataclass
-
-
-class QueryType(Enum):
-    """
-    Types of biomedical queries for strategic planning and optimization
-    
-    Each query type corresponds to a different approach for query decomposition,
-    execution planning, and result processing.
-    """
-    DRUG_MECHANISM = "drug_mechanism"           # How does drug X work/affect Y?
-    DISEASE_TREATMENT = "disease_treatment"     # What treats disease X?
-    GENE_FUNCTION = "gene_function"             # What does gene X do?
-    PATHWAY_ANALYSIS = "pathway_analysis"       # What pathways are involved in X?
-    DRUG_TARGET = "drug_target"                 # What does drug X target?
-    DISEASE_GENE = "disease_gene"               # What genes cause disease X?
-    PHENOTYPE_GENE = "phenotype_gene"           # What genes affect phenotype X?
-    PROTEIN_FUNCTION = "protein_function"       # What does protein X do?
-    GENE_DISEASE = "gene_disease"               # What diseases does gene X cause?
-    DRUG_DISEASE = "drug_disease"               # What diseases does drug X treat?
-    UNKNOWN = "unknown"                         # Query type could not be determined
-
-
+# Additional query type information for enhanced classification
 @dataclass
 class QueryTypeInfo:
     """Information about a specific query type including processing strategies"""
@@ -175,7 +148,7 @@ class QueryTypeInfo:
     complexity_score: int  # 1-5, where 5 is most complex
 
 
-# Query type information registry
+# Query type information registry for enhanced classification
 QUERY_TYPE_INFO: Dict[QueryType, QueryTypeInfo] = {
     QueryType.DRUG_MECHANISM: QueryTypeInfo(
         query_type=QueryType.DRUG_MECHANISM,

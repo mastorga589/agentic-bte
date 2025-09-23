@@ -24,7 +24,42 @@ from .bte_client import BTEClient
 logger = logging.getLogger(__name__)
 
 
-class TRAPIQueryBuilder:
+# Legacy convenience functions (kept for backward compatibility)
+def build_trapi_query_legacy(query: str, entity_data: Dict[str, str] = None, 
+                            failed_trapis: List[Dict] = None, 
+                            openai_api_key: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Legacy convenience function - use TRAPIQueryBuilder.build_trapi_query instead
+    """
+    builder = TRAPIQueryBuilder(openai_api_key)
+    return builder.build_trapi_query(query, entity_data, failed_trapis)
+
+
+def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
+    """
+    Validate TRAPI query structure
+    
+    Args:
+        trapi_query: TRAPI query to validate
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    from ...config.settings import get_settings
+    settings = get_settings()
+    # Simple validation without requiring full TRAPIQueryBuilder initialization
+    try:
+        if "message" not in trapi_query:
+            return False, "Missing 'message' key"
+        message = trapi_query["message"]
+        if "query_graph" not in message:
+            return False, "Missing 'query_graph' key in message"
+        query_graph = message["query_graph"]
+        if "nodes" not in query_graph or "edges" not in query_graph:
+            return False, "Missing 'nodes' or 'edges' in query_graph"
+        return True, "Valid TRAPI query"
+    except Exception as e:
+        return False, f"Validation error: {str(e)}"
     """
     TRAPI Query Builder for BioThings Explorer
     
@@ -45,7 +80,7 @@ class TRAPIQueryBuilder:
         self.openai_api_key = openai_api_key or self.settings.openai_api_key
         
         if not self.openai_api_key:
-            raise ExternalServiceError("OpenAI API key is required for TRAPI query building")
+            raise ValueError("OpenAI API key is required for TRAPI query building")
         
         # Initialize LLM
         self.llm = ChatOpenAI(
@@ -117,13 +152,13 @@ class TRAPIQueryBuilder:
                     return json.loads(extracted_dict)
                 except json.JSONDecodeError as e:
                     logger.error(f"JSON parsing error: {e}")
-                    logger.debug(f"Attempted to parse: {extracted_dict}")
+                    logger.error(f"Attempted to parse: {extracted_dict}")
         
         # Try parsing the entire string as JSON
         try:
             return json.loads(raw_string)
         except json.JSONDecodeError:
-            logger.error(f"Could not parse as JSON: {raw_string[:200]}...")
+            logger.error(f"Could not parse as JSON: {raw_string}")
             return {"error": "could not parse dict"}
     
     def find_predicates(self, subject: str, obj: str) -> List[str]:
@@ -276,7 +311,7 @@ class TRAPIQueryBuilder:
         Returns:
             TRAPI query dictionary
         """
-        logger.debug("Building TRAPI structure...")
+        print("\\n\\n Building trapi....")
         
         # TRAPI example for reference
         trapi_example = {
@@ -378,7 +413,7 @@ class TRAPIQueryBuilder:
                 logger.error("Could not determine subject/object nodes")
                 return {"error": "Could not determine subject/object nodes"}
             
-            logger.debug(f"Identified subject/object: {json.dumps(subject_object)}")
+            print(f"\\n\\nIdentified subject/object: {json.dumps(subject_object)}")
             
             # Step 2: Find available predicates
             predicate_list = self.find_predicates(
@@ -390,12 +425,12 @@ class TRAPIQueryBuilder:
             failed_predicates = set()
             for trapi_query in failed_trapis:
                 try:
-                    edges = (trapi_query.get("message", {})
-                            .get("query_graph", {})
-                            .get("edges", {}))
-                    for edge_data in edges.values():
-                        predicates = edge_data.get("predicates", [])
-                        failed_predicates.update(predicates)
+                    predicates = (trapi_query.get("message", {})
+                                .get("query_graph", {})
+                                .get("edges", {})
+                                .get("e01", {})
+                                .get("predicates", []))
+                    failed_predicates.update(predicates)
                 except Exception as e:
                     logger.warning(f"Error extracting predicates from failed_trapis: {e}")
             
@@ -453,27 +488,3 @@ def build_trapi_query(query: str, entity_data: Optional[Dict[str, str]] = None,
     """
     builder = TRAPIQueryBuilder(openai_api_key)
     return builder.build_trapi_query(query, entity_data, failed_trapis)
-
-
-def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
-    """
-    Validate TRAPI query structure
-    
-    Args:
-        trapi_query: TRAPI query to validate
-        
-    Returns:
-        Tuple of (is_valid, error_message)
-    """
-    try:
-        if "message" not in trapi_query:
-            return False, "Missing 'message' key"
-        message = trapi_query["message"]
-        if "query_graph" not in message:
-            return False, "Missing 'query_graph' key in message"
-        query_graph = message["query_graph"]
-        if "nodes" not in query_graph or "edges" not in query_graph:
-            return False, "Missing 'nodes' or 'edges' in query_graph"
-        return True, "Valid TRAPI query"
-    except Exception as e:
-        return False, f"Validation error: {str(e)}"

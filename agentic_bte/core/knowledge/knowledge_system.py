@@ -97,7 +97,7 @@ class BiomedicalKnowledgeSystem:
             
             # Step 3: Build TRAPI query
             logger.info("Step 3: Building TRAPI query...")
-            trapi_query = self.trapi_builder.build_query(query, entity_ids)
+            trapi_query = self.trapi_builder.build_trapi_query(query, entity_ids)
             
             if "error" in trapi_query:
                 return {
@@ -197,7 +197,7 @@ class BiomedicalKnowledgeSystem:
         Returns:
             TRAPI query dictionary
         """
-        return self.trapi_builder.build_query(query, entity_data, failed_trapis)
+        return self.trapi_builder.build_trapi_query(query, entity_data, failed_trapis)
     
     def execute_trapi_only(self, trapi_query: Dict[str, Any], 
                           max_results: int = 50, k: int = 5) -> Tuple[List[Dict], Dict[str, str], Dict[str, Any]]:
