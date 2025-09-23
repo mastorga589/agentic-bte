@@ -21,6 +21,8 @@ from .query_tool import (
     get_plan_and_execute_tool_definition,
     handle_plan_and_execute
 )
+# Optimization tools are now integrated into plan_and_execute_query
+# from .optimization_tools import (...)
 
 __all__ = [
     "get_bio_ner_tool_definition",

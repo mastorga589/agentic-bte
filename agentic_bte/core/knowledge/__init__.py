@@ -6,23 +6,9 @@ including entity recognition, linking, TRAPI query building, and BTE API integra
 Migrated and enhanced from original BTE-LLM implementations.
 """
 
-# Core classes
-from .entity_recognition import (
-    BioNERTool,
-    BiomedicalEntityRecognizer,
-    ExtractedEntity,
-    LinkedEntity,
-    extract_biomedical_entities,
-    classify_entity_types
-)
-
-from .entity_linking import (
-    EntityLinker,
-    EntityResolver,
-    LinkingCandidate,
-    link_entities_to_kb,
-    resolve_entity_names
-)
+# Core classes - using updated architecture
+from ..entities.bio_ner import BioNERTool
+from ..entities.linking import EntityLinker
 
 from .trapi import (
     TRAPIQueryBuilder,
@@ -36,11 +22,10 @@ from .bte_client import (
 )
 
 from .knowledge_system import (
-    IntegratedKnowledgeSystem,
-    KnowledgeQuery,
-    KnowledgeResult,
-    query_biomedical_knowledge,
-    batch_query_biomedical_knowledge
+    BiomedicalKnowledgeSystem,
+    process_query,
+    extract_biomedical_entities,
+    classify_biomedical_query
 )
 
 # Version info
@@ -49,20 +34,9 @@ __author__ = "Agentic BTE Development Team"
 
 # Main exports
 __all__ = [
-    # Entity Recognition
+    # Entity Recognition & Linking
     "BioNERTool",
-    "BiomedicalEntityRecognizer", 
-    "ExtractedEntity",
-    "LinkedEntity",
-    "extract_biomedical_entities",
-    "classify_entity_types",
-    
-    # Entity Linking
     "EntityLinker",
-    "EntityResolver",
-    "LinkingCandidate",
-    "link_entities_to_kb",
-    "resolve_entity_names",
     
     # TRAPI Query Building
     "TRAPIQueryBuilder",
@@ -73,10 +47,9 @@ __all__ = [
     "execute_trapi_query",
     "get_meta_knowledge_graph",
     
-    # Integrated System
-    "IntegratedKnowledgeSystem",
-    "KnowledgeQuery",
-    "KnowledgeResult", 
-    "query_biomedical_knowledge",
-    "batch_query_biomedical_knowledge",
+    # Knowledge System
+    "BiomedicalKnowledgeSystem",
+    "process_query",
+    "extract_biomedical_entities",
+    "classify_biomedical_query",
 ]
