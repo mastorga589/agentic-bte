@@ -41,6 +41,8 @@ from .tools.query_tool import (
     get_plan_and_execute_tool_definition,
     handle_plan_and_execute
 )
+# Optimization tools are now integrated into plan_and_execute_query
+# from .tools.optimization_tools import (...)
 from ...config.settings import get_settings
 
 # Configure logging
