@@ -144,7 +144,7 @@ class BTEClient:
         
         try:
             logger.info("Fetching meta knowledge graph from BTE")
-            response = self._make_request("metakg")
+            response = self._make_request("meta_knowledge_graph")
             meta_kg = response.json()
             
             # Update cache
@@ -175,8 +175,8 @@ class BTEClient:
             logger.info("Executing TRAPI query against BTE")
             logger.debug(f"TRAPI query: {json.dumps(trapi_query, indent=2)}")
             
-            # Use v1/query endpoint for TRAPI queries
-            response = self._make_request("v1/query", method="POST", data=trapi_query)
+            # Use query endpoint for TRAPI queries
+            response = self._make_request("query", method="POST", data=trapi_query)
             result = response.json()
             
             # Check for BTE-specific errors in response
