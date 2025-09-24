@@ -338,8 +338,30 @@ class TRAPIQueryBuilder:
             
             Please make sure that only one node in the TRAPI query has the "ids" field (either "n0" or "n1" but NOT both); 
             decide which one would result in more useful results (for "Which of these genes are involved in a physiological process?", including the IDs for Gene would result in more useful results. In this case DO NOT include the ID for Physiological Process)
+            
+            CRITICAL ENTITY SELECTION GUIDANCE:
+            When you have multiple entities that could match a node type, choose the most specific and relevant one:
+            
+            1. For Disease nodes: Choose the most specific disease mentioned in the query
+               - "Age related macular degeneration" > "Age" > generic disease terms
+               - "breast cancer" > "cancer" > "disease"
+            
+            2. For SmallMolecule nodes: Choose specific drug names over general terms
+               - "aspirin" > "NSAIDs" > "drugs"
+               - "metformin" > "antidiabetics" > "medications"
+            
+            3. For Gene nodes: Choose specific gene names over general terms
+               - "BRCA1" > "tumor suppressor genes" > "genes"
+            
+            4. Always analyze the query context to determine which entity is most relevant
+               - Query: "What drugs treat age-related macular degeneration?"
+               - Use: "macular degeneration" ID (specific) not "Age" ID (too general)
+            
+            5. If you need multiple entities for a complex query, include them strategically
+               - For multi-hop queries, you may need entities for multiple nodes
+               - Always ensure the primary focus entity gets the most specific ID
 
-            Using these, output a JSON object containing the completed TRAPI query. 
+            Using these guidelines, output a JSON object containing the completed TRAPI query.
         """
         
         result = self.invoke_with_retries(trapi_prompt, self.extract_dict)
@@ -351,15 +373,443 @@ class TRAPIQueryBuilder:
             logger.error(f"Failed to build TRAPI query for: {query}")
             return {"error": "Could not build TRAPI query"}
     
+    def extract_context_entities(self, query: str, accumulated_results: List[Dict[str, Any]], target_type: str) -> List[str]:
+        """
+        Extract relevant entity IDs from accumulated results based on query context
+        
+        Args:
+            query: Natural language query (e.g., "What genes do these drugs target?")
+            accumulated_results: Previous query results to analyze
+            target_type: Target biolink type to extract (e.g., "SmallMolecule", "Gene")
+            
+        Returns:
+            List of entity IDs matching the target type
+        """
+        entity_ids = set()
+        
+        # Convert biolink type to match result format
+        type_variations = {
+            "SmallMolecule": ["small molecule", "drug", "compound", "chemical"],
+            "Gene": ["gene", "protein", "polypeptide"],
+            "Disease": ["disease", "condition", "disorder"],
+            "PhysiologicalProcess": ["process", "pathway", "function"],
+            "PhenotypicFeature": ["phenotype", "trait", "feature"]
+        }
+        
+        # Determine which field to extract from (subject or object)
+        # If query asks about "these drugs", we want to extract drug subjects/objects
+        query_lower = query.lower()
+        extract_from_subject = False
+        extract_from_object = False
+        
+        # Analyze query to determine extraction strategy
+        if any(term in query_lower for term in ["these", "those", "identified", "found"]):
+            # Context-referencing query
+            target_terms = type_variations.get(target_type, [target_type.lower()])
+            
+            for term in target_terms:
+                if term in query_lower:
+                    extract_from_subject = True
+                    extract_from_object = True
+                    break
+        
+        # Extract entity IDs from accumulated results
+        for result in accumulated_results:
+            if extract_from_subject and 'subject' in result:
+                # Check if subject matches target type context
+                subject = result['subject']
+                if self._is_relevant_entity(subject, target_type, type_variations):
+                    # Try to find corresponding ID in entity mappings
+                    entity_id = self._find_entity_id(subject)
+                    if entity_id:
+                        entity_ids.add(entity_id)
+            
+            if extract_from_object and 'object' in result:
+                # Check if object matches target type context
+                obj = result['object']
+                if self._is_relevant_entity(obj, target_type, type_variations):
+                    # Try to find corresponding ID
+                    entity_id = self._find_entity_id(obj)
+                    if entity_id:
+                        entity_ids.add(entity_id)
+        
+        result_list = list(entity_ids)[:10]  # Limit to 10 entities for batch queries
+        logger.info(f"Extracted {len(result_list)} context entities of type {target_type} for batch query")
+        
+        return result_list
+    
+    def _is_relevant_entity(self, entity_name: str, target_type: str, type_variations: Dict[str, List[str]]) -> bool:
+        """
+        Check if an entity name is relevant to the target type
+        
+        Args:
+            entity_name: Name of the entity
+            target_type: Target biolink type
+            type_variations: Dictionary of type variations
+            
+        Returns:
+            True if entity is relevant to target type
+        """
+        entity_lower = entity_name.lower()
+        target_terms = type_variations.get(target_type, [target_type.lower()])
+        
+        # For drugs/small molecules, check if it's a known drug name pattern
+        if target_type == "SmallMolecule":
+            # Common drug name patterns or known drugs
+            drug_indicators = [
+                "mab",  # monoclonal antibodies
+                "ine", "ole", "ide", "ate",  # common drug suffixes
+                "aflib", "ranibi", "pegap",  # specific AMD drugs
+            ]
+            if any(indicator in entity_lower for indicator in drug_indicators):
+                return True
+                
+        # For genes, check if it matches gene name patterns
+        elif target_type == "Gene":
+            # Gene name patterns (uppercase, short names)
+            if (len(entity_name) <= 10 and 
+                (entity_name.isupper() or any(c.isupper() for c in entity_name))):
+                return True
+        
+        # Default: check against type variations
+        return any(term in entity_lower for term in target_terms)
+    
+    def _find_entity_id(self, entity_name: str) -> Optional[str]:
+        """
+        Find entity ID for a given entity name using common biomedical ID patterns
+        
+        Args:
+            entity_name: Name of the entity
+            
+        Returns:
+            Entity ID if found, None otherwise
+        """
+        # This is a simplified approach - in practice, you might want to
+        # maintain a reverse lookup from the original entity extraction
+        
+        # For now, return the entity name as a placeholder ID
+        # In a full implementation, this would look up the proper ID
+        return None  # Will be handled by the batch query builder
+    
+    def build_batch_trapi_query(self, query: str, accumulated_results: List[Dict[str, Any]], 
+                               entity_data: Optional[Dict[str, str]] = None,
+                               failed_trapis: Optional[List[Dict]] = None) -> Dict[str, Any]:
+        """
+        Build a TRAPI query that can handle batch queries based on accumulated context
+        
+        Args:
+            query: Natural language query (e.g., "What genes do these drugs target?")
+            accumulated_results: Previous results to extract context from
+            entity_data: Optional entity name to ID mapping
+            failed_trapis: Optional list of failed TRAPI queries
+            
+        Returns:
+            TRAPI query dictionary with batch entity IDs
+        """
+        if entity_data is None:
+            entity_data = {}
+        if failed_trapis is None:
+            failed_trapis = []
+        
+        logger.info(f"Building batch TRAPI query for: {query}")
+        logger.info(f"Analyzing {len(accumulated_results)} accumulated results for context")
+        
+        try:
+            # Step 1: Identify subject and object nodes
+            subject_object = self.identify_nodes(query)
+            if not subject_object or "error" in subject_object:
+                logger.error("Could not determine subject/object nodes for batch query")
+                return {"error": "Could not determine subject/object nodes"}
+            
+            # Step 2: Determine which entity type to extract from context
+            # If query asks "What genes do these drugs target?", extract drugs from context
+            query_lower = query.lower()
+            context_type = None
+            
+            if any(term in query_lower for term in ["these", "those", "identified", "found"]):
+                # Determine what "these" refers to based on subject/object analysis
+                if "drug" in query_lower or "compound" in query_lower:
+                    context_type = "SmallMolecule"
+                elif "gene" in query_lower and "do" not in query_lower.split("gene")[0]:
+                    context_type = "Gene"
+                elif "disease" in query_lower:
+                    context_type = "Disease"
+            
+            # Step 3: Extract context entities if identified
+            context_entity_ids = []
+            if context_type and accumulated_results:
+                # Extract entity names from accumulated results
+                context_entities = self._extract_entity_names_from_results(accumulated_results, context_type)
+                
+                # Try to find IDs for these entities in entity_data
+                for entity_name in context_entities:
+                    entity_id = entity_data.get(entity_name)
+                    if entity_id:
+                        context_entity_ids.append(entity_id)
+                    else:
+                        # Try variations of the entity name
+                        for mapped_name, mapped_id in entity_data.items():
+                            if (entity_name.lower() in mapped_name.lower() or 
+                                mapped_name.lower() in entity_name.lower()):
+                                context_entity_ids.append(mapped_id)
+                                break
+            
+            # Step 4: Build enhanced entity_data with context
+            enhanced_entity_data = entity_data.copy()
+            if context_entity_ids:
+                # Add context entities to the entity_data for TRAPI building
+                context_key = f"{context_type.lower()}s" if context_type else "entities"
+                enhanced_entity_data[context_key] = context_entity_ids
+                logger.info(f"Added {len(context_entity_ids)} context entities to batch query")
+            
+            # Step 5: Find predicates and build query as usual
+            predicate_list = self.find_predicates(
+                subject_object.get("subject", ""), 
+                subject_object.get("object", "")
+            )
+            
+            if not predicate_list:
+                logger.error("No valid predicates found for batch query")
+                return {"error": "No valid predicates found"}
+            
+            predicate = self.choose_predicate(predicate_list, query)
+            
+            # Step 6: Build enhanced TRAPI structure with batch support
+            trapi = self._build_batch_trapi_structure(
+                query, subject_object, predicate, enhanced_entity_data, 
+                context_entity_ids, failed_trapis
+            )
+            
+            if trapi and "error" not in trapi:
+                logger.info("Successfully built batch TRAPI query")
+                return trapi
+            else:
+                logger.error("Failed to build batch TRAPI query")
+                return {"error": "Could not build batch TRAPI query"}
+            
+        except Exception as e:
+            logger.error(f"Error building batch TRAPI query: {e}")
+            return {"error": f"Batch TRAPI query building failed: {str(e)}"}
+    
+    def _extract_entity_names_from_results(self, results: List[Dict[str, Any]], target_type: str) -> List[str]:
+        """
+        Extract entity names of a specific type from accumulated results
+        
+        Args:
+            results: List of result dictionaries
+            target_type: Target biolink type to extract
+            
+        Returns:
+            List of entity names
+        """
+        entity_names = set()
+        
+        for result in results:
+            # Extract from both subject and object
+            for field in ['subject', 'object']:
+                if field in result:
+                    entity_name = result[field]
+                    if self._is_relevant_entity(entity_name, target_type, {
+                        "SmallMolecule": ["mab", "ine", "ole", "ide", "ate"],
+                        "Gene": ["gene", "protein"],
+                        "Disease": ["disease", "syndrome", "disorder"],
+                    }):
+                        entity_names.add(entity_name)
+        
+        return list(entity_names)[:8]  # Limit for performance
+    
+    def _build_batch_trapi_structure(self, query: str, subject_object: Dict[str, str], 
+                                   predicate: str, entity_data: Dict[str, str],
+                                   context_entity_ids: List[str],
+                                   failed_trapis: List[Dict]) -> Dict[str, Any]:
+        """
+        Build TRAPI structure with support for batch entity IDs
+        
+        Args:
+            query: Original query
+            subject_object: Subject and object types
+            predicate: Selected predicate
+            entity_data: Entity mappings
+            context_entity_ids: List of context entity IDs for batch query
+            failed_trapis: Previously failed queries
+            
+        Returns:
+            Enhanced TRAPI query with batch support
+        """
+        # Use the regular TRAPI builder but with enhanced entity data
+        if context_entity_ids:
+            # Create a modified prompt that emphasizes batch querying
+            batch_query_prompt = f"""You are building a TRAPI query for a batch operation.
+            
+            Original query: "{query}"
+            
+            The query references multiple entities from previous results. You should include 
+            MULTIPLE entity IDs in the appropriate node to create a batch query.
+            
+            Context entity IDs to include: {context_entity_ids}
+            
+            Subject/Object types: {subject_object}
+            Predicate: {predicate}
+            Entity mappings: {entity_data}
+            
+            Build a TRAPI query that includes these entity IDs in the appropriate node 
+            (either n0 or n1) to query for all of them simultaneously.
+            """
+            
+            result = self.invoke_with_retries(batch_query_prompt, self.extract_dict)
+            
+            if result and "error" not in result:
+                # Enhance the result with batch entity IDs if not already included
+                self._inject_batch_ids(result, context_entity_ids, subject_object)
+                return result
+        
+        # Fallback to regular TRAPI building
+        return self.build_trapi_query_structure(query, subject_object, predicate, entity_data, failed_trapis)
+    
+    def _handle_grouped_query(self, query: str, entity_data: Dict[str, str], failed_trapis: List[Dict]) -> Dict[str, Any]:
+        """
+        Handle grouped queries with multiple comma-separated entities
+        
+        Args:
+            query: Grouped query string (e.g., "What genes do donepezil, acetylcarnitine interact with?")
+            entity_data: Available entity mappings
+            failed_trapis: Previously failed queries
+            
+        Returns:
+            TRAPI query dictionary
+        """
+        try:
+            # Extract entity names from the query
+            import re
+            
+            # Find comma-separated list in the query
+            # Pattern matches: "What X do A, B, C Y with?" or "What X do A, B, C Y?"
+            pattern = r"what\s+\w+\s+do\s+([^?]+?)\s+(\w+)\s*(?:with)?\?"
+            match = re.search(pattern, query.lower())
+            
+            if not match:
+                logger.warning(f"Could not parse grouped query: {query}")
+                return {"error": "Could not parse grouped query"}
+            
+            entity_list_str = match.group(1).strip()
+            
+            # Split by comma and clean up entity names
+            entity_names = [name.strip() for name in entity_list_str.split(",")]
+            logger.info(f"Extracted entity names from grouped query: {entity_names}")
+            
+            # Find corresponding entity IDs
+            entity_ids = []
+            for entity_name in entity_names:
+                # Try exact match first
+                if entity_name in entity_data:
+                    entity_ids.append(entity_data[entity_name])
+                else:
+                    # Try fuzzy matching (case insensitive)
+                    for key, value in entity_data.items():
+                        if entity_name.lower() in key.lower() or key.lower() in entity_name.lower():
+                            entity_ids.append(value)
+                            break
+            
+            logger.info(f"Found {len(entity_ids)} entity IDs for grouped query: {entity_ids[:5]}...")  # Show first 5
+            
+            if not entity_ids:
+                logger.warning("No entity IDs found for grouped query")
+                return {"error": "No entity IDs found for grouped query"}
+            
+            # Create a modified query with a single placeholder entity for TRAPI building
+            single_entity_query = query.replace(entity_list_str, entity_names[0])
+            logger.info(f"Building TRAPI with simplified query: {single_entity_query}")
+            
+            # Build base TRAPI query using the simplified query
+            subject_object = self.identify_nodes(single_entity_query)
+            if not subject_object or "error" in subject_object:
+                logger.error("Could not determine subject/object nodes for grouped query")
+                return {"error": "Could not determine subject/object nodes"}
+            
+            # Find predicate
+            predicate_list = self.find_predicates(
+                subject_object.get("subject", ""),
+                subject_object.get("object", "")
+            )
+            
+            if not predicate_list:
+                logger.error("No predicates found for grouped query")
+                return {"error": "No predicates found"}
+            
+            predicate = self.choose_predicate(predicate_list, query)
+            
+            # Build the TRAPI structure
+            trapi_query = self.build_trapi_query_structure(single_entity_query, subject_object, predicate, entity_data, failed_trapis)
+            
+            if trapi_query and "error" not in trapi_query:
+                # Inject multiple entity IDs into the appropriate node
+                self._inject_batch_ids(trapi_query, entity_ids, subject_object)
+                logger.info(f"Successfully built grouped TRAPI query with {len(entity_ids)} entities")
+                return trapi_query
+            else:
+                logger.error("Failed to build base TRAPI query for grouped query")
+                return {"error": "Failed to build base TRAPI query"}
+                
+        except Exception as e:
+            logger.error(f"Error handling grouped query: {e}")
+            return {"error": f"Error handling grouped query: {str(e)}"}
+    
+    def _inject_batch_ids(self, trapi_query: Dict[str, Any], entity_ids: List[str], 
+                         subject_object: Dict[str, str]) -> None:
+        """
+        Inject batch entity IDs into the appropriate TRAPI query node
+        
+        Args:
+            trapi_query: TRAPI query to modify
+            entity_ids: List of entity IDs to inject
+            subject_object: Subject and object type information
+        """
+        try:
+            query_graph = trapi_query.get("message", {}).get("query_graph", {})
+            nodes = query_graph.get("nodes", {})
+            
+            # Determine which node should get the batch IDs
+            # Usually the node that already has IDs or the subject node
+            target_node = None
+            
+            for node_id, node_data in nodes.items():
+                if "ids" in node_data:
+                    target_node = node_id
+                    break
+            
+            # If no node has IDs, use the first node
+            if not target_node and nodes:
+                target_node = list(nodes.keys())[0]
+            
+            # Inject the batch IDs
+            if target_node and entity_ids:
+                if "ids" not in nodes[target_node]:
+                    nodes[target_node]["ids"] = []
+                
+                # Add unique IDs only
+                existing_ids = set(nodes[target_node]["ids"])
+                for entity_id in entity_ids:
+                    if entity_id and entity_id not in existing_ids:
+                        nodes[target_node]["ids"].append(entity_id)
+                        existing_ids.add(entity_id)
+                
+                logger.info(f"Injected {len(entity_ids)} batch entity IDs into node {target_node}")
+            
+        except Exception as e:
+            logger.warning(f"Could not inject batch IDs: {e}")
+    
     def build_trapi_query(self, query: str, entity_data: Optional[Dict[str, str]] = None, 
-                         failed_trapis: Optional[List[Dict]] = None) -> Dict[str, Any]:
+                         failed_trapis: Optional[List[Dict]] = None, 
+                         accumulated_results: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         """
         Main method to build a complete TRAPI query from natural language
+        Enhanced to support batch queries based on accumulated context
         
         Args:
             query: Natural language biomedical query
             entity_data: Optional mapping of entity names to IDs
             failed_trapis: Optional list of previously failed TRAPI queries
+            accumulated_results: Optional accumulated results for context-aware batch queries
             
         Returns:
             Complete TRAPI query dictionary
@@ -369,6 +819,34 @@ class TRAPIQueryBuilder:
         if failed_trapis is None:
             failed_trapis = []
         
+        # Check if this is a context-referencing query that could benefit from batch processing
+        query_lower = query.lower()
+        is_context_query = any(term in query_lower for term in ["these", "those", "identified", "found"])
+        
+        # Also check if this is a grouped query with multiple entities (comma-separated)
+        is_grouped_query = ", " in query and any(term in query_lower for term in ["what", "which", "do", "does"])
+        
+        if is_grouped_query:
+            logger.info("Detected grouped query with multiple entities")
+            logger.info(f"Query: {query}")
+            return self._handle_grouped_query(query, entity_data, failed_trapis)
+        
+        if is_context_query and accumulated_results:
+            logger.info("Detected context-referencing query, attempting batch TRAPI query")
+            logger.info(f"Query: {query}")
+            logger.info(f"Entity data: {entity_data}")
+            logger.info(f"Accumulated results available: {len(accumulated_results)}")
+            
+            batch_result = self.build_batch_trapi_query(query, accumulated_results, entity_data, failed_trapis)
+            
+            # If batch query was successful, return it
+            if batch_result and "error" not in batch_result:
+                logger.info(f"Batch TRAPI query successful: {json.dumps(batch_result, indent=2)}")
+                return batch_result
+            else:
+                logger.warning(f"Batch query failed: {batch_result.get('error', 'Unknown error')}, falling back to regular TRAPI query")
+        
+        # Fallback to regular TRAPI query building (original implementation)
         max_retries = 3
         
         try:
