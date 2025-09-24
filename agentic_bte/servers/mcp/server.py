@@ -38,8 +38,12 @@ from .tools.bte_tool import (
     handle_bte_call
 )
 from .tools.query_tool import (
-    get_plan_and_execute_tool_definition,
-    handle_plan_and_execute
+    get_basic_plan_and_execute_tool_definition,
+    handle_basic_plan_and_execute
+)
+from .tools.metakg_optimizer_tool import (
+    get_metakg_optimizer_tool_definition,
+    handle_metakg_optimizer
 )
 # Optimization tools are now integrated into plan_and_execute_query
 # from .tools.optimization_tools import (...)
@@ -73,7 +77,8 @@ class AgenticBTEMCPServer:
                 Tool(**get_bio_ner_tool_definition()),
                 Tool(**get_trapi_query_tool_definition()),
                 Tool(**get_bte_call_tool_definition()),
-                Tool(**get_plan_and_execute_tool_definition()),
+                Tool(**get_basic_plan_and_execute_tool_definition()),
+                Tool(**get_metakg_optimizer_tool_definition()),
             ]
             
             logger.info(f"Listed {len(tools)} available tools")
@@ -93,8 +98,10 @@ class AgenticBTEMCPServer:
                     result = await handle_trapi_query(arguments)
                 elif name == "call_bte_api":
                     result = await handle_bte_call(arguments)
-                elif name == "plan_and_execute_query":
-                    result = await handle_plan_and_execute(arguments)
+                elif name == "basic_plan_and_execute_query":
+                    result = await handle_basic_plan_and_execute(arguments)
+                elif name == "metakg_aware_optimizer":
+                    result = await handle_metakg_optimizer(arguments)
                 else:
                     error_msg = f"Unknown tool: {name}"
                     logger.error(error_msg)
@@ -196,6 +203,10 @@ def run_server():
     except Exception as e:
         logger.error(f"Failed to start server: {e}")
         sys.exit(1)
+
+
+# Alias for backward compatibility
+MCPServer = AgenticBTEMCPServer
 
 
 if __name__ == "__main__":
