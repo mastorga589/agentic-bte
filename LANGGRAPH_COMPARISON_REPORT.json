@@ -1,0 +1,115 @@
+{
+  "test_timestamp": "2025-09-22 23:27:01",
+  "test_type": "LangGraph Context-Driven vs Static vs Strategy-Based",
+  "context_driven_optimizer": {
+    "description": "Pure contextual reasoning, no predefined strategies",
+    "queries_tested": 5,
+    "successful_executions": 5,
+    "features": {
+      "rdf_knowledge_graphs": true,
+      "contextual_subquery_generation": true,
+      "mechanistic_reasoning": true,
+      "single_hop_queries": true,
+      "iterative_refinement": true,
+      "predefined_strategies": false
+    }
+  },
+  "context_driven_results": {
+    "What drugs can treat Prostatitis by targeting DNA topological change?": {
+      "success": true,
+      "subqueries_executed": 5,
+      "total_results": 60,
+      "execution_time": 47.206562757492065,
+      "completion_reason": "",
+      "final_answer_length": 2208,
+      "subqueries": [
+        "What drugs can treat Prostatitis?",
+        "What genes do the drugs that treat Prostatitis interact with?",
+        "What genes are involved in DNA topological change?",
+        "What genes are involved in DNA topological change?",
+        "What physiological processes are the genes that interact with pharmaceutical preparations involved in?"
+      ]
+    },
+    "What drugs treat diabetes?": {
+      "success": true,
+      "subqueries_executed": 5,
+      "total_results": 100,
+      "execution_time": 61.91491103172302,
+      "completion_reason": "",
+      "final_answer_length": 2751,
+      "subqueries": [
+        "What drugs are used to treat diabetes?",
+        "What drugs are tested by clinical trials for diabetes?",
+        "What are the mechanisms of action of the drugs that treat diabetes?",
+        "What are the mechanisms of action of the drugs that treat diabetes?",
+        "What are the mechanisms of action of the drugs that treat diabetes?"
+      ]
+    },
+    "How does aspirin work to prevent heart disease?": {
+      "success": true,
+      "subqueries_executed": 5,
+      "total_results": 170,
+      "execution_time": 63.384994983673096,
+      "completion_reason": "",
+      "final_answer_length": 2507,
+      "subqueries": [
+        "What physiological processes does aspirin affect?",
+        "What physiological processes are involved in heart disease?",
+        "What physiological processes does aspirin affect that are also affected by heart disorders?",
+        "What physiological processes are involved in heart disease that aspirin affects?",
+        "What physiological processes does aspirin disrupt?"
+      ]
+    },
+    "Which genes are involved in Alzheimer's disease pathogenesis?": {
+      "success": true,
+      "subqueries_executed": 5,
+      "total_results": 200,
+      "execution_time": 53.145187854766846,
+      "completion_reason": "",
+      "final_answer_length": 2400,
+      "subqueries": [
+        "What genes are associated with Alzheimer's disease?",
+        "What genes are associated with Alzheimer's disease?",
+        "What genes are associated with Alzheimer's disease?",
+        "What pathological processes are associated with Alzheimer's disease?",
+        "What genes are associated with Alzheimer's disease?"
+      ]
+    },
+    "What are the mechanisms of action of metformin in treating diabetes?": {
+      "success": true,
+      "subqueries_executed": 5,
+      "total_results": 250,
+      "execution_time": 156.26481294631958,
+      "completion_reason": "",
+      "final_answer_length": 2544,
+      "subqueries": [
+        "What diseases can metformin treat?",
+        "What genes does metformin interact with?",
+        "What physiological processes are the genes that metformin interacts with involved in?",
+        "What physiological processes are affected by the genes that metformin interacts with?",
+        "What physiological processes are affected by the genes that metformin interacts with?"
+      ]
+    }
+  },
+  "comprehensive_comparison": {},
+  "feature_testing": {
+    "contextual_planning": {
+      "success": true,
+      "subqueries": [
+        "What drugs are used to treat diabetes?",
+        "What drugs are tested by clinical trials for diabetes mellitus?",
+        "What are the mechanisms of action of the drugs that can treat diabetes?"
+      ],
+      "completion_reason": "",
+      "total_results": 100
+    }
+  },
+  "key_insights": [
+    "Context-driven approach uses pure LLM-based contextual reasoning",
+    "No predefined strategies - queries generated based on knowledge state",
+    "Uses RDF/Turtle graphs for knowledge accumulation like LangGraph",
+    "Implements mechanistic decomposition through iterative planning",
+    "Single-hop subqueries with contextual refinement",
+    "True adaptive planning based on intermediate results"
+  ]
+}

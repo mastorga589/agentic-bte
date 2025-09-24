@@ -1,0 +1,54 @@
+{
+  "test_timestamp": "2025-09-22 23:03:01",
+  "adaptive_optimizer": {
+    "queries_tested": 5,
+    "successful_plans": 5,
+    "strategies_used": [
+      "mechanistic_chain",
+      "bidirectional",
+      "exploratory"
+    ],
+    "average_subqueries": 1.0
+  },
+  "static_approach": {
+    "queries_tested": 5,
+    "successful_classifications": 5,
+    "query_types_identified": [
+      "drug_mechanism",
+      "disease_gene",
+      "disease_treatment"
+    ],
+    "average_confidence": 0.9299999999999999
+  },
+  "comparison_summary": {
+    "query": "What drugs can treat Prostatitis by targeting DNA topological change?",
+    "adaptive_approach": {
+      "execution_time": 38.54377198219299,
+      "subqueries_executed": 2,
+      "total_results": 10,
+      "replanning_count": 1,
+      "strategy": "mechanistic_chain",
+      "success": true,
+      "final_answer_length": 1936
+    },
+    "static_approach": {
+      "execution_time": 16.173137187957764,
+      "total_results": 0,
+      "query_type": "disease_treatment",
+      "success": true,
+      "classification_confidence": 0.85
+    },
+    "comparison_metrics": {
+      "adaptive_more_results": true,
+      "adaptive_faster": false,
+      "adaptive_more_comprehensive": true,
+      "result_difference": 10,
+      "time_difference": 22.37063479423523
+    }
+  },
+  "key_insights": [
+    "Adaptive approach found more results than static approach",
+    "Adaptive approach used multi-step reasoning with subqueries",
+    "Adaptive approach demonstrated replanning capability"
+  ]
+}

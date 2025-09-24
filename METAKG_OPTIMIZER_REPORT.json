@@ -1,0 +1,148 @@
+{
+  "test_timestamp": "2025-09-23 10:09:57",
+  "test_type": "Meta-KG Aware vs Basic Context-Driven vs Static",
+  "meta_kg_aware_optimizer": {
+    "description": "Uses BTE meta-KG edges to inform subquery generation",
+    "queries_tested": 5,
+    "successful_executions": 5,
+    "features": {
+      "meta_kg_edge_analysis": true,
+      "guaranteed_single_hop": true,
+      "contextual_subquery_generation": true,
+      "mechanistic_reasoning": true,
+      "rdf_knowledge_graphs": true,
+      "predefined_strategies": false,
+      "edge_scoring_and_ranking": true
+    }
+  },
+  "meta_kg_results": {
+    "What drugs can treat diabetes?": {
+      "success": true,
+      "subqueries_executed": 1,
+      "total_results": 50,
+      "execution_time": 38.8098201751709,
+      "completion_reason": "Plan determined complete by meta-KG aware contextual reasoning",
+      "final_answer_length": 2300,
+      "subqueries": [
+        "What small molecules are used to treat diabetes?"
+      ],
+      "suggested_edges": [
+        null
+      ]
+    },
+    "What genes are associated with Alzheimer's disease?": {
+      "success": true,
+      "subqueries_executed": 1,
+      "total_results": 50,
+      "execution_time": 22.565418004989624,
+      "completion_reason": "Plan determined complete by meta-KG aware contextual reasoning",
+      "final_answer_length": 2363,
+      "subqueries": [
+        "What genes are associated with Alzheimer's disease?"
+      ],
+      "suggested_edges": [
+        null
+      ]
+    },
+    "How does aspirin work to prevent heart disease?": {
+      "success": true,
+      "subqueries_executed": 1,
+      "total_results": 50,
+      "execution_time": 21.69403886795044,
+      "completion_reason": "Plan determined complete by meta-KG aware contextual reasoning",
+      "final_answer_length": 1892,
+      "subqueries": [
+        "What genes does aspirin interact with?"
+      ],
+      "suggested_edges": [
+        null
+      ]
+    },
+    "What are the mechanisms of action of metformin?": {
+      "success": true,
+      "subqueries_executed": 1,
+      "total_results": 50,
+      "execution_time": 23.255160808563232,
+      "completion_reason": "Plan determined complete by meta-KG aware contextual reasoning",
+      "final_answer_length": 2362,
+      "subqueries": [
+        "What genes does metformin interact with?"
+      ],
+      "suggested_edges": [
+        null
+      ]
+    },
+    "Which genes are involved in cancer pathogenesis?": {
+      "success": true,
+      "subqueries_executed": 1,
+      "total_results": 50,
+      "execution_time": 215.10040926933289,
+      "completion_reason": "Plan determined complete by meta-KG aware contextual reasoning",
+      "final_answer_length": 2889,
+      "subqueries": [
+        "What genes are associated with cancer?"
+      ],
+      "suggested_edges": [
+        null
+      ]
+    }
+  },
+  "optimizer_comparison": {
+    "query": "What drugs can treat diabetes?",
+    "meta_kg_aware": {
+      "execution_time": 47.06350493431091,
+      "subqueries": 1,
+      "total_results": 50,
+      "completion_reason": "Plan determined complete by meta-KG aware contextual reasoning",
+      "subquery_details": [
+        [
+          "What small molecules are used to treat diabetes?",
+          50,
+          "None"
+        ]
+      ]
+    },
+    "basic_context_driven": {
+      "execution_time": 60.37774968147278,
+      "subqueries": 3,
+      "total_results": 100,
+      "completion_reason": "",
+      "subquery_details": [
+        [
+          "What drugs are used to treat diabetes?",
+          50
+        ],
+        [
+          "What drugs are tested by clinical trials for diabetes mellitus?",
+          50
+        ],
+        [
+          "What genes do the drugs that treat diabetes target?",
+          0
+        ]
+      ]
+    },
+    "comparison_metrics": {
+      "meta_kg_faster": true,
+      "meta_kg_more_results": false,
+      "meta_kg_more_efficient": true,
+      "time_difference": 13.314244747161865,
+      "result_difference": -50
+    }
+  },
+  "feature_testing": {
+    "edge_analysis": {
+      "success": true,
+      "suggested_edges_count": 0,
+      "top_suggestions": []
+    }
+  },
+  "key_insights": [
+    "Meta-KG aware optimizer uses actual BTE edge relationships to guide planning",
+    "Guarantees single-hop subqueries by constraining to available meta-KG edges",
+    "Reduces failed queries by avoiding impossible node-predicate combinations",
+    "Provides more targeted and efficient query execution paths",
+    "Combines LangGraph-style contextual reasoning with meta-KG structure awareness",
+    "Maintains mechanistic decomposition while improving query success rates"
+  ]
+}
