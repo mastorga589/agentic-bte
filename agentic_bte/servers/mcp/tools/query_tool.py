@@ -19,6 +19,102 @@ from ....config.settings import get_settings
 logger = logging.getLogger(__name__)
 
 
+def _generate_final_answer(query: str, results: list, entity_mappings: dict) -> str:
+    """
+    Generate a concise final answer based on the biomedical results
+    
+    Args:
+        query: The original query
+        results: List of biomedical relationships
+        entity_mappings: Mapping of entity IDs to names
+        
+    Returns:
+        Concise final answer string
+    """
+    if not results:
+        return "No relevant biomedical results found for your query."
+    
+    try:
+        query_lower = query.lower()
+        
+        # Create inverse mapping for results
+        id_to_name = {}
+        if entity_mappings:
+            # entity_mappings is typically name -> id, create id -> name
+            for name, entity_id in entity_mappings.items():
+                id_to_name[entity_id] = name
+        
+        # Extract key findings based on query type
+        if any(word in query_lower for word in ['drug', 'drugs', 'treat', 'treatment', 'medicine', 'therapeutic']):
+            # Drug-focused query
+            drugs = set()
+            for result in results[:20]:  # Look at top 20 results
+                subject_id = result.get('subject', '')
+                object_id = result.get('object', '')
+                predicate = result.get('predicate', '')
+                
+                # Look for drug relationships
+                if 'treat' in predicate.lower() or 'drug' in predicate.lower():
+                    drug_name = id_to_name.get(subject_id, subject_id)
+                    if drug_name and drug_name != subject_id:
+                        drugs.add(drug_name)
+                    
+                    drug_name = id_to_name.get(object_id, object_id)
+                    if drug_name and drug_name != object_id:
+                        drugs.add(drug_name)
+            
+            if drugs:
+                drug_list = sorted(list(drugs))[:5]
+                return f"Key therapeutic options include: {', '.join(drug_list)}."
+        
+        elif any(word in query_lower for word in ['gene', 'genes', 'genetic', 'protein']):
+            # Gene-focused query
+            genes = set()
+            for result in results[:20]:
+                subject_id = result.get('subject', '')
+                object_id = result.get('object', '')
+                
+                # Look for gene IDs or names
+                if subject_id.startswith('NCBIGene:'):
+                    gene_name = id_to_name.get(subject_id, subject_id)
+                    genes.add(gene_name)
+                
+                if object_id.startswith('NCBIGene:'):
+                    gene_name = id_to_name.get(object_id, object_id)
+                    genes.add(gene_name)
+            
+            if genes:
+                gene_list = sorted(list(genes))[:5]
+                return f"Key associated genes include: {', '.join(gene_list)}."
+        
+        elif any(word in query_lower for word in ['disease', 'disorder', 'condition', 'syndrome']):
+            # Disease-focused query
+            diseases = set()
+            for result in results[:20]:
+                subject_id = result.get('subject', '')
+                object_id = result.get('object', '')
+                
+                # Look for disease IDs
+                if any(subject_id.startswith(prefix) for prefix in ['MONDO:', 'DOID:']):
+                    disease_name = id_to_name.get(subject_id, subject_id)
+                    diseases.add(disease_name)
+                
+                if any(object_id.startswith(prefix) for prefix in ['MONDO:', 'DOID:']):
+                    disease_name = id_to_name.get(object_id, object_id)
+                    diseases.add(disease_name)
+            
+            if diseases:
+                disease_list = sorted(list(diseases))[:3]
+                return f"Key related conditions include: {', '.join(disease_list)}."
+        
+        # Generic fallback
+        return f"Found {len(results)} biomedical relationships providing insights into your query."
+        
+    except Exception as e:
+        logger.debug(f"Error generating final answer: {e}")
+        return f"Analysis complete with {len(results)} biomedical findings."
+
+
 class PlanAndExecuteInput(BaseModel):
     """Input schema for comprehensive query processing"""
     query: str = Field(
@@ -50,11 +146,11 @@ class PlanAndExecuteInput(BaseModel):
     )
 
 
-def get_plan_and_execute_tool_definition() -> Dict[str, Any]:
-    """Get the MCP tool definition for comprehensive query processing"""
+def get_basic_plan_and_execute_tool_definition() -> Dict[str, Any]:
+    """Get the MCP tool definition for basic comprehensive query processing"""
     return {
-        "name": "plan_and_execute_query",
-        "description": "Plan and execute complex biomedical queries using advanced optimization strategies including query decomposition, parallel execution, and dynamic replanning based on intermediate results",
+        "name": "basic_plan_and_execute_query",
+        "description": "Plan and execute complex biomedical queries using basic optimization strategies with comprehensive biomedical entity resolution and TRAPI query processing",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -105,9 +201,9 @@ def get_plan_and_execute_tool_definition() -> Dict[str, Any]:
     }
 
 
-async def handle_plan_and_execute(arguments: Dict[str, Any]) -> Dict[str, Any]:
+async def handle_basic_plan_and_execute(arguments: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Handle comprehensive query processing tool calls
+    Handle basic comprehensive query processing tool calls
     
     Args:
         arguments: Tool call arguments
@@ -154,69 +250,170 @@ async def handle_plan_and_execute(arguments: Dict[str, Any]) -> Dict[str, Any]:
                 ]
             }
         
-        # Format successful response
-        response_text = f"Biomedical Query Results for: {query}\n\n"
+        # Generate BTE-LLM style structured output
+        formatted_text = "🧬 BASIC_PLAN_AND_EXECUTE_QUERY RESULTS\n"
+        formatted_text += "=" * 50 + "\n\n"
+        
+        # Generate final answer first (prominently at top)
+        final_answer = _generate_final_answer(query, result.get("results", []), result.get("entity_mappings", {}))
+        if final_answer:
+            formatted_text += "🎯 FINAL ANSWER:\n"
+            formatted_text += "─" * 20 + "\n"
+            formatted_text += f"💡 {final_answer}\n\n"
+            formatted_text += "📋 DETAILED BREAKDOWN:\n"
+            formatted_text += "─" * 25 + "\n\n"
+        
+        # 1. EXECUTION SUMMARY
+        formatted_text += "📊 EXECUTION SUMMARY:\n"
+        formatted_text += "─" * 25 + "\n"
+        formatted_text += f"✅ Query processed: Basic optimization strategy\n"
+        
+        if "metadata" in result:
+            metadata = result["metadata"]
+            formatted_text += f"🔢 Total results: {metadata.get('total_results', len(result.get('results', [])))}\n"
+            if "execution_metadata" in metadata:
+                exec_meta = metadata["execution_metadata"]
+                formatted_text += f"🔗 API batches: {exec_meta.get('total_batches', 1)}\n"
+                formatted_text += f"✅ Successful batches: {exec_meta.get('successful_batches', 1)}\n"
         
         # Show query classification
         if "query_type" in result:
             classification = result.get("classification", {})
-            response_text += f"Query Classification:\n"
-            response_text += f"  - Type: {result['query_type']}\n"
-            response_text += f"  - Confidence: {classification.get('confidence', 0):.2f}\n"
-            response_text += f"  - Method: {classification.get('method', 'unknown')}\n\n"
+            formatted_text += f"📋 Query Type: {result['query_type']}\n"
+            formatted_text += f"📈 Classification Confidence: {classification.get('confidence', 0):.2f}\n"
         
-        # Show extracted entities
-        if "entities" in result and result["entities"]:
-            response_text += f"Extracted Entities ({len(result['entities'])}):\n"
-            for entity, data in result["entities"].items():
-                entity_id = data.get("id", "Unknown")
-                entity_type = data.get("type", "Unknown")
-                response_text += f"  - {entity}: {entity_id} ({entity_type})\n"
-            response_text += "\n"
+        formatted_text += "\n"
         
-        # Show results
-        if "results" in result and result["results"]:
-            results = result["results"]
-            response_text += f"Biomedical Relationships Found ({len(results)}):\n\n"
+        # 2. ENTITY MAPPINGS (BTE-style with grouping)
+        entities_data = result.get("entities", {})
+        entity_mappings = result.get("entity_mappings", {})
+        
+        # Create comprehensive entity mapping (ID -> Name and Name -> ID)
+        all_entity_mappings = {}
+        if entity_mappings:
+            # entity_mappings is typically name -> id, we want id -> name too
+            for name, entity_id in entity_mappings.items():
+                all_entity_mappings[entity_id] = name
+        
+        # Add entities data
+        for entity_name, entity_info in entities_data.items():
+            entity_id = entity_info.get("id")
+            if entity_id and entity_id not in all_entity_mappings:
+                all_entity_mappings[entity_id] = entity_name
+        
+        if all_entity_mappings:
+            formatted_text += "🏷️ ENTITY MAPPINGS (FROM BTE DATABASE):\n"
+            formatted_text += "─" * 35 + "\n"
+            formatted_text += f"📊 Resolved {len(all_entity_mappings)} entity names:\n\n"
             
-            # Show sample results
-            sample_size = min(10, len(results))
-            for i, relationship in enumerate(results[:sample_size]):
-                subject = relationship.get("subject", "Unknown")
-                predicate = relationship.get("predicate", "unknown_relation")
-                obj = relationship.get("object", "Unknown")
+            # Group by entity type for better organization
+            diseases = {k: v for k, v in all_entity_mappings.items() if k.startswith(("MONDO:", "DOID:"))}
+            genes = {k: v for k, v in all_entity_mappings.items() if k.startswith("NCBIGene:")}
+            drugs = {k: v for k, v in all_entity_mappings.items() if k.startswith(("CHEBI:", "CHEMBL", "DRUGBANK:"))}
+            other = {k: v for k, v in all_entity_mappings.items() if not any(k.startswith(p) for p in ["MONDO:", "DOID:", "NCBIGene:", "CHEBI:", "CHEMBL", "DRUGBANK:"])}
+            
+            if diseases:
+                formatted_text += "  🏥 DISEASES:\n"
+                for entity_id, name in list(diseases.items())[:5]:
+                    formatted_text += f"     • {entity_id} → {name}\n"
+                if len(diseases) > 5:
+                    formatted_text += f"     ... and {len(diseases) - 5} more diseases\n"
+                formatted_text += "\n"
+            
+            if drugs:
+                formatted_text += "  💊 DRUGS & CHEMICALS:\n"
+                for entity_id, name in list(drugs.items())[:8]:
+                    formatted_text += f"     • {entity_id} → {name}\n"
+                if len(drugs) > 8:
+                    formatted_text += f"     ... and {len(drugs) - 8} more drugs\n"
+                formatted_text += "\n"
+            
+            if genes:
+                formatted_text += "  🧬 GENES:\n"
+                for entity_id, name in list(genes.items())[:8]:
+                    formatted_text += f"     • {entity_id} → {name}\n"
+                if len(genes) > 8:
+                    formatted_text += f"     ... and {len(genes) - 8} more genes\n"
+                formatted_text += "\n"
+            
+            if other:
+                formatted_text += "  🔬 OTHER ENTITIES:\n"
+                for entity_id, name in list(other.items())[:5]:
+                    formatted_text += f"     • {entity_id} → {name}\n"
+                formatted_text += "\n"
+        
+        # 3. BIOMEDICAL RELATIONSHIPS
+        results_data = result.get("results", [])
+        if results_data:
+            formatted_text += "🔬 BIOMEDICAL RELATIONSHIPS:\n"
+            formatted_text += "─" * 30 + "\n"
+            formatted_text += f"📊 Found {len(results_data)} relationships, showing key examples:\n\n"
+            
+            # Group and display relationships
+            drug_relationships = []
+            gene_relationships = []
+            disease_relationships = []
+            
+            for res in results_data[:15]:  # Look at first 15
+                predicate = res.get('predicate', '').replace('biolink:', '').replace('_', ' ')
+                subject = res.get('subject', 'N/A')
+                obj = res.get('object', 'N/A')
                 
-                # Clean up predicate for display
-                clean_predicate = predicate.replace("biolink:", "").replace("_", " ")
+                # Use entity mappings to get readable names
+                subject_name = all_entity_mappings.get(subject, subject)
+                object_name = all_entity_mappings.get(obj, obj)
                 
-                response_text += f"  {i+1}. {subject} --{clean_predicate}--> {obj}\n"
+                # Categorize by content
+                if any(term in predicate.lower() for term in ['treat', 'drug', 'chemical']):
+                    drug_relationships.append((subject_name, predicate, object_name))
+                elif any(term in predicate.lower() for term in ['gene', 'protein', 'express']):
+                    gene_relationships.append((subject_name, predicate, object_name))
+                else:
+                    disease_relationships.append((subject_name, predicate, object_name))
             
-            if len(results) > sample_size:
-                response_text += f"\n... and {len(results) - sample_size} more relationships.\n"
+            if drug_relationships:
+                formatted_text += "  💊 DRUG-RELATED RELATIONSHIPS:\n"
+                for i, (subj, pred, obj) in enumerate(drug_relationships[:5], 1):
+                    formatted_text += f"     {i}. {subj} ← {pred} → {obj}\n"
+                formatted_text += "\n"
             
+            if gene_relationships:
+                formatted_text += "  🧬 GENE-RELATED RELATIONSHIPS:\n"
+                for i, (subj, pred, obj) in enumerate(gene_relationships[:5], 1):
+                    formatted_text += f"     {i}. {subj} ← {pred} → {obj}\n"
+                formatted_text += "\n"
+            
+            if disease_relationships:
+                formatted_text += "  🏥 DISEASE-RELATED RELATIONSHIPS:\n"
+                for i, (subj, pred, obj) in enumerate(disease_relationships[:5], 1):
+                    formatted_text += f"     {i}. {subj} ← {pred} → {obj}\n"
+                formatted_text += "\n"
+            
+            # Show remaining relationships if any
+            total_shown = len(drug_relationships[:5]) + len(gene_relationships[:5]) + len(disease_relationships[:5])
+            if len(results_data) > total_shown:
+                formatted_text += f"     ... and {len(results_data) - total_shown} more relationships\n\n"
+        
         else:
-            response_text += "No biomedical relationships found.\n"
+            formatted_text += "🔬 BIOMEDICAL RELATIONSHIPS:\n"
+            formatted_text += "─" * 30 + "\n"
+            formatted_text += "❌ No biomedical relationships found\n"
             if "message" in result:
-                response_text += f"\nMessage: {result['message']}\n"
+                formatted_text += f"💬 Message: {result['message']}\n"
+            formatted_text += "\n"
         
-        # Show execution metadata if available
-        if "metadata" in result and show_plan_details:
-            metadata = result["metadata"]
-            response_text += f"\nExecution Summary:\n"
-            response_text += f"  - Total results: {metadata.get('total_results', 0)}\n"
-            if "execution_metadata" in metadata:
-                exec_meta = metadata["execution_metadata"]
-                response_text += f"  - API batches: {exec_meta.get('total_batches', 1)}\n"
-                response_text += f"  - Successful batches: {exec_meta.get('successful_batches', 1)}\n"
+        # 4. SUMMARY
+        formatted_text += "🎯 SUMMARY:\n"
+        formatted_text += "─" * 15 + "\n"
+        formatted_text += "✨ Features demonstrated:\n"
+        formatted_text += "   ✅ Basic biomedical query processing\n"
+        formatted_text += "   ✅ Entity extraction and mapping\n"
+        formatted_text += "   ✅ TRAPI query generation\n"
+        formatted_text += "   ✅ BTE knowledge graph integration\n"
+        formatted_text += "   ✅ Structured result presentation\n\n"
         
-        # Show entity name mappings if available
-        if "entity_mappings" in result and result["entity_mappings"]:
-            mappings = result["entity_mappings"]
-            response_text += f"\nEntity Name Mappings ({len(mappings)} entities):\n"
-            for entity_name, entity_id in list(mappings.items())[:5]:
-                response_text += f"  - {entity_name}: {entity_id}\n"
-            if len(mappings) > 5:
-                response_text += f"  ... and {len(mappings) - 5} more entities.\n"
+        # Store the structured text for return
+        response_text = formatted_text
         
         return {
             "content": [
