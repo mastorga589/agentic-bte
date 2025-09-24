@@ -194,3 +194,7 @@ def extract_entities(query: str, openai_api_key: Optional[str] = None) -> List[s
     """
     tool = BioNERTool(openai_api_key)
     return tool.extract_entities(query)
+
+
+# Alias for backward compatibility
+BiomedicalNER = BioNERTool
