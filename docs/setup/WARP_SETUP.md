@@ -68,7 +68,7 @@ The Warp MCP configuration is in `warp-mcp-config.json`:
 
 ## Available MCP Tools
 
-The server provides 4 streamlined MCP tools for biomedical research:
+The server provides 5 powerful MCP tools for biomedical research:
 
 1. **`bio_ner`** - Biomedical entity extraction and linking
    - Extracts entities like diseases, drugs, genes, proteins
@@ -92,6 +92,17 @@ The server provides 4 streamlined MCP tools for biomedical research:
    - **Comprehensive result synthesis:** Entity name resolution and structured output
    - **Perfect for complex biomedical research questions**
 
+5. **`got_biomedical_query`** - **🧠 ADVANCED: Graph of Thoughts (GoT) Framework**
+   - **🎯 Research-grade biomedical query optimization**
+   - **📊 Graph-based reasoning with parallel thought execution**
+   - **🔍 TRAPI query visualization and debugging**
+   - **📈 Performance metrics tracking (volume, latency, quality)**
+   - **🔄 Comprehensive result aggregation and refinement**
+   - **📋 Executive summaries and detailed breakdowns**
+   - **⚡ Iterative quality improvement with feedback loops**
+   - **🧬 Ideal for: Complex research questions, drug discovery, pathway analysis**
+   - **📚 Based on latest research in AI reasoning systems**
+
 ## Usage Examples
 
 ### Simple Entity Extraction
@@ -107,6 +118,31 @@ Use the plan_and_execute_query tool to analyze: "What are the molecular mechanis
 ### End-to-End Processing
 ```
 Use the plan_and_execute_query tool for: "Which genes are targeted by drugs used to treat Alzheimer's disease and how do they relate to neuroinflammation?"
+```
+
+### 🧠 Advanced GoT Research Queries
+```
+Use the got_biomedical_query tool for: "Construct a comprehensive analysis of the molecular interactions between oxidative stress, inflammation, and neurodegeneration in Parkinson's disease"
+```
+
+### GoT with Custom Configuration
+```
+Use the got_biomedical_query tool with parameters:
+{
+  "query": "What is the molecular network connecting insulin signaling to glucose metabolism in diabetes?",
+  "output_format": "comprehensive",
+  "confidence_threshold": 0.8,
+  "show_debug": true
+}
+```
+
+### GoT Summary Mode
+```
+Use the got_biomedical_query tool with:
+{
+  "query": "How do BRCA1 mutations contribute to breast cancer risk?",
+  "output_format": "summary"
+}
 ```
 
 ## System Requirements

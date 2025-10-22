@@ -70,7 +70,7 @@ Use the provided `mcp-config.json` file as a template and adjust paths/settings 
 
 ## Available MCP Tools
 
-Once configured, your MCP client will have access to these biomedical research tools:
+Once configured, your MCP client will have access to these powerful biomedical research tools:
 
 ### 1. `bio_ner`
 Extract and link biomedical entities from natural language text.
@@ -135,6 +135,38 @@ Execute TRAPI queries against the BioThings Explorer knowledge graph.
     "query": "What drugs can treat diabetes?",
     "max_results": 20,
     "k": 3
+  }
+}
+```
+
+### 5. `got_biomedical_query`
+**🧠 ADVANCED**: Graph of Thoughts (GoT) biomedical query optimization with research-grade analysis.
+
+**Parameters**:
+- `query` (string): Complex biomedical research query
+- `output_format` (string, optional): "comprehensive", "summary", or "debug" (default: "comprehensive")
+- `show_debug` (boolean, optional): Enable TRAPI query debugging (default: true)
+- `confidence_threshold` (number, optional): Minimum confidence threshold (default: 0.7)
+- `max_iterations` (integer, optional): Maximum GoT iterations (default: 5)
+- `enable_refinement` (boolean, optional): Enable iterative refinement (default: true)
+- `save_results` (boolean, optional): Save results to files (default: false)
+
+**Features**:
+- Graph-based reasoning with parallel execution
+- TRAPI query visualization and debugging
+- Performance metrics (volume, latency, quality)
+- Executive summaries and detailed breakdowns
+- Iterative result refinement
+
+**Example**:
+```json
+{
+  "name": "got_biomedical_query",
+  "arguments": {
+    "query": "What is the molecular network connecting oxidative stress and neurodegeneration in Parkinson's disease?",
+    "output_format": "comprehensive",
+    "confidence_threshold": 0.8,
+    "show_debug": true
   }
 }
 ```

@@ -97,10 +97,11 @@ async def handle_trapi_query(arguments: Dict[str, Any]) -> Dict[str, Any]:
         # Initialize TRAPI query builder
         trapi_builder = TRAPIQueryBuilder()
         
-        # Build TRAPI query
-        trapi_query = trapi_builder.build_query(query, entity_data, failed_trapis)
+        # Build TRAPI query batches (presplit to <=50 ids)
+        trapi_batches = trapi_builder.build_trapi_query_batches(query, entity_data, failed_trapis)
+        trapi_query = trapi_batches[0]
         
-        if "error" in trapi_query:
+        if isinstance(trapi_query, dict) and "error" in trapi_query:
             return {
                 "error": trapi_query["error"],
                 "content": [
@@ -112,7 +113,8 @@ async def handle_trapi_query(arguments: Dict[str, Any]) -> Dict[str, Any]:
             }
         
         # Validate the TRAPI query
-        is_valid, validation_message = trapi_builder.validate_trapi_query(trapi_query)
+        from ....core.knowledge.trapi import validate_trapi
+        is_valid, validation_message = validate_trapi(trapi_query)
         
         if not is_valid:
             return {
@@ -138,7 +140,7 @@ async def handle_trapi_query(arguments: Dict[str, Any]) -> Dict[str, Any]:
                     "text": response_text
                 }
             ],
-            "trapi_query": trapi_query  # Include raw TRAPI for programmatic use
+            "result_data": {"query": trapi_query, "queries": trapi_batches}  # Include batches
         }
         
     except Exception as e:

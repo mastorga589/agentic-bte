@@ -41,12 +41,13 @@ from .tools.query_tool import (
     get_basic_plan_and_execute_tool_definition,
     handle_basic_plan_and_execute
 )
-from .tools.metakg_optimizer_tool import (
-    get_metakg_optimizer_tool_definition,
-    handle_metakg_optimizer
+from .tools.got_tool import (
+    get_got_tool_definition,
+    handle_got_query
 )
-# Optimization tools are now integrated into plan_and_execute_query
-# from .tools.optimization_tools import (...)
+# GoT tool provides advanced Graph of Thoughts optimization
+# This represents the latest research in biomedical query optimization
+# using graph-based reasoning with parallel execution
 from ...config.settings import get_settings
 
 # Configure logging
@@ -78,7 +79,7 @@ class AgenticBTEMCPServer:
                 Tool(**get_trapi_query_tool_definition()),
                 Tool(**get_bte_call_tool_definition()),
                 Tool(**get_basic_plan_and_execute_tool_definition()),
-                Tool(**get_metakg_optimizer_tool_definition()),
+                Tool(**get_got_tool_definition()),
             ]
             
             logger.info(f"Listed {len(tools)} available tools")
@@ -100,8 +101,8 @@ class AgenticBTEMCPServer:
                     result = await handle_bte_call(arguments)
                 elif name == "basic_plan_and_execute_query":
                     result = await handle_basic_plan_and_execute(arguments)
-                elif name == "metakg_aware_optimizer":
-                    result = await handle_metakg_optimizer(arguments)
+                elif name == "got_biomedical_query":
+                    result = await handle_got_query(arguments)
                 else:
                     error_msg = f"Unknown tool: {name}"
                     logger.error(error_msg)

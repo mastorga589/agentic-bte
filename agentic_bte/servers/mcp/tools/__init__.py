@@ -21,10 +21,6 @@ from .query_tool import (
     get_basic_plan_and_execute_tool_definition,
     handle_basic_plan_and_execute
 )
-from .metakg_optimizer_tool import (
-    get_metakg_optimizer_tool_definition,
-    handle_metakg_optimizer
-)
 
 __all__ = [
     "get_bio_ner_tool_definition",
@@ -35,6 +31,4 @@ __all__ = [
     "handle_bte_call",
     "get_basic_plan_and_execute_tool_definition",
     "handle_basic_plan_and_execute",
-    "get_metakg_optimizer_tool_definition",
-    "handle_metakg_optimizer",
 ]

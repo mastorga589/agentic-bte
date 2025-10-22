@@ -19,6 +19,28 @@ from ....config.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
+# Global cached BioNER tool instance to avoid redundant model loading
+_cached_bio_ner_tool = None
+
+
+def get_cached_bio_ner_tool() -> BioNERTool:
+    """
+    Get a cached BioNER tool instance to avoid redundant model loading
+    
+    Returns:
+        Cached BioNER tool instance
+    """
+    global _cached_bio_ner_tool
+    
+    if _cached_bio_ner_tool is None:
+        logger.info("Initializing cached BioNER tool (first time)")
+        _cached_bio_ner_tool = BioNERTool()
+        logger.info("BioNER tool cached and ready for reuse")
+    else:
+        logger.debug("Using cached BioNER tool instance")
+    
+    return _cached_bio_ner_tool
+
 
 class BioNERInput(BaseModel):
     """Input schema for BioNER tool"""
@@ -70,8 +92,8 @@ async def handle_bio_ner(arguments: Dict[str, Any]) -> Dict[str, Any]:
         
         logger.info(f"Processing BioNER request for query: {query[:100]}...")
         
-        # Initialize BioNER tool
-        bio_ner_tool = BioNERTool()
+        # Get cached BioNER tool instance to avoid redundant model loading
+        bio_ner_tool = get_cached_bio_ner_tool()
         
         # Extract and link entities
         result = bio_ner_tool.extract_and_link(query, include_types=True)
@@ -92,10 +114,21 @@ async def handle_bio_ner(arguments: Dict[str, Any]) -> Dict[str, Any]:
         
         if "entities" in result and result["entities"]:
             response_text += "Entities with types and IDs:\n"
-            for entity, data in result["entities"].items():
-                entity_id = data.get("id", "Unknown")
-                entity_type = data.get("type", "Unknown")
-                response_text += f"  - {entity}: {entity_id} ({entity_type})\n"
+            # Handle both list and dict formats
+            entities = result["entities"]
+            if isinstance(entities, list):
+                # New format: list of entity objects
+                for entity_obj in entities:
+                    entity_name = entity_obj.get("name", "Unknown")
+                    entity_id = entity_obj.get("id", "Unknown")
+                    entity_type = entity_obj.get("type", "Unknown")
+                    response_text += f"  - {entity_name}: {entity_id} ({entity_type})\n"
+            elif isinstance(entities, dict):
+                # Old format: dict with entity names as keys
+                for entity, data in entities.items():
+                    entity_id = data.get("id", "Unknown")
+                    entity_type = data.get("type", "Unknown")
+                    response_text += f"  - {entity}: {entity_id} ({entity_type})\n"
         
         if "entity_names" in result and result["entity_names"]:
             response_text += "\nResolved entity names:\n"

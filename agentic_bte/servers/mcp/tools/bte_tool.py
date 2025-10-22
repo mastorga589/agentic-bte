@@ -18,6 +18,33 @@ from ....config.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
+# Global cached BTE client instance to avoid redundant meta-KG fetching
+_cached_bte_client = None
+
+
+def get_cached_bte_client() -> BTEClient:
+    """
+    Get a cached BTE client instance to avoid redundant meta-KG fetching
+    
+    Returns:
+        Cached BTE client instance
+    """
+    global _cached_bte_client
+    
+    if _cached_bte_client is None:
+        logger.info("Initializing cached BTE client (first time)")
+        _cached_bte_client = BTEClient()
+        # Preload meta-KG to cache it
+        try:
+            _cached_bte_client.get_meta_knowledge_graph()
+            logger.info("BTE client cached with meta-KG loaded")
+        except Exception as e:
+            logger.warning(f"Could not preload meta-KG: {e}")
+    else:
+        logger.debug("Using cached BTE client instance")
+    
+    return _cached_bte_client
+
 
 class BTECallInput(BaseModel):
     """Input schema for BTE API call tool"""
@@ -31,6 +58,14 @@ class BTECallInput(BaseModel):
     k: int = Field(
         default=5,
         description="Maximum results per entity"
+    )
+    predicate: str = Field(
+        default=None,
+        description="The predicate used in this query (for evidence scoring)"
+    )
+    query_intent: str = Field(
+        default=None,
+        description="Query intent (therapeutic, genetic, mechanism, general) for relevance scoring"
     )
 
 
@@ -59,6 +94,14 @@ def get_bte_call_tool_definition() -> Dict[str, Any]:
                     "default": 5,
                     "minimum": 1,
                     "maximum": 50
+                },
+                "predicate": {
+                    "type": "string",
+                    "description": "The predicate used in this query (for evidence scoring)"
+                },
+                "query_intent": {
+                    "type": "string",
+                    "description": "Query intent (therapeutic, genetic, mechanism, general) for relevance scoring"
                 }
             },
             "required": ["json_query"]
@@ -80,6 +123,8 @@ async def handle_bte_call(arguments: Dict[str, Any]) -> Dict[str, Any]:
         json_query = arguments.get("json_query")
         max_results = arguments.get("maxresults", 50)
         k = arguments.get("k", 5)
+        predicate = arguments.get("predicate")
+        query_intent = arguments.get("query_intent")
         
         if not json_query:
             return {
@@ -105,12 +150,12 @@ async def handle_bte_call(arguments: Dict[str, Any]) -> Dict[str, Any]:
         
         logger.info(f"Executing BTE API call with max_results={max_results}, k={k}")
         
-        # Initialize BTE client
-        bte_client = BTEClient()
+        # Get cached BTE client to avoid redundant meta-KG fetching
+        bte_client = get_cached_bte_client()
         
         # Execute TRAPI query with batching
         results, entity_mappings, metadata = bte_client.execute_trapi_with_batching(
-            json_query, max_results, k
+            json_query, max_results, k, predicate=predicate, query_intent=query_intent
         )
         
         if "error" in metadata:
