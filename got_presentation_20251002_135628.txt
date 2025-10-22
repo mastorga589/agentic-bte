@@ -1,0 +1,398 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: Which drugs can treat Brucellosis by targeting translation?
+Timestamp: 2025-10-02 13:56:28
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 380.272s
+Entities Found: 4
+Total Results: 60
+Quality Score: 0.344
+Execution Steps: 12
+GoT Volume: 12 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+## Primary Answer Currently, there are no drugs specifically identified that
+treat Brucellosis by targeting the biological process of translation. While
+several drugs have been studied for their efficacy against Brucellosis, none
+have been linked to translation as a therapeutic target based on the available
+evidence.  ## QUERY EXECUTION PLAN To address the query, a systematic approach
+was employed, decomposing the main question into three focused subqueries:  1.
+**Subquery 1**: What drugs are known to treat Brucellosis?    - **Entities**:
+Brucellosis, drugs    - **Results found**: 122  2. **Subquery 2**: Which
+biological targets involved in translation are affected by drugs?    -
+**Entities**: drugs, translation    - **Results found**: 0  3. **Subquery 3**:
+How does targeting translation impact the treatment of Brucellosis?    -
+**Entities**: Brucellosis, translation    - **Results found**: 0  The execution
+of these subqueries aimed to identify potential therapeutic agents for
+Brucellosis and their mechanisms of action, particularly focusing on
+translation.  ## KEY EVIDENCE BY SUBQUERY ### Subquery 1: Drugs Known to Treat
+Brucellosis - **Evidence Discovered**:   1. MONDO:0005683 → tested by clinical
+trials of → CHEBI:27882 [MED: 0.562]   2. MONDO:0005683 → subject of treatment
+application or study for treatment by → CHEBI:133011 [LOW: 0.360]   3.
+MONDO:0005683 → subject of treatment application or study for treatment by →
+CHEBI:17076 [LOW: 0.345]   4. MONDO:0005683 → subject of treatment application
+or study for treatment by → CHEBI:27902 [LOW: 0.340]   5. MONDO:0005683 →
+subject of treatment application or study for treatment by → CHEBI:50694 [LOW:
+0.335]  ### Subquery 2: Biological Targets Involved in Translation - **Evidence
+Discovered**:   - No drugs were identified that specifically target translation
+in the context of Brucellosis treatment.  ### Subquery 3: Impact of Targeting
+Translation on Brucellosis Treatment - **Evidence Discovered**:   - No relevant
+relationships were found linking translation targeting to Brucellosis treatment.
+## Evidence-Based Analysis The first subquery yielded a variety of drugs that
+have been tested or studied for their efficacy against Brucellosis, with the
+highest confidence relationship indicating that a specific compound
+(CHEBI:27882) has been tested in clinical trials for this disease (confidence
+score: 0.562). However, the remaining evidence from this subquery is of lower
+confidence, indicating preliminary findings that require further validation.  In
+contrast, the second and third subqueries revealed a significant gap in the
+literature regarding the targeting of translation as a therapeutic strategy for
+Brucellosis. The absence of identified drugs that affect translation suggests
+that current treatment strategies may not focus on this biological process,
+which is critical for bacterial protein synthesis and could represent a
+potential avenue for future research.  ## Scientific Context Brucellosis is
+caused by the Brucella species, which are intracellular bacteria that can evade
+the host immune response. The treatment typically involves a combination of
+antibiotics, such as doxycycline and rifampicin, but the mechanisms of action of
+these drugs do not primarily involve the inhibition of translation. Instead,
+they may target other bacterial processes, such as cell wall synthesis or
+nucleic acid synthesis.  The lack of drugs targeting translation highlights an
+opportunity for future research. Translation is a vital process for bacterial
+survival, and targeting ribosomal function could lead to novel therapeutic
+strategies. For instance, compounds that inhibit bacterial ribosomes could
+potentially be effective against Brucella species, but such agents have not yet
+been identified in the context of Brucellosis.  ## Quality Transparency -
+**Evidence Strength**:    - High confidence evidence: 0 (0%)   - Medium
+confidence evidence: 1 (2%)   - Lower confidence evidence: 49 (98%)  The current
+evidence is largely preliminary, with no strong or medium confidence
+relationships identified. This indicates a need for further research to explore
+the potential of translation-targeting drugs in the treatment of Brucellosis.
+Future studies should focus on identifying compounds that can effectively
+inhibit translation in Brucella species and evaluating their therapeutic
+potential in clinical settings.
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 73.150s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 10.375s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.24
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.21
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.24
+    ↓
+    🛠️  Query Building ✅
+       Time: 9.241s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s
+    ↓
+    🛠️  Query Building ✅
+       Time: 10.161s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s
+    ↓
+    📊 Aggregation ✅
+       Time: 0.002s, Confidence: 0.34
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759438208
+   Execution Time: 73.150s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 4 entities
+   📋 Entities Found:
+      • drugs (drug) - ID: UMLS:C0013227, Conf: 0.85
+      • treat (general) - ID: UMLS:C1292734, Conf: 0.85
+      • Brucellosis (disease) - ID: UMLS:C0006309, Conf: 0.85
+      • translation (biologicalProcess) - ID: GO:0006412, Conf: 0.85
+
+2. Query Building ✅
+   Step ID: query_building_1759438290_subq_0
+   Execution Time: 10.375s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759438423_pred_related_to_subq_0
+   Execution Time: 0.000s
+   Confidence: 0.24
+   Input: dict with 3 keys
+   Output: 60 results
+   📊 API Results: 60 total
+      Result 1: result_1 (score: 0.345)
+        Nodes: 0, Edges: 0
+      Result 2: result_2 (score: 0.287)
+        Nodes: 0, Edges: 0
+      Result 3: result_3 (score: 0.360)
+        Nodes: 0, Edges: 0
+
+4. Api Execution ✅
+   Step ID: api_execution_1759438423_pred_associated_with_subq_0
+   Execution Time: 0.000s
+   Confidence: 0.21
+   Input: dict with 3 keys
+   Output: 2 results
+   📊 API Results: 2 total
+      Result 1: result_1 (score: 0.215)
+        Nodes: 0, Edges: 0
+      Result 2: result_2 (score: 0.215)
+        Nodes: 0, Edges: 0
+
+5. Api Execution ✅
+   Step ID: api_execution_1759438423_pred_related_to_subq_0
+   Execution Time: 0.000s
+   Confidence: 0.24
+   Input: dict with 3 keys
+   Output: 60 results
+   📊 API Results: 60 total
+      Result 1: result_1 (score: 0.345)
+        Nodes: 0, Edges: 0
+      Result 2: result_2 (score: 0.287)
+        Nodes: 0, Edges: 0
+      Result 3: result_3 (score: 0.360)
+        Nodes: 0, Edges: 0
+
+6. Query Building ✅
+   Step ID: query_building_1759438423_subq_1
+   Execution Time: 9.241s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+7. Api Execution ✅
+   Step ID: api_execution_1759438469_pred_affects_subq_1
+   Execution Time: 0.000s
+   Input: dict with 3 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+8. Query Building ✅
+   Step ID: query_building_1759438469_subq_2
+   Execution Time: 10.161s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+9. Api Execution ✅
+   Step ID: api_execution_1759438553_pred_related_to_subq_2
+   Execution Time: 0.000s
+   Input: dict with 3 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+10. Api Execution ✅
+   Step ID: api_execution_1759438553_pred_affects_subq_2
+   Execution Time: 0.000s
+   Input: dict with 3 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+11. Api Execution ✅
+   Step ID: api_execution_1759438553_pred_related_to_subq_2
+   Execution Time: 0.000s
+   Input: dict with 3 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+12. Aggregation ✅
+   Step ID: aggregation_1759438553
+   Execution Time: 0.002s
+   Confidence: 0.34
+   Input: 4 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 0
+      Duplicates Removed: 0
+      Final Results: 60
+      Top Result Score: 0.000
+
+🐛 TRAPI QUERY DEBUGGING
+--------------------------------------------------
+
+TRAPI Query 1 (query_building):
+Step ID: query_building_1759438290_subq_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0006309"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:treated_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Disease)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:treated_by)
+
+TRAPI Query 2 (query_building):
+Step ID: query_building_1759438423_subq_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Polypeptide"
+          ]
+        },
+        "n2": {
+          "categories": [
+            "biolink:BiologicalProcess"
+          ],
+          "ids": [
+            "GO:0006412"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        },
+        "e02": {
+          "subject": "n1",
+          "object": "n2",
+          "predicates": [
+            "biolink:involved_in"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 3 nodes, 2 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:Polypeptide)
+  n2: Unnamed (biolink:BiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+  e02: n1 → n2 (biolink:involved_in)
+
+TRAPI Query 3 (query_building):
+Step ID: query_building_1759438469_subq_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0006412"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0006309"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affected_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:Disease)
+Edges:
+  e01: n0 → n1 (biolink:affected_by)
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 12 thoughts
+Latency: 4 hops
+Total Thoughts: 12
+Quality Improvement: 3.95x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 3.00
+
+Thought Type Distribution:
+  entity_extraction: 1 (8.3%)
+  query_building: 3 (25.0%)
+  api_execution: 7 (58.3%)
+  aggregation: 1 (8.3%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+

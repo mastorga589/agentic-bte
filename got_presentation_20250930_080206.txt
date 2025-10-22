@@ -1,0 +1,291 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: What genes are associated with diabetes?
+Timestamp: 2025-09-30 08:02:06
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 0.001s
+Entities Found: 3
+Total Results: 20
+Quality Score: 0.796
+Execution Steps: 6
+GoT Volume: 6 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+Based on the analysis of gene, genes, diabetes Found 8 high-confidence results
+out of 20 total results. The analysis identified 2 key biomedical entities and 1
+relationships between them. Results have an average confidence score of 0.68.
+Note that some results have lower confidence and should be validated with
+additional research.
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 0.000s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 0.000s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.68
+    ↓
+    🛠️  Query Building ✅
+       Time: 0.000s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.68
+    ↓
+    📊 Aggregation ✅
+       Time: 0.000s, Confidence: 0.80
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759244526
+   Execution Time: 0.000s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 3 entities
+   📋 Entities Found:
+      • gene (gene) - ID: GENE:8855, Conf: 0.70
+      • genes (gene) - ID: GENE:9403, Conf: 0.70
+      • diabetes (disease) - ID: DISEASE:519, Conf: 0.70
+
+2. Query Building ✅
+   Step ID: query_building_1759244526_pair_0
+   Execution Time: 0.000s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759244526_pair_0
+   Execution Time: 0.000s
+   Confidence: 0.68
+   Input: dict with 1 keys
+   Output: 10 results
+   📊 API Results: 10 total
+      Result 1: result_0 (score: 0.900)
+        Nodes: 2, Edges: 1
+      Result 2: result_1 (score: 0.850)
+        Nodes: 2, Edges: 1
+      Result 3: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+4. Query Building ✅
+   Step ID: query_building_1759244526_pair_1
+   Execution Time: 0.000s
+   Confidence: 0.80
+   Input: 1 entities
+   Output: TRAPI query
+
+5. Api Execution ✅
+   Step ID: api_execution_1759244526_pair_1
+   Execution Time: 0.000s
+   Confidence: 0.68
+   Input: dict with 1 keys
+   Output: 10 results
+   📊 API Results: 10 total
+      Result 1: result_0 (score: 0.900)
+        Nodes: 1, Edges: 0
+      Result 2: result_1 (score: 0.850)
+        Nodes: 1, Edges: 0
+      Result 3: result_2 (score: 0.800)
+        Nodes: 1, Edges: 0
+
+6. Aggregation ✅
+   Step ID: aggregation_1759244526
+   Execution Time: 0.000s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 0
+      Duplicates Removed: 0
+      Final Results: 20
+      Top Result Score: 0.000
+
+🐛 TRAPI QUERY DEBUGGING
+--------------------------------------------------
+
+TRAPI Query 1 (query_building):
+Step ID: query_building_1759244526_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:gene"
+          ],
+          "ids": [
+            "GENE:8855"
+          ],
+          "name": "gene"
+        },
+        "n1": {
+          "categories": [
+            "biolink:gene"
+          ],
+          "ids": [
+            "GENE:9403"
+          ],
+          "name": "genes"
+        }
+      },
+      "edges": {
+        "e0": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:related_to"
+          ]
+        }
+      }
+    }
+  },
+  "submitter": "GoT-Framework",
+  "query_type": "biomedical_research"
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: gene (biolink:gene)
+  n1: genes (biolink:gene)
+Edges:
+  e0: n0 → n1 (biolink:related_to)
+
+TRAPI Query 2 (api_execution):
+Step ID: api_execution_1759244526_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:gene"
+          ],
+          "ids": [
+            "GENE:8855"
+          ],
+          "name": "gene"
+        },
+        "n1": {
+          "categories": [
+            "biolink:gene"
+          ],
+          "ids": [
+            "GENE:9403"
+          ],
+          "name": "genes"
+        }
+      },
+      "edges": {
+        "e0": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:related_to"
+          ]
+        }
+      }
+    }
+  },
+  "submitter": "GoT-Framework",
+  "query_type": "biomedical_research"
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: gene (biolink:gene)
+  n1: genes (biolink:gene)
+Edges:
+  e0: n0 → n1 (biolink:related_to)
+
+TRAPI Query 3 (query_building):
+Step ID: query_building_1759244526_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:disease"
+          ],
+          "ids": [
+            "DISEASE:519"
+          ],
+          "name": "diabetes"
+        }
+      },
+      "edges": {}
+    }
+  },
+  "submitter": "GoT-Framework",
+  "query_type": "biomedical_research"
+}
+```
+Query Graph: 1 nodes, 0 edges
+Nodes:
+  n0: diabetes (biolink:disease)
+
+TRAPI Query 4 (api_execution):
+Step ID: api_execution_1759244526_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:disease"
+          ],
+          "ids": [
+            "DISEASE:519"
+          ],
+          "name": "diabetes"
+        }
+      },
+      "edges": {}
+    }
+  },
+  "submitter": "GoT-Framework",
+  "query_type": "biomedical_research"
+}
+```
+Query Graph: 1 nodes, 0 edges
+Nodes:
+  n0: diabetes (biolink:disease)
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 6 thoughts
+Latency: 4 hops
+Total Thoughts: 6
+Quality Improvement: 1.26x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 1.50
+
+Thought Type Distribution:
+  entity_extraction: 1 (16.7%)
+  query_building: 2 (33.3%)
+  api_execution: 2 (33.3%)
+  aggregation: 1 (16.7%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+

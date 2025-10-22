@@ -1,0 +1,109 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: Which drugs can treat Age related macular degeneration by targeting
+       antioxidant activity?
+Timestamp: 2025-09-30 10:50:32
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 0.003s
+Entities Found: 2
+Total Results: 10
+Quality Score: 0.779
+Execution Steps: 4
+GoT Volume: 4 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+Based on the analysis of gene, drug Found 4 high-confidence results out of 10
+total results. The analysis identified 2 key biomedical entities and 1
+relationships between them. Results have an average confidence score of 0.68.
+Note that some results have lower confidence and should be validated with
+additional research.
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 0.001s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 0.000s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.68
+    ↓
+    📊 Aggregation ✅
+       Time: 0.001s, Confidence: 0.78
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759254632
+   Execution Time: 0.001s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 2 entities
+   📋 Entities Found:
+      • gene (gene) - ID: GENE:6592, Conf: 0.70
+      • drug (chemical) - ID: CHEMICAL:7938, Conf: 0.70
+
+2. Query Building ✅
+   Step ID: query_building_1759254632
+   Execution Time: 0.000s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759254632
+   Execution Time: 0.000s
+   Confidence: 0.68
+   Input: dict with 1 keys
+   Output: 10 results
+   📊 API Results: 10 total
+      Result 1: result_0 (score: 0.900)
+        Nodes: 2, Edges: 1
+      Result 2: result_1 (score: 0.850)
+        Nodes: 2, Edges: 1
+      Result 3: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+4. Aggregation ✅
+   Step ID: aggregation_1759254632
+   Execution Time: 0.001s
+   Confidence: 0.78
+   Input: 2 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 0
+      Duplicates Removed: 0
+      Final Results: 10
+      Top Result Score: 0.000
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 4 thoughts
+Latency: 4 hops
+Total Thoughts: 4
+Quality Improvement: 1.26x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 1.00
+
+Thought Type Distribution:
+  entity_extraction: 1 (25.0%)
+  query_building: 1 (25.0%)
+  api_execution: 1 (25.0%)
+  aggregation: 1 (25.0%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+

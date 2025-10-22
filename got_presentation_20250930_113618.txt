@@ -1,0 +1,411 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: Which drugs can treat Psychotic Disorders by targeting neurotransmitter
+       uptake?
+Timestamp: 2025-09-30 11:36:18
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 120.792s
+Entities Found: 5
+Total Results: 100
+Quality Score: 0.000
+Execution Steps: 8
+GoT Volume: 8 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+**🔬 Therapeutic Compounds Analysis** ⚠️ No specific therapeutic compounds were
+identified with sufficient confidence. This may indicate that:   • The query
+requires more specific terminology   • The knowledge graph has limited coverage
+for this area   • The relationships exist but have low confidence scores  **📈
+Analysis Quality Assessment:**   • Total results processed: 100   • Results with
+structured data: 0/100 (0%)   • Confidence scores: Not available (may require
+manual validation)   • Data completeness: 0%  **💡 Recommendations:**   • Results
+have low confidence - consider refining query specificity   • No therapeutic
+compounds found - try alternative terminology or broader search terms   •
+Limited structured data available - results may need expert interpretation   •
+Consider consulting additional biomedical databases or literature
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 58.659s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 17.308s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 21.185s
+    ↓
+    🛠️  Query Building ✅
+       Time: 12.083s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 1.223s
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.931s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 1.260s
+    ↓
+    📊 Aggregation ✅
+       Time: 0.004s
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759257257
+   Execution Time: 58.659s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 5 entities
+   📋 Entities Found:
+      • drugs (drug) - ID: UMLS:C0013227, Conf: 0.85
+      • treat (general) - ID: UMLS:C1292734, Conf: 0.85
+      • Psychotic Disorders (disease) - ID: UMLS:C0033975, Conf: 0.85
+      • neurotransmitter (biologicalEntity) - ID: UMLS:C0597064, Conf: 0.85
+      • uptake (biologicalProcess) - ID: GO:0001504, Conf: 0.85
+
+2. Query Building ✅
+   Step ID: query_building_1759257320_pair_0
+   Execution Time: 17.308s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759257337_pair_0
+   Execution Time: 21.185s
+   Input: dict with 1 keys
+   Output: 100 results
+   📊 API Results: 100 total
+      Result 1: result_1 (score: 0.000)
+        Nodes: 0, Edges: 0
+      Result 2: result_2 (score: 0.000)
+        Nodes: 0, Edges: 0
+      Result 3: result_3 (score: 0.000)
+        Nodes: 0, Edges: 0
+
+4. Query Building ✅
+   Step ID: query_building_1759257358_pair_1
+   Execution Time: 12.083s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: TRAPI query
+
+5. Api Execution ✅
+   Step ID: api_execution_1759257370_pair_1
+   Execution Time: 1.223s
+   Input: dict with 1 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+6. Query Building ✅
+   Step ID: query_building_1759257371_pair_2
+   Execution Time: 4.931s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: TRAPI query
+
+7. Api Execution ✅
+   Step ID: api_execution_1759257376_pair_2
+   Execution Time: 1.260s
+   Input: dict with 1 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+8. Aggregation ✅
+   Step ID: aggregation_1759257378
+   Execution Time: 0.004s
+   Input: 5 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 0
+      Duplicates Removed: 0
+      Final Results: 100
+      Top Result Score: 0.000
+
+🐛 TRAPI QUERY DEBUGGING
+--------------------------------------------------
+
+TRAPI Query 1 (query_building):
+Step ID: query_building_1759257320_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:treated_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Disease)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:treated_by)
+
+TRAPI Query 2 (api_execution):
+Step ID: api_execution_1759257337_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:treated_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Disease)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:treated_by)
+
+TRAPI Query 3 (query_building):
+Step ID: query_building_1759257358_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0001504"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affected_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:affected_by)
+
+TRAPI Query 4 (api_execution):
+Step ID: api_execution_1759257370_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0001504"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affected_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:affected_by)
+
+TRAPI Query 5 (query_building):
+Step ID: query_building_1759257371_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0001504"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:Disease)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 6 (api_execution):
+Step ID: api_execution_1759257376_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0001504"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:Disease)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 8 thoughts
+Latency: 4 hops
+Total Thoughts: 8
+Quality Improvement: 1.06x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 2.00
+
+Thought Type Distribution:
+  entity_extraction: 1 (12.5%)
+  query_building: 3 (37.5%)
+  api_execution: 3 (37.5%)
+  aggregation: 1 (12.5%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+

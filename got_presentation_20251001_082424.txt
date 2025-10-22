@@ -1,0 +1,423 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: What are the genetic factors that influence the efficacy of antipsychotic
+       drugs      in treating schizophrenia, and how do these genetic variations
+       affect dopamine receptor pathways      and drug metabolism? Include
+       information about personalized medicine approaches.
+Timestamp: 2025-10-01 08:24:24
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 688.557s
+Entities Found: 11
+Total Results: 201
+Quality Score: 0.278
+Execution Steps: 10
+GoT Volume: 10 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+### Genetic Factors Influencing Antipsychotic Efficacy in Schizophrenia  The
+efficacy of antipsychotic drugs in treating schizophrenia is significantly
+influenced by genetic factors. Variations in specific genes can affect both the
+pharmacodynamics (how the drug affects the body) and pharmacokinetics (how the
+body processes the drug) of these medications, particularly through their
+interactions with dopamine receptor pathways and drug metabolism.  #### Key
+Genetic Variations  1. **Dopamine Receptor Genes**:     - Variants in genes
+encoding dopamine receptors (e.g., DRD2, DRD3) are known to influence the
+response to antipsychotic medications. For instance, polymorphisms in the DRD2
+gene can affect receptor sensitivity and, consequently, the therapeutic efficacy
+of drugs targeting these receptors.    - Evidence suggests that genetic
+variations in these receptors can lead to differential responses to
+antipsychotics, impacting treatment outcomes (confidence score: low).  2. **Drug
+Metabolism Genes**:    - Genes involved in drug metabolism, such as those coding
+for cytochrome P450 enzymes (e.g., CYP2D6, CYP3A4), play a crucial role in the
+pharmacokinetics of antipsychotic drugs. Variations in these genes can lead to
+altered drug metabolism, affecting drug levels in the body and, ultimately,
+therapeutic efficacy.    - For example, individuals with certain polymorphisms
+may metabolize drugs more slowly, leading to increased side effects or
+therapeutic failure (confidence score: low).  #### Impact on Dopamine Pathways
+- **Dopamine Pathway Modulation**:     - Antipsychotic drugs primarily target
+dopamine pathways, which are crucial in the pathophysiology of schizophrenia.
+Genetic variations can modulate these pathways, influencing both the efficacy
+and side effect profiles of treatments.    - For instance, individuals with
+specific DRD2 variants may experience more significant symptom relief from
+dopamine antagonists, while others may not respond as favorably, highlighting
+the importance of personalized medicine approaches (confidence score: low).
+#### Personalized Medicine Approaches  - **Tailored Treatment Strategies**:
+- The integration of pharmacogenomics into clinical practice allows for more
+personalized treatment strategies. By assessing an individual's genetic profile,
+clinicians can predict which antipsychotic medications are likely to be most
+effective and which may pose a higher risk of adverse effects.    - For example,
+genetic testing for polymorphisms in drug metabolism genes can guide dosage
+adjustments or the selection of alternative medications to optimize therapeutic
+outcomes (confidence score: low).  #### Limitations and Future Directions  -
+**Evidence Quality**:     - The current evidence regarding genetic factors
+influencing antipsychotic efficacy is primarily of low confidence, indicating a
+need for further research to establish stronger associations and mechanisms.
+- While some genetic variations have been identified, the complexity of
+schizophrenia and the multifactorial nature of drug response necessitate larger,
+well-designed studies to validate these findings.  - **Emerging Research**:
+- Ongoing studies are exploring the role of additional genetic factors,
+including those related to neurotransmitter systems beyond dopamine, as well as
+epigenetic influences that may affect treatment response.    - Future research
+should focus on integrating genetic data with clinical outcomes to refine
+personalized medicine approaches in schizophrenia treatment.  ### Conclusion  In
+summary, genetic factors significantly influence the efficacy of antipsychotic
+drugs in treating schizophrenia, particularly through their effects on dopamine
+receptor pathways and drug metabolism. While current evidence is primarily of
+low confidence, the potential for personalized medicine approaches based on
+genetic profiling holds promise for improving treatment outcomes in individuals
+with schizophrenia. Continued research is essential to enhance our understanding
+of these genetic influences and to develop more effective, tailored therapeutic
+strategies.
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 80.142s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 12.133s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.27
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.103s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.27
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.864s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s, Confidence: 0.24
+    ↓
+    🛠️  Query Building ✅
+       Time: 5.648s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 0.000s
+    ↓
+    📊 Aggregation ✅
+       Time: 0.004s, Confidence: 0.28
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759331575
+   Execution Time: 80.142s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 11 entities
+   📋 Entities Found:
+      • genetic factors (general) - ID: EFO:0004828, Conf: 0.85
+      • efficacy (general) - ID: UMLS:C0087113, Conf: 0.85
+      • antipsychotic drugs (drug) - ID: UMLS:C0040615, Conf: 0.85
+      • schizophrenia (disease) - ID: UMLS:C0036341, Conf: 0.85
+      • genetic variations (general) - ID: UMLS:C0042333, Conf: 0.85
+
+2. Query Building ✅
+   Step ID: query_building_1759331661_subq_0
+   Execution Time: 12.133s
+   Confidence: 0.80
+   Input: 4 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759332122_pred_related_to_subq_0
+   Execution Time: 0.000s
+   Confidence: 0.27
+   Input: dict with 3 keys
+   Output: 100 results
+   📊 API Results: 100 total
+      Result 1: result_1 (score: 0.265)
+        Nodes: 0, Edges: 0
+      Result 2: result_2 (score: 0.265)
+        Nodes: 0, Edges: 0
+      Result 3: result_3 (score: 0.265)
+        Nodes: 0, Edges: 0
+
+4. Query Building ✅
+   Step ID: query_building_1759332122_subq_1
+   Execution Time: 4.103s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: TRAPI query
+
+5. Api Execution ✅
+   Step ID: api_execution_1759332141_pred_related_to_subq_1
+   Execution Time: 0.000s
+   Confidence: 0.27
+   Input: dict with 3 keys
+   Output: 100 results
+   📊 API Results: 100 total
+      Result 1: result_1 (score: 0.290)
+        Nodes: 0, Edges: 0
+      Result 2: result_2 (score: 0.285)
+        Nodes: 0, Edges: 0
+      Result 3: result_3 (score: 0.280)
+        Nodes: 0, Edges: 0
+
+6. Query Building ✅
+   Step ID: query_building_1759332141_subq_2
+   Execution Time: 4.864s
+   Confidence: 0.80
+   Input: 4 entities
+   Output: TRAPI query
+
+7. Api Execution ✅
+   Step ID: api_execution_1759332233_pred_related_to_subq_2
+   Execution Time: 0.000s
+   Confidence: 0.24
+   Input: dict with 3 keys
+   Output: 1 results
+   📊 API Results: 1 total
+      Result 1: result_1 (score: 0.245)
+        Nodes: 0, Edges: 0
+
+8. Query Building ✅
+   Step ID: query_building_1759332233_subq_3
+   Execution Time: 5.648s
+   Confidence: 0.80
+   Input: 5 entities
+   Output: TRAPI query
+
+9. Api Execution ✅
+   Step ID: api_execution_1759332243_pred_related_to_subq_3
+   Execution Time: 0.000s
+   Input: dict with 3 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+10. Aggregation ✅
+   Step ID: aggregation_1759332243
+   Execution Time: 0.004s
+   Confidence: 0.28
+   Input: 11 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 0
+      Duplicates Removed: 0
+      Final Results: 201
+      Top Result Score: 0.000
+
+🐛 TRAPI QUERY DEBUGGING
+--------------------------------------------------
+
+TRAPI Query 1 (query_building):
+Step ID: query_building_1759331661_subq_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Gene"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0040615"
+          ]
+        },
+        "n2": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0036341"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        },
+        "e02": {
+          "subject": "n1",
+          "object": "n2",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 3 nodes, 2 edges
+Nodes:
+  n0: Unnamed (biolink:Gene)
+  n1: Unnamed (biolink:SmallMolecule)
+  n2: Unnamed (biolink:Disease)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+  e02: n1 → n2 (biolink:treats)
+
+TRAPI Query 2 (query_building):
+Step ID: query_building_1759332122_subq_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Gene"
+          ],
+          "ids": [
+            "UMLS:C0042333"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Gene)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 3 (query_building):
+Step ID: query_building_1759332141_subq_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Gene"
+          ],
+          "ids": [
+            "UMLS:C0042333"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0040615"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Gene)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 4 (query_building):
+Step ID: query_building_1759332233_subq_3
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Gene"
+          ],
+          "ids": [
+            "EFO:0004828"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0040615"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Gene)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 10 thoughts
+Latency: 4 hops
+Total Thoughts: 10
+Quality Improvement: 3.47x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 2.50
+
+Thought Type Distribution:
+  entity_extraction: 1 (10.0%)
+  query_building: 4 (40.0%)
+  api_execution: 4 (40.0%)
+  aggregation: 1 (10.0%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+

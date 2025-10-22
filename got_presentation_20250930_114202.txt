@@ -1,0 +1,421 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: Which drugs can treat Psychotic Disorders by targeting neurotransmitter
+       uptake?
+Timestamp: 2025-09-30 11:42:02
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 110.784s
+Entities Found: 5
+Total Results: 173
+Quality Score: 0.800
+Execution Steps: 8
+GoT Volume: 8 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+**🔬 Therapeutic Compounds Analysis** Found 1 therapeutic compounds relevant to
+your query:   1. Pharmaceutical Preparations  **🔗 Key Biomedical
+Relationships:**   • psychosis treated by Aripiprazole (confidence: 0.80)   •
+psychosis treated by Quetiapine (confidence: 0.80)   • psychosis treated by
+Risperidone (confidence: 0.80)   • psychosis tested by clinical trials of
+Olanzapine (confidence: 0.80)   • psychosis treated by Dexmedetomidine
+(confidence: 0.80)  **📈 Analysis Quality Assessment:**   • Total results
+processed: 173   • Results with structured data: 173/173 (100%)   • Average
+confidence score: 0.80 (High)   • Data completeness: 100%  **🔬 Research
+Context:** This analysis is based on curated biomedical knowledge graphs and
+peer-reviewed data sources.  Results represent current scientific understanding
+but should be validated through additional research.
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 66.717s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.024s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 18.336s, Confidence: 0.80
+    ↓
+    🛠️  Query Building ✅
+       Time: 3.867s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 6.056s, Confidence: 0.80
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.297s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 1.609s
+    ↓
+    📊 Aggregation ✅
+       Time: 0.008s, Confidence: 0.80
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759257611
+   Execution Time: 66.717s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 5 entities
+   📋 Entities Found:
+      • drugs (drug) - ID: UMLS:C0013227, Conf: 0.85
+      • treat (general) - ID: UMLS:C1292734, Conf: 0.85
+      • Psychotic Disorders (disease) - ID: UMLS:C0033975, Conf: 0.85
+      • neurotransmitter (biologicalEntity) - ID: UMLS:C0597064, Conf: 0.85
+      • uptake (biologicalProcess) - ID: GO:0001504, Conf: 0.85
+
+2. Query Building ✅
+   Step ID: query_building_1759257683_pair_0
+   Execution Time: 4.024s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759257687_pair_0
+   Execution Time: 18.336s
+   Confidence: 0.80
+   Input: dict with 1 keys
+   Output: 100 results
+   📊 API Results: 100 total
+      Result 1: result_1 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 2: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 3: result_3 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+4. Query Building ✅
+   Step ID: query_building_1759257706_pair_1
+   Execution Time: 3.867s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: TRAPI query
+
+5. Api Execution ✅
+   Step ID: api_execution_1759257710_pair_1
+   Execution Time: 6.056s
+   Confidence: 0.80
+   Input: dict with 1 keys
+   Output: 73 results
+   📊 API Results: 73 total
+      Result 1: result_1 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 2: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 3: result_3 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+6. Query Building ✅
+   Step ID: query_building_1759257716_pair_2
+   Execution Time: 4.297s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: TRAPI query
+
+7. Api Execution ✅
+   Step ID: api_execution_1759257720_pair_2
+   Execution Time: 1.609s
+   Input: dict with 1 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+8. Aggregation ✅
+   Step ID: aggregation_1759257722
+   Execution Time: 0.008s
+   Confidence: 0.80
+   Input: 5 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 0
+      Duplicates Removed: 0
+      Final Results: 173
+      Top Result Score: 0.000
+
+🐛 TRAPI QUERY DEBUGGING
+--------------------------------------------------
+
+TRAPI Query 1 (query_building):
+Step ID: query_building_1759257683_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:treated_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Disease)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:treated_by)
+
+TRAPI Query 2 (api_execution):
+Step ID: api_execution_1759257687_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:treated_by"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Disease)
+  n1: Unnamed (biolink:SmallMolecule)
+Edges:
+  e01: n0 → n1 (biolink:treated_by)
+
+TRAPI Query 3 (query_building):
+Step ID: query_building_1759257706_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0013227"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:disrupts"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:disrupts)
+
+TRAPI Query 4 (api_execution):
+Step ID: api_execution_1759257710_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0013227"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:disrupts"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:disrupts)
+
+TRAPI Query 5 (query_building):
+Step ID: query_building_1759257716_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0001504"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:Disease)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 6 (api_execution):
+Step ID: api_execution_1759257720_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0001504"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0033975"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:Disease)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 8 thoughts
+Latency: 4 hops
+Total Thoughts: 8
+Quality Improvement: 1.06x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 2.00
+
+Thought Type Distribution:
+  entity_extraction: 1 (12.5%)
+  query_building: 3 (37.5%)
+  api_execution: 3 (37.5%)
+  aggregation: 1 (12.5%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+

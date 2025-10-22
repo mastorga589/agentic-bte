@@ -1,0 +1,1398 @@
+2025-10-07 18:32:51,638 - agentic_bte.core.entities.bio_ner - INFO - <module>:45 - Initializing spaCy models and linkers...
+2025-10-07 18:32:51,638 - agentic_bte.core.entities.bio_ner - DEBUG - <module>:47 - Loading en_core_sci_lg model...
+/Users/mastorga/miniforge3/lib/python3.12/site-packages/spacy/language.py:2195: FutureWarning: Possible set union at position 6328
+  deserializers["tokenizer"] = lambda p: self.tokenizer.from_disk(  # type: ignore[union-attr]
+2025-10-07 18:32:56,660 - agentic_bte.core.entities.bio_ner - INFO - <module>:49 - Successfully loaded en_core_sci_lg model with 6 pipes: ['tok2vec', 'tagger', 'attribute_ruler', 'lemmatizer', 'parser', 'ner']
+2025-10-07 18:32:56,660 - agentic_bte.core.entities.bio_ner - DEBUG - <module>:51 - Loading en_ner_bc5cdr_md model...
+2025-10-07 18:33:00,619 - agentic_bte.core.entities.bio_ner - INFO - <module>:53 - Successfully loaded en_ner_bc5cdr_md model with 6 pipes: ['tok2vec', 'tagger', 'attribute_ruler', 'lemmatizer', 'parser', 'ner']
+2025-10-07 18:33:00,620 - agentic_bte.core.entities.bio_ner - DEBUG - <module>:55 - Adding scispacy_linker to main nlp pipeline...
+/Users/mastorga/miniforge3/lib/python3.12/site-packages/sklearn/base.py:442: InconsistentVersionWarning: Trying to unpickle estimator TfidfTransformer from version 1.1.2 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+/Users/mastorga/miniforge3/lib/python3.12/site-packages/sklearn/base.py:442: InconsistentVersionWarning: Trying to unpickle estimator TfidfVectorizer from version 1.1.2 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+2025-10-07 18:33:38,233 - agentic_bte.core.entities.bio_ner - INFO - <module>:57 - Successfully added scispacy_linker. Updated pipeline: ['tok2vec', 'tagger', 'attribute_ruler', 'lemmatizer', 'parser', 'ner', 'scispacy_linker']
+2025-10-07 18:33:38,495 - agentic_bte.core.entities.bio_ner - DEBUG - __init__:492 - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:38,495 - agentic_bte.core.entities.bio_ner - DEBUG - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:38,623 - agentic_bte.unified.entity_processor - INFO - Unified entity processor initialized
+2025-10-07 18:33:38,623 - agentic_bte.unified.performance - INFO - Unified performance monitor initialized
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - INFO - __init__:143 - === Initializing GoTPlanner ===
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - INFO - === Initializing GoTPlanner ===
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - __init__:144 - Parameters - llm: GPT41GoTLLM, config: False
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - Parameters - llm: GPT41GoTLLM, config: False
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - __init__:147 - Setting up LLM component...
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - Setting up LLM component...
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - INFO - __init__:149 - LLM configured: GPT41GoTLLM
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - INFO - LLM configured: GPT41GoTLLM
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - __init__:151 - Initializing NetworkX graph...
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - Initializing NetworkX graph...
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - __init__:153 - Graph initialized
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - Graph initialized
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - __init__:155 - Setting up BTE client...
+2025-10-07 18:33:38,629 - agentic_bte.unified.got_planner - DEBUG - Setting up BTE client...
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - INFO - __init__:61 - === Initializing BTEClient ===
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - INFO - === Initializing BTEClient ===
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:62 - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - DEBUG - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:66 - Successfully loaded settings
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - DEBUG - Successfully loaded settings
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - INFO - __init__:71 - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - INFO - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:74 - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:38,629 - agentic_bte.core.knowledge.bte_client - DEBUG - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:83 - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:92 - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - __init__:104 - HTTP session configured with retry strategy
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - HTTP session configured with retry strategy
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:110 - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - __init__:117 - BTEClient initialization completed in 0.000s
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - BTEClient initialization completed in 0.000s
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - INFO - __init__:157 - BTE client initialized
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - INFO - BTE client initialized
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - DEBUG - __init__:159 - Loading BTE meta knowledge graph...
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - DEBUG - Loading BTE meta knowledge graph...
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - INFO - _load_bte_metakg:189 - === Loading BTE meta knowledge graph ===
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - INFO - === Loading BTE meta knowledge graph ===
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - DEBUG - _load_bte_metakg:191 - Requesting meta knowledge graph from BTE client...
+2025-10-07 18:33:38,630 - agentic_bte.unified.got_planner - DEBUG - Requesting meta knowledge graph from BTE client...
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - get_meta_knowledge_graph:222 - === Getting meta knowledge graph from BTE ===
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - === Getting meta knowledge graph from BTE ===
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - get_meta_knowledge_graph:232 - Cache status - exists: False, age: 1759876418.6s, TTL: 3600s
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - Cache status - exists: False, age: 1759876418.6s, TTL: 3600s
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - get_meta_knowledge_graph:235 - Fetching fresh meta knowledge graph from BTE API...
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - Fetching fresh meta knowledge graph from BTE API...
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - _make_request:144 - === Making GET request to BTE API ===
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - INFO - === Making GET request to BTE API ===
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:145 - URL: http://localhost:3000/v1/meta_knowledge_graph
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - URL: http://localhost:3000/v1/meta_knowledge_graph
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:146 - Parameters: None
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - Parameters: None
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:147 - Timeout: 300s
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - Timeout: 300s
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:156 - Executing GET request...
+2025-10-07 18:33:38,630 - agentic_bte.core.knowledge.bte_client - DEBUG - Executing GET request...
+2025-10-07 18:33:42,138 - agentic_bte.core.knowledge.bte_client - INFO - _make_request:175 - BTE API request completed in 3.509s
+2025-10-07 18:33:42,138 - agentic_bte.core.knowledge.bte_client - INFO - BTE API request completed in 3.509s
+2025-10-07 18:33:42,138 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:176 - Response status: 200
+2025-10-07 18:33:42,138 - agentic_bte.core.knowledge.bte_client - DEBUG - Response status: 200
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:177 - Response headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'X-DNS-Prefetch-Control': 'off', 'Expect-CT': 'max-age=0', 'X-Frame-Options': 'SAMEORIGIN', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Download-Options': 'noopen', 'X-Content-Type-Options': 'nosniff', 'X-Permitted-Cross-Domain-Policies': 'none', 'Referrer-Policy': 'no-referrer', 'X-XSS-Protection': '0', 'X-RateLimit-Limit': '10000', 'X-RateLimit-Remaining': '9998', 'Date': 'Tue, 07 Oct 2025 22:33:39 GMT', 'X-RateLimit-Reset': '1759876480', 'Content-Type': 'application/json', 'Vary': 'Accept-Encoding', 'Content-Encoding': 'gzip', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5', 'Transfer-Encoding': 'chunked'}
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - Response headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'X-DNS-Prefetch-Control': 'off', 'Expect-CT': 'max-age=0', 'X-Frame-Options': 'SAMEORIGIN', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Download-Options': 'noopen', 'X-Content-Type-Options': 'nosniff', 'X-Permitted-Cross-Domain-Policies': 'none', 'Referrer-Policy': 'no-referrer', 'X-XSS-Protection': '0', 'X-RateLimit-Limit': '10000', 'X-RateLimit-Remaining': '9998', 'Date': 'Tue, 07 Oct 2025 22:33:39 GMT', 'X-RateLimit-Reset': '1759876480', 'Content-Type': 'application/json', 'Vary': 'Accept-Encoding', 'Content-Encoding': 'gzip', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5', 'Transfer-Encoding': 'chunked'}
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:181 - Response content size: 604995 bytes
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - Response content size: 604995 bytes
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:187 - Response content preview: {"nodes":{"biolink:SmallMolecule":{"id_prefixes":["PUBCHEM.COMPOUND","TTD.DRUG","INCHIKEY","UMLS","CHEBI","CHEMBL.COMPOUND","UNII","CAS","EFO","HMDB","KEGG.COMPOUND","DRUGBANK","MESH","GTOPDB","DrugCentral","BIGG.METABOLITE","ChemBank","INCHI","KEGG","KEGG.DRUG","KEGG.ENVIRON","KEGG.GLYCAN","PUBCHEM...
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - Response content preview: {"nodes":{"biolink:SmallMolecule":{"id_prefixes":["PUBCHEM.COMPOUND","TTD.DRUG","INCHIKEY","UMLS","CHEBI","CHEMBL.COMPOUND","UNII","CAS","EFO","HMDB","KEGG.COMPOUND","DRUGBANK","MESH","GTOPDB","DrugCentral","BIGG.METABOLITE","ChemBank","INCHI","KEGG","KEGG.DRUG","KEGG.ENVIRON","KEGG.GLYCAN","PUBCHEM...
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - INFO - _make_request:192 - BTE API request successful: 200
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - INFO - BTE API request successful: 200
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - get_meta_knowledge_graph:238 - Parsing meta knowledge graph response...
+2025-10-07 18:33:42,139 - agentic_bte.core.knowledge.bte_client - DEBUG - Parsing meta knowledge graph response...
+2025-10-07 18:33:42,144 - agentic_bte.core.knowledge.bte_client - INFO - get_meta_knowledge_graph:244 - Meta KG structure: 48 nodes, 3697 edges
+2025-10-07 18:33:42,144 - agentic_bte.core.knowledge.bte_client - INFO - Meta KG structure: 48 nodes, 3697 edges
+2025-10-07 18:33:42,145 - agentic_bte.core.knowledge.bte_client - DEBUG - get_meta_knowledge_graph:251 - Sample predicates: ['biolink:related_to', 'biolink:disrupts', 'biolink:in_clinical_trials_for', 'biolink:studied_to_treat', 'biolink:causes']
+2025-10-07 18:33:42,145 - agentic_bte.core.knowledge.bte_client - DEBUG - Sample predicates: ['biolink:related_to', 'biolink:disrupts', 'biolink:in_clinical_trials_for', 'biolink:studied_to_treat', 'biolink:causes']
+2025-10-07 18:33:42,145 - agentic_bte.core.knowledge.bte_client - INFO - get_meta_knowledge_graph:260 - Meta knowledge graph retrieved successfully in 3.515s
+2025-10-07 18:33:42,145 - agentic_bte.core.knowledge.bte_client - INFO - Meta knowledge graph retrieved successfully in 3.515s
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - INFO - _load_bte_metakg:196 - BTE meta KG loaded successfully: 48 nodes, 3697 edges
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - INFO - BTE meta KG loaded successfully: 48 nodes, 3697 edges
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - _load_bte_metakg:205 - Sample predicates: ['biolink:disrupts', 'biolink:causes', 'biolink:affects', 'biolink:in_clinical_trials_for', 'biolink:contraindicated_in']
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - Sample predicates: ['biolink:disrupts', 'biolink:causes', 'biolink:affects', 'biolink:in_clinical_trials_for', 'biolink:contraindicated_in']
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - _load_bte_metakg:206 - Sample subjects: ['biolink:SmallMolecule']
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - Sample subjects: ['biolink:SmallMolecule']
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - _load_bte_metakg:207 - Sample objects: ['biolink:Disease']
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - Sample objects: ['biolink:Disease']
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - INFO - __init__:161 - Meta KG loaded with 3697 edges
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - INFO - Meta KG loaded with 3697 edges
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - __init__:163 - Generating BTE constraints for prompts...
+2025-10-07 18:33:42,145 - agentic_bte.unified.got_planner - DEBUG - Generating BTE constraints for prompts...
+2025-10-07 18:33:42,153 - agentic_bte.unified.got_planner - DEBUG - __init__:165 - Prompt constraint generated (length: 297844 chars)
+2025-10-07 18:33:42,153 - agentic_bte.unified.got_planner - DEBUG - Prompt constraint generated (length: 297844 chars)
+2025-10-07 18:33:42,153 - agentic_bte.unified.got_planner - DEBUG - __init__:167 - Initializing execution engine...
+2025-10-07 18:33:42,153 - agentic_bte.unified.got_planner - DEBUG - Initializing execution engine...
+2025-10-07 18:33:42,153 - agentic_bte.unified.execution_engine - INFO - Initializing UnifiedExecutionEngine...
+2025-10-07 18:33:42,153 - agentic_bte.core.entities.bio_ner - DEBUG - __init__:492 - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:42,153 - agentic_bte.core.entities.bio_ner - DEBUG - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:42,178 - agentic_bte.unified.entity_processor - INFO - Unified entity processor initialized
+2025-10-07 18:33:42,178 - agentic_bte.unified.performance - INFO - Unified performance monitor initialized
+2025-10-07 18:33:42,179 - agentic_bte.unified.execution_engine - INFO - UnifiedCache initialized with backend: CacheBackend.MEMORY
+2025-10-07 18:33:42,179 - agentic_bte.unified.execution_engine - INFO - ErrorHandler initialized with max_retries: 3
+2025-10-07 18:33:42,179 - agentic_bte.unified.execution_engine - INFO - Unified execution engine initialized (no strategy logic)
+2025-10-07 18:33:42,179 - agentic_bte.unified.got_planner - INFO - __init__:169 - Execution engine initialized
+2025-10-07 18:33:42,179 - agentic_bte.unified.got_planner - INFO - Execution engine initialized
+2025-10-07 18:33:42,179 - agentic_bte.unified.got_planner - DEBUG - __init__:171 - Initializing knowledge manager...
+2025-10-07 18:33:42,179 - agentic_bte.unified.got_planner - DEBUG - Initializing knowledge manager...
+2025-10-07 18:33:42,179 - agentic_bte.unified.knowledge_manager - INFO - === INITIALIZING UNIFIED KNOWLEDGE MANAGER ===
+2025-10-07 18:33:42,180 - agentic_bte.unified.knowledge_manager - INFO - Unified Knowledge Manager initialized successfully
+2025-10-07 18:33:42,180 - agentic_bte.unified.got_planner - INFO - __init__:173 - Knowledge manager initialized
+2025-10-07 18:33:42,180 - agentic_bte.unified.got_planner - INFO - Knowledge manager initialized
+2025-10-07 18:33:42,180 - agentic_bte.unified.got_planner - DEBUG - __init__:175 - Initializing biomedical knowledge system...
+2025-10-07 18:33:42,180 - agentic_bte.unified.got_planner - DEBUG - Initializing biomedical knowledge system...
+2025-10-07 18:33:42,180 - agentic_bte.core.entities.bio_ner - DEBUG - __init__:492 - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:42,180 - agentic_bte.core.entities.bio_ner - DEBUG - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:61 - === Initializing BTEClient ===
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - === Initializing BTEClient ===
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:62 - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:66 - Successfully loaded settings
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Successfully loaded settings
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:71 - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:74 - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:83 - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:92 - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:104 - HTTP session configured with retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - HTTP session configured with retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:110 - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:117 - BTEClient initialization completed in 0.000s
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - BTEClient initialization completed in 0.000s
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:61 - === Initializing BTEClient ===
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - === Initializing BTEClient ===
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:62 - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:66 - Successfully loaded settings
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Successfully loaded settings
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:71 - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:74 - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:83 - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:92 - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:104 - HTTP session configured with retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - HTTP session configured with retry strategy
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:110 - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - DEBUG - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - __init__:117 - BTEClient initialization completed in 0.000s
+2025-10-07 18:33:42,195 - agentic_bte.core.knowledge.bte_client - INFO - BTEClient initialization completed in 0.000s
+2025-10-07 18:33:42,195 - agentic_bte.unified.got_planner - INFO - __init__:177 - Biomedical knowledge system initialized
+2025-10-07 18:33:42,195 - agentic_bte.unified.got_planner - INFO - Biomedical knowledge system initialized
+2025-10-07 18:33:42,195 - agentic_bte.unified.got_planner - INFO - __init__:181 - GoTPlanner initialization completed in 3.566s
+2025-10-07 18:33:42,195 - agentic_bte.unified.got_planner - INFO - GoTPlanner initialization completed in 3.566s
+2025-10-07 18:33:42,195 - agentic_bte.unified.execution_engine - INFO - Initializing UnifiedExecutionEngine...
+2025-10-07 18:33:42,196 - agentic_bte.core.entities.bio_ner - DEBUG - __init__:492 - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:42,196 - agentic_bte.core.entities.bio_ner - DEBUG - Initializing BioNERTool wrapper with API key: False
+2025-10-07 18:33:42,215 - agentic_bte.unified.entity_processor - INFO - Unified entity processor initialized
+2025-10-07 18:33:42,215 - agentic_bte.unified.performance - INFO - Unified performance monitor initialized
+2025-10-07 18:33:42,215 - agentic_bte.unified.execution_engine - INFO - UnifiedCache initialized with backend: CacheBackend.MEMORY
+2025-10-07 18:33:42,215 - agentic_bte.unified.execution_engine - INFO - ErrorHandler initialized with max_retries: 3
+2025-10-07 18:33:42,215 - agentic_bte.unified.execution_engine - INFO - Unified execution engine initialized (no strategy logic)
+2025-10-07 18:33:42,215 - agentic_bte.unified.knowledge_manager - INFO - === INITIALIZING UNIFIED KNOWLEDGE MANAGER ===
+2025-10-07 18:33:42,216 - agentic_bte.unified.knowledge_manager - INFO - Unified Knowledge Manager initialized successfully
+2025-10-07 18:33:42,242 - agentic_bte.unified.parallel_executor - INFO - Unified Parallel Executor initialized
+2025-10-07 18:33:42,243 - agentic_bte.unified.agent - INFO - UnifiedBiomedicalAgent initialized
+2025-10-07 18:33:42,243 - agentic_bte.unified.agent - INFO - Initializing UnifiedBiomedicalAgent components...
+2025-10-07 18:33:42,243 - agentic_bte.unified.entity_processor - INFO - Initializing UnifiedEntityProcessor...
+2025-10-07 18:33:42,243 - agentic_bte.unified.entity_processor - INFO - UnifiedEntityProcessor initialization completed
+2025-10-07 18:33:42,243 - agentic_bte.unified.execution_engine - INFO - === INITIALIZING UNIFIED EXECUTION ENGINE ===
+2025-10-07 18:33:42,245 - agentic_bte.unified.execution_engine - INFO - UnifiedExecutionEngine initialization completed
+2025-10-07 18:33:42,245 - agentic_bte.unified.execution_engine - INFO - Ready with components: entity_processor, performance_monitor, cache, error_handler
+2025-10-07 18:33:42,245 - agentic_bte.unified.knowledge_manager - INFO - === INITIALIZING UNIFIED KNOWLEDGE MANAGER ===
+2025-10-07 18:33:42,245 - agentic_bte.unified.knowledge_manager - INFO - UnifiedKnowledgeManager initialization completed
+2025-10-07 18:33:42,245 - agentic_bte.unified.knowledge_manager - INFO - Ready with components: rdf_manager, evidence_scorer, predicate_selector, knowledge_assertions, cached_trapi_queries
+2025-10-07 18:33:42,245 - agentic_bte.unified.agent - INFO - UnifiedBiomedicalAgent initialization completed
+2025-10-07 18:33:42,245 - agentic_bte.unified.agent - INFO - Processing query: What drugs treat diabetes?...
+2025-10-07 18:33:42,245 - agentic_bte.unified.entity_processor - INFO - Processing entities for query: What drugs treat diabetes?...
+2025-10-07 18:33:42,245 - agentic_bte.core.queries.mcp_integration - INFO - MCP tool integration initialized
+2025-10-07 18:33:42,245 - agentic_bte.core.queries.mcp_integration - INFO - Calling MCP tool 'bio_ner' (attempt 1/3)
+2025-10-07 18:33:42,802 - agentic_bte.core.queries.mcp_integration - WARNING - Real bio_ner MCP tool failed, using fallback: No module named 'agentic_bte.servers.mcp.tools.got_tool'
+2025-10-07 18:33:42,802 - agentic_bte.core.queries.mcp_integration - INFO - MCP tool 'bio_ner' completed successfully
+2025-10-07 18:33:42,802 - agentic_bte.unified.entity_processor - INFO - Consolidated 3 entities into 3 unique entities
+2025-10-07 18:33:42,802 - agentic_bte.core.entities.linking - ERROR - Error linking entity 'diabetes': LLM-based entity classification needs to be filled in as required.
+2025-10-07 18:33:42,802 - agentic_bte.core.entities.linking - INFO - Successfully linked 0 entities
+2025-10-07 18:33:42,802 - agentic_bte.core.entities.linking - ERROR - Error linking entity 'drug': LLM-based entity classification needs to be filled in as required.
+2025-10-07 18:33:42,802 - agentic_bte.core.entities.linking - INFO - Successfully linked 0 entities
+2025-10-07 18:33:42,802 - agentic_bte.core.entities.linking - ERROR - Error linking entity 'drugs': LLM-based entity classification needs to be filled in as required.
+2025-10-07 18:33:42,802 - agentic_bte.core.entities.linking - INFO - Successfully linked 0 entities
+2025-10-07 18:33:43,043 - httpx - INFO - HTTP Request: GET https://name-lookup.ci.transltr.io/lookup?curie=CHEBI%3A23888 "HTTP/1.1 422 Unprocessable Entity"
+2025-10-07 18:33:43,217 - httpx - INFO - HTTP Request: GET https://name-lookup.ci.transltr.io/lookup?curie=CHEBI%3A23888 "HTTP/1.1 422 Unprocessable Entity"
+2025-10-07 18:33:43,218 - agentic_bte.unified.entity_processor - INFO - Found generic term: drugs
+2025-10-07 18:33:43,218 - agentic_bte.unified.entity_processor - INFO - Resolved 0 generic terms
+2025-10-07 18:33:43,218 - agentic_bte.unified.entity_processor - INFO - Filtered entities: kept 3 out of original set
+2025-10-07 18:33:43,218 - agentic_bte.unified.entity_processor - INFO - Entity processing completed in 0.97s with 3 entities
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - INFO - execute:349 - === Starting GoTPlanner execution for query: 'What drugs treat diabetes?' ===
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - INFO - === Starting GoTPlanner execution for query: 'What drugs treat diabetes?' ===
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - INFO - execute:353 - Phase 1: Query decomposition
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - INFO - Phase 1: Query decomposition
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - INFO - decompose_initial_query:258 - === Decomposing initial query: 'What drugs treat diabetes?' ===
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - INFO - === Decomposing initial query: 'What drugs treat diabetes?' ===
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:259 - Query length: 26 characters
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - DEBUG - Query length: 26 characters
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:263 - Resetting entity mappings and RDF graph...
+2025-10-07 18:33:43,218 - agentic_bte.unified.got_planner - DEBUG - Resetting entity mappings and RDF graph...
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:268 - RDF graph initialized with biolink and example namespaces
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - DEBUG - RDF graph initialized with biolink and example namespaces
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:272 - Planning prompt created (length: 297906 chars)
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - DEBUG - Planning prompt created (length: 297906 chars)
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:273 - Prompt preview: SYSTEM MESSAGE: You act as a biomedical subquery decomposition planner specialized for BioThings Explorer (BTE).
+
+Your output must ONLY contain atomic scientific subquestions (facts/edges) that corres...
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - DEBUG - Prompt preview: SYSTEM MESSAGE: You act as a biomedical subquery decomposition planner specialized for BioThings Explorer (BTE).
+
+Your output must ONLY contain atomic scientific subquestions (facts/edges) that corres...
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - INFO - decompose_initial_query:275 - Sending decomposition request to LLM...
+2025-10-07 18:33:43,219 - agentic_bte.unified.got_planner - INFO - Sending decomposition request to LLM...
+2025-10-07 18:33:48,670 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+Running GoTPlanner query...
+[DEBUG] Entering GoTPlanner execution block.
+
+[GoTPlanner][ABSOLUTE RAW LLM OUTPUT]:
+ ```json
+{
+  "nodes": [
+    {"id": "Q1", "content": "What drugs treat diabetes?", "dependencies": []}
+  ],
+  "edges": []
+}
+```
+[GoTPlanner][DEBUG] Output written to /Users/mastorga/Documents/agentic-bte/debug_output/gotplanner_llm_output_latest.txt
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:277 - LLM raw output: ```json
+{
+  "nodes": [
+    {"id": "Q1", "content": "What drugs treat diabetes?", "dependencies": []}
+  ],
+  "edges": []
+}
+```
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - LLM raw output: ```json
+{
+  "nodes": [
+    {"id": "Q1", "content": "What drugs treat diabetes?", "dependencies": []}
+  ],
+  "edges": []
+}
+```
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:279 - Parsing LLM decomposition response...
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - Parsing LLM decomposition response...
+[GoTPlanner][RAW LLM OUTPUT]:
+ ```json
+{
+  "nodes": [
+    {"id": "Q1", "content": "What drugs treat diabetes?", "dependencies": []}
+  ],
+  "edges": []
+}
+```
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - INFO - decompose_initial_query:281 - Decomposed query into 1 nodes and 0 edges
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - INFO - Decomposed query into 1 nodes and 0 edges
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:284 - Decomposed GoT graph:
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - Decomposed GoT graph:
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:286 -   Node Q1: What drugs treat diabetes?...
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG -   Node Q1: What drugs treat diabetes?...
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:291 - Building NetworkX graph from decomposition...
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - Building NetworkX graph from decomposition...
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - decompose_initial_query:298 - Added node Q1: What drugs treat diabetes?...
+2025-10-07 18:33:48,682 - agentic_bte.unified.got_planner - DEBUG - Added node Q1: What drugs treat diabetes?...
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - decompose_initial_query:313 - Query decomposition completed in 5.464s: 1 nodes, 0 edges added
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - Query decomposition completed in 5.464s: 1 nodes, 0 edges added
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - execute:355 - Graph initialized with 1 nodes and 0 edges
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - Graph initialized with 1 nodes and 0 edges
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - execute:358 - Phase 2: Iterative thought execution
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - Phase 2: Iterative thought execution
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - execute:364 - === Execution iteration 1 ===
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - === Execution iteration 1 ===
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - execute:367 - Found 1 ready thoughts for execution
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - Found 1 ready thoughts for execution
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute:380 - Ready thought: Q1 - What drugs treat diabetes?...
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Ready thought: Q1 - What drugs treat diabetes?...
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute:383 - Executing 1 thoughts in parallel...
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Executing 1 thoughts in parallel...
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - execute_thought:422 - === Executing thought Q1 ===
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - INFO - === Executing thought Q1 ===
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:423 - Node content: What drugs treat diabetes?
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Node content: What drugs treat diabetes?
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:424 - Node dependencies: []
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Node dependencies: []
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:425 - Node status before execution: pending
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Node status before execution: pending
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:429 - Node Q1 status set to 'running'
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Node Q1 status set to 'running'
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:432 - Content after placeholder injection: What drugs treat diabetes?
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Content after placeholder injection: What drugs treat diabetes?
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:438 - Collecting entity mappings...
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Collecting entity mappings...
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:443 - Normalized content: what drugs treat diabetes?
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Normalized content: what drugs treat diabetes?
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:448 - Found 3 entities in context
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Found 3 entities in context
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:462 - Added entity mapping: diabetes -> MONDO:0005148
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Added entity mapping: diabetes -> MONDO:0005148
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:462 - Added entity mapping: drug -> CHEBI:23888
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Added entity mapping: drug -> CHEBI:23888
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - execute_thought:462 - Added entity mapping: drugs -> CHEBI:23888
+2025-10-07 18:33:48,683 - agentic_bte.unified.got_planner - DEBUG - Added entity mapping: drugs -> CHEBI:23888
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - DEBUG - execute_thought:480 - Adding BTE additional mappings: {}
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - DEBUG - Adding BTE additional mappings: {}
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - INFO - execute_thought:483 - Total entity mappings for Q1: 3 entities
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - INFO - Total entity mappings for Q1: 3 entities
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - DEBUG - execute_thought:484 - Entity mappings: {'diabetes': 'MONDO:0005148', 'drug': 'CHEBI:23888', 'drugs': 'CHEBI:23888'}
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - DEBUG - Entity mappings: {'diabetes': 'MONDO:0005148', 'drug': 'CHEBI:23888', 'drugs': 'CHEBI:23888'}
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - DEBUG - execute_thought:489 - Building TRAPI query...
+2025-10-07 18:33:48,684 - agentic_bte.unified.got_planner - DEBUG - Building TRAPI query...
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - INFO - __init__:61 - === Initializing BTEClient ===
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - INFO - === Initializing BTEClient ===
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:62 - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - DEBUG - Parameters - base_url: None, timeout: 300
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:66 - Successfully loaded settings
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - DEBUG - Successfully loaded settings
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - INFO - __init__:71 - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - INFO - BTE client configured with base_url: http://localhost:3000/v1, timeout: 300s
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:74 - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:48,701 - agentic_bte.core.knowledge.bte_client - DEBUG - Setting up HTTP session with retry strategy...
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:83 - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - DEBUG - Retry configuration: {'total': 3, 'status_forcelist': [429, 500, 502, 503, 504], 'backoff_factor': 1}
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:92 - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - DEBUG - Using 'allowed_methods' for urllib3 retry strategy
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - INFO - __init__:104 - HTTP session configured with retry strategy
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - INFO - HTTP session configured with retry strategy
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - DEBUG - __init__:110 - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - DEBUG - Meta knowledge graph cache initialized (TTL: 3600s)
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - INFO - __init__:117 - BTEClient initialization completed in 0.001s
+2025-10-07 18:33:48,702 - agentic_bte.core.knowledge.bte_client - INFO - BTEClient initialization completed in 0.001s
+2025-10-07 18:33:50,709 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 18:33:50,711 - agentic_bte.core.knowledge.trapi - INFO - 
+====== [TRAPI PROMPT CONTEXT] ======
+
+You are a biomedical knowledge graph assistant and need to appropriately construct a TRAPI batch query.
+
+
+IMPORTANT BIOLINK CATEGORY MAPPINGS:
+- Drugs, medications, compounds, chemicals → biolink:SmallMolecule (NOT biolink:Drug!)
+- Diseases, disorders, conditions → biolink:Disease
+- Genes → biolink:Gene  
+- Proteins → biolink:Protein
+- Biological processes, pathways → biolink:BiologicalProcess
+- Phenotypes, symptoms → biolink:PhenotypicFeature
+
+
+- Query: What drugs treat diabetes?
+- Entities and IDs: {
+  "diabetes": "MONDO:0005148",
+  "drug": "CHEBI:23888",
+  "drugs": "CHEBI:23888"
+}
+Example TRAPI: {
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }
+}
+
+Rules:
+1. Use biolink:SmallMolecule for drugs/chemicals, NOT biolink:Drug
+2. Only create one 'ids' field on one node
+3. Set IDs for the most informative/relevant node for this subquery
+4. Use correct subject-predicate-object direction
+
+Here are failed attempts: []
+Output only a valid JSON TRAPI query (no surrounding text or explanations).
+
+======
+
+2025-10-07 18:33:50,711 - agentic_bte.core.knowledge.trapi - INFO - LLM TRAPI output: {
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }
+}
+2025-10-07 18:33:50,711 - agentic_bte.core.knowledge.trapi - INFO - Batch count: 1
+2025-10-07 18:33:50,711 - agentic_bte.unified.got_planner - DEBUG - execute_thought:495 - TRAPI query for node Q1: {
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }
+}
+2025-10-07 18:33:50,711 - agentic_bte.unified.got_planner - DEBUG - TRAPI query for node Q1: {
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }
+}
+2025-10-07 18:33:50,711 - agentic_bte.unified.got_planner - INFO - execute_thought:514 - Executing TRAPI query for node Q1...
+2025-10-07 18:33:50,711 - agentic_bte.unified.got_planner - INFO - Executing TRAPI query for node Q1...
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - INFO - execute_trapi_query:282 - === Executing TRAPI query against BTE API ===
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - INFO - === Executing TRAPI query against BTE API ===
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - INFO - execute_trapi_query:292 - TRAPI query structure: 2 nodes, 1 edges
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - INFO - TRAPI query structure: 2 nodes, 1 edges
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - execute_trapi_query:298 - Node n0: categories=['biolink:Disease'], entity_count=1
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Node n0: categories=['biolink:Disease'], entity_count=1
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - execute_trapi_query:300 -   Sample IDs: ['MONDO:0005148']...
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG -   Sample IDs: ['MONDO:0005148']...
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - execute_trapi_query:298 - Node n1: categories=['biolink:SmallMolecule'], entity_count=0
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Node n1: categories=['biolink:SmallMolecule'], entity_count=0
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - execute_trapi_query:307 - Edge e01: n1 --['biolink:treats']--> n0
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Edge e01: n1 --['biolink:treats']--> n0
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - execute_trapi_query:312 - Full TRAPI query:
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }
+}
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Full TRAPI query:
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }
+}
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - execute_trapi_query:315 - Sending TRAPI query to BTE API...
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Sending TRAPI query to BTE API...
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - INFO - _make_request:144 - === Making POST request to BTE API ===
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - INFO - === Making POST request to BTE API ===
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:145 - URL: http://localhost:3000/v1/query
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - URL: http://localhost:3000/v1/query
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:146 - Parameters: None
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Parameters: None
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:147 - Timeout: 300s
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Timeout: 300s
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:150 - Request data size: 246 bytes
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Request data size: 246 bytes
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:152 - Request data preview: {
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }...
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Request data preview: {
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "MONDO:0005148"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n1",
+          "object": "n0",
+          "predicates": [
+            "biolink:treats"
+          ]
+        }
+      }
+    }
+  }...
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:160 - Executing POST request with headers: {'Content-Type': 'application/json'}
+2025-10-07 18:33:50,712 - agentic_bte.core.knowledge.bte_client - DEBUG - Executing POST request with headers: {'Content-Type': 'application/json'}
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - INFO - _make_request:175 - BTE API request completed in 4.494s
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - INFO - BTE API request completed in 4.494s
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:176 - Response status: 200
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - DEBUG - Response status: 200
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:177 - Response headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'X-DNS-Prefetch-Control': 'off', 'Expect-CT': 'max-age=0', 'X-Frame-Options': 'SAMEORIGIN', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Download-Options': 'noopen', 'X-Content-Type-Options': 'nosniff', 'X-Permitted-Cross-Domain-Policies': 'none', 'Referrer-Policy': 'no-referrer', 'X-XSS-Protection': '0', 'X-RateLimit-Limit': '100', 'X-RateLimit-Remaining': '99', 'Date': 'Tue, 07 Oct 2025 22:33:50 GMT', 'X-RateLimit-Reset': '1759876491', 'Content-Type': 'application/json', 'Vary': 'Accept-Encoding', 'Content-Encoding': 'gzip', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5', 'Transfer-Encoding': 'chunked'}
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - DEBUG - Response headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'X-DNS-Prefetch-Control': 'off', 'Expect-CT': 'max-age=0', 'X-Frame-Options': 'SAMEORIGIN', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Download-Options': 'noopen', 'X-Content-Type-Options': 'nosniff', 'X-Permitted-Cross-Domain-Policies': 'none', 'Referrer-Policy': 'no-referrer', 'X-XSS-Protection': '0', 'X-RateLimit-Limit': '100', 'X-RateLimit-Remaining': '99', 'Date': 'Tue, 07 Oct 2025 22:33:50 GMT', 'X-RateLimit-Reset': '1759876491', 'Content-Type': 'application/json', 'Vary': 'Accept-Encoding', 'Content-Encoding': 'gzip', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5', 'Transfer-Encoding': 'chunked'}
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:181 - Response content size: 1086386 bytes
+2025-10-07 18:33:55,206 - agentic_bte.core.knowledge.bte_client - DEBUG - Response content size: 1086386 bytes
+2025-10-07 18:33:55,207 - agentic_bte.core.knowledge.bte_client - DEBUG - _make_request:187 - Response content preview: {"description":"Query processed successfully, retrieved 114 results.","schema_version":"1.5.0","biolink_version":"4.2.2","workflow":[{"id":"lookup_and_score"}],"message":{"query_graph":{"nodes":{"n0":{"categories":["biolink:Disease"],"ids":["MONDO:0005148"]},"n1":{"categories":["biolink:SmallMolecul...
+2025-10-07 18:33:55,207 - agentic_bte.core.knowledge.bte_client - DEBUG - Response content preview: {"description":"Query processed successfully, retrieved 114 results.","schema_version":"1.5.0","biolink_version":"4.2.2","workflow":[{"id":"lookup_and_score"}],"message":{"query_graph":{"nodes":{"n0":{"categories":["biolink:Disease"],"ids":["MONDO:0005148"]},"n1":{"categories":["biolink:SmallMolecul...
+2025-10-07 18:33:55,207 - agentic_bte.core.knowledge.bte_client - INFO - _make_request:192 - BTE API request successful: 200
+2025-10-07 18:33:55,207 - agentic_bte.core.knowledge.bte_client - INFO - BTE API request successful: 200
+2025-10-07 18:33:55,207 - agentic_bte.core.knowledge.bte_client - DEBUG - execute_trapi_query:318 - Parsing BTE API response...
+2025-10-07 18:33:55,207 - agentic_bte.core.knowledge.bte_client - DEBUG - Parsing BTE API response...
+2025-10-07 18:33:55,215 - agentic_bte.core.knowledge.bte_client - INFO - execute_trapi_query:349 - TRAPI response: 115 KG nodes, 139 KG edges, 114 results
+2025-10-07 18:33:55,215 - agentic_bte.core.knowledge.bte_client - INFO - TRAPI response: 115 KG nodes, 139 KG edges, 114 results
+2025-10-07 18:33:55,216 - agentic_bte.core.knowledge.bte_client - INFO - execute_trapi_query:353 - TRAPI query executed successfully in 4.504s
+2025-10-07 18:33:55,216 - agentic_bte.core.knowledge.bte_client - INFO - TRAPI query executed successfully in 4.504s
+2025-10-07 18:33:55,216 - agentic_bte.unified.got_planner - DEBUG - execute_thought:518 - BTE execution completed for node Q1
+2025-10-07 18:33:55,216 - agentic_bte.unified.got_planner - DEBUG - BTE execution completed for node Q1
+2025-10-07 18:33:55,230 - agentic_bte.unified.got_planner - INFO - execute_thought:521 - BTE returned results for node Q1
+2025-10-07 18:33:55,230 - agentic_bte.unified.got_planner - INFO - BTE returned results for node Q1
+2025-10-07 18:33:55,230 - agentic_bte.unified.got_planner - DEBUG - execute_thought:527 - BTE response structure: 115 KG nodes, 139 KG edges, 114 results
+2025-10-07 18:33:55,230 - agentic_bte.unified.got_planner - DEBUG - BTE response structure: 115 KG nodes, 139 KG edges, 114 results
+2025-10-07 18:33:55,230 - agentic_bte.unified.got_planner - DEBUG - execute_thought:537 - Parsing BTE results...
+2025-10-07 18:33:55,230 - agentic_bte.unified.got_planner - DEBUG - Parsing BTE results...
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:437 - First result structure: {
+  "node_bindings": {
+    "n1": [
+      {
+        "id": "CHEBI:6801",
+        "attributes": []
+      }
+    ],
+    "n0": [
+      {
+        "id": "MONDO:0005148",
+        "attributes": []
+      }
+    ]
+  },
+  "analyses": [
+    {
+      "resource_id": "infores:biothings-explorer",
+      "edge_bindings": {
+        "e01": [
+          {
+            "id": "776286c8afc2e468209e2925923df89b",
+            "attributes": []
+          },
+          {
+            "id": "f2c59e50a1e8e7ee70c422fd04c58882",
+            "attributes": []
+          },
+          {
+            "id": "2c7fb952a06a266dfff4c6ec3a4b7eb0",
+            "attributes": []
+          }
+        ]
+      },
+      "score": 0.6434138353713597
+    }
+  ]
+}
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - First result structure: {
+  "node_bindings": {
+    "n1": [
+      {
+        "id": "CHEBI:6801",
+        "attributes": []
+      }
+    ],
+    "n0": [
+      {
+        "id": "MONDO:0005148",
+        "attributes": []
+      }
+    ]
+  },
+  "analyses": [
+    {
+      "resource_id": "infores:biothings-explorer",
+      "edge_bindings": {
+        "e01": [
+          {
+            "id": "776286c8afc2e468209e2925923df89b",
+            "attributes": []
+          },
+          {
+            "id": "f2c59e50a1e8e7ee70c422fd04c58882",
+            "attributes": []
+          },
+          {
+            "id": "2c7fb952a06a266dfff4c6ec3a4b7eb0",
+            "attributes": []
+          }
+        ]
+      },
+      "score": 0.6434138353713597
+    }
+  ]
+}
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:444 - Processing result 0: {
+  "node_bindings": {
+    "n1": [
+      {
+        "id": "CHEBI:6801",
+        "attributes": []
+      }
+    ],
+    "n0": [
+      {
+        "id": "MONDO:0005148",
+        "attributes": []
+      }
+    ]
+  },
+  "analyses": [
+    {
+      "resource_id": "infores:biothings-explorer",
+      "edge_bindings": {
+        "e01": [
+          {
+            "id": "776286c8afc2e468209e2925923df89b",
+            "attributes": []
+          },
+          {
+            "id": "f2c59e50a1e8e7ee70c422fd04c58882",
+     ...
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Processing result 0: {
+  "node_bindings": {
+    "n1": [
+      {
+        "id": "CHEBI:6801",
+        "attributes": []
+      }
+    ],
+    "n0": [
+      {
+        "id": "MONDO:0005148",
+        "attributes": []
+      }
+    ]
+  },
+  "analyses": [
+    {
+      "resource_id": "infores:biothings-explorer",
+      "edge_bindings": {
+        "e01": [
+          {
+            "id": "776286c8afc2e468209e2925923df89b",
+            "attributes": []
+          },
+          {
+            "id": "f2c59e50a1e8e7ee70c422fd04c58882",
+     ...
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:6801
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:6801
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Metformin
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Metformin
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:470 - Looking for edges connecting MONDO:0005148 -> CHEBI:6801
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Looking for edges connecting MONDO:0005148 -> CHEBI:6801
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:471 - Available edges: 139
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Available edges: 139
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:475 - Sample edge 6ac169880056686e7d1651a26e65b15d: CHEBI:167574 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Sample edge 6ac169880056686e7d1651a26e65b15d: CHEBI:167574 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:475 - Sample edge 92b99805efcd81bfdb53223ab0e38d95: CHEBI:194186 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Sample edge 92b99805efcd81bfdb53223ab0e38d95: CHEBI:194186 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:475 - Sample edge d971587bf05d84b76a149b96eabec8e6: CHEBI:134715 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Sample edge d971587bf05d84b76a149b96eabec8e6: CHEBI:134715 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:486 - Found matching edge: CHEBI:6801 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Found matching edge: CHEBI:6801 -[biolink:treats]-> MONDO:0005148
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:487 - Query was for: MONDO:0005148 -> CHEBI:6801
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Query was for: MONDO:0005148 -> CHEBI:6801
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:2376
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:2376
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=acarbose
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=acarbose
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:8228
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:8228
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Pioglitazone
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Pioglitazone
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5931
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5931
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=insulin human
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=insulin human
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:71193
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:71193
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Liraglutide
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Liraglutide
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:194186
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:194186
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Tirzepatide
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Tirzepatide
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:188719
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:188719
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Ertugliflozin
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Ertugliflozin
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:68610
+2025-10-07 18:33:55,231 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:68610
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Linagliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Linagliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:8805
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:8805
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Repaglinide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Repaglinide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5384
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5384
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Glipizide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Glipizide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:85078
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:85078
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Dapagliflozin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Dapagliflozin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:82720
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:82720
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Empagliflozin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Empagliflozin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5441
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5441
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Glyburide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Glyburide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:40237
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:40237
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Sitagliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Sitagliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:72323
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:72323
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Alogliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Alogliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:167574
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:167574
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Semaglutide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Semaglutide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:32300
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:32300
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Voglibose
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Voglibose
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:50122
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:50122
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Rosiglitazone
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Rosiglitazone
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:4167
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:4167
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=D-glucopyranose
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=D-glucopyranose
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:15365
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:15365
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Aspirin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Aspirin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:9463
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:9463
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Testosterone cypionate
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Testosterone cypionate
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=UNII:WTT295HSY5
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=UNII:WTT295HSY5
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Dulaglutide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Dulaglutide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=UNII:DE2O63YV8R
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=UNII:DE2O63YV8R
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Finerenone
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Finerenone
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:85662
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:85662
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Lixisenatide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Lixisenatide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:135285
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:135285
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Vildagliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Vildagliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136042
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136042
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Teneligliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Teneligliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134724
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134724
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Ipragliflozin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Ipragliflozin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=UNII:09118300L7
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=UNII:09118300L7
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Evogliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Evogliptin
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=UNII:9P1872D4OL
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=UNII:9P1872D4OL
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Exenatide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Exenatide
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=UNII:G4PX8C4HKV
+2025-10-07 18:33:55,232 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=UNII:G4PX8C4HKV
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Gliclazide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Gliclazide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:31897
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:31897
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Nateglinide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Nateglinide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136041
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136041
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Tofogliflozin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Tofogliflozin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=UNII:UU226QGU97
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=UNII:UU226QGU97
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Imeglimin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Imeglimin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134725
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134725
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Luseogliflozin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Luseogliflozin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:73272
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:73272
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=CANAGLIFLOZIN
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=CANAGLIFLOZIN
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136052
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136052
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Lobeglitazone
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Lobeglitazone
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:135349
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:135349
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Mitiglinide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Mitiglinide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:6935
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:6935
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Miglitol
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Miglitol
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:78425
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:78425
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Albiglutide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Albiglutide
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134715
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134715
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Trelagliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Trelagliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134731
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134731
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Gemigliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Gemigliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:71271
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:71271
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=saxagliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=saxagliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136043
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:136043
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Anagliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Anagliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134735
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:134735
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Omarigliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Omarigliptin
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:9753
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:9753
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Troglitazone
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Troglitazone
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:38545
+2025-10-07 18:33:55,233 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:38545
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Rosuvastatin
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Rosuvastatin
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:93416
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:93416
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Gliquidone
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Gliquidone
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:3650
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:3650
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Chlorpropamide
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Chlorpropamide
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5001
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5001
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Fenofibrate
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Fenofibrate
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:447 - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Node bindings keys: ['n1', 'n0']
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:452 - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5959
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Extracted IDs: subject=MONDO:0005148, object=CHEBI:5959
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - parse_bte_results:457 - Resolved names: subject=type 2 diabetes mellitus, object=Irbesartan
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - DEBUG - Resolved names: subject=type 2 diabetes mellitus, object=Irbesartan
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - INFO - parse_bte_results:526 - Parsed 50 relationships from BTE API
+2025-10-07 18:33:55,234 - agentic_bte.core.knowledge.bte_client - INFO - Parsed 50 relationships from BTE API
+2025-10-07 18:33:55,234 - agentic_bte.unified.got_planner - INFO - execute_thought:539 - Parsed 50 relationships from BTE results
+2025-10-07 18:33:55,234 - agentic_bte.unified.got_planner - INFO - Parsed 50 relationships from BTE results
+2025-10-07 18:33:55,234 - agentic_bte.unified.got_planner - DEBUG - execute_thought:541 - Adding results to RDF graph...
+2025-10-07 18:33:55,234 - agentic_bte.unified.got_planner - DEBUG - Adding results to RDF graph...
+2025-10-07 18:33:55,236 - agentic_bte.unified.got_planner - INFO - execute_thought:546 - Node Q1 completed successfully with 50 results
+2025-10-07 18:33:55,236 - agentic_bte.unified.got_planner - INFO - Node Q1 completed successfully with 50 results
+2025-10-07 18:33:55,236 - agentic_bte.unified.got_planner - INFO - execute_thought:565 - Node Q1 execution completed in 6.553s with status: complete
+2025-10-07 18:33:55,236 - agentic_bte.unified.got_planner - INFO - Node Q1 execution completed in 6.553s with status: complete
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - DEBUG - execute_thought:568 - Checking for unreachable nodes...
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - DEBUG - Checking for unreachable nodes...
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - DEBUG - execute:388 - Expanding thoughts after execution...
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - DEBUG - Expanding thoughts after execution...
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - INFO - execute:399 - Iteration 1 complete: 1 complete, 0 retired, 0 pending
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - INFO - Iteration 1 complete: 1 complete, 0 retired, 0 pending
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - INFO - execute:405 - Phase 3: Final answer composition
+2025-10-07 18:33:55,237 - agentic_bte.unified.got_planner - INFO - Phase 3: Final answer composition
+2025-10-07 18:34:12,581 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-07 18:34:12,590 - agentic_bte.unified.got_planner - INFO - execute:410 - GoTPlanner execution completed in 29.372s after 1 iterations
+2025-10-07 18:34:12,590 - agentic_bte.unified.got_planner - INFO - GoTPlanner execution completed in 29.372s after 1 iterations
+2025-10-07 18:34:12,597 - agentic_bte.unified.agent - INFO - Query b72ba880-5c35-44ee-a54a-a38a871529f7 completed in 30.346s with 0 results
+2025-10-07 18:34:12,597 - agentic_bte.unified.agent - INFO - Shutting down UnifiedBiomedicalAgent...
+2025-10-07 18:34:12,597 - agentic_bte.unified.parallel_executor - INFO - Shutting down parallel executor
+2025-10-07 18:34:12,598 - agentic_bte.unified.parallel_executor - INFO - Parallel executor shutdown complete
+2025-10-07 18:34:12,599 - agentic_bte.unified.agent - INFO - UnifiedBiomedicalAgent shutdown completed
+2025-10-07 18:34:12,600 - agentic_bte.unified.performance - INFO - Resource monitoring stopped
+[GoTPlanner] === FINAL ANSWER SYNTHESIS: Using 50 BTE results from 1 nodes
+[GoTPlanner] Nodes with results: Q1 (50 results)
+[GoTPlanner] === FINAL RDF GRAPH ===
+ @prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix ex: <http://example.org/entity/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:type_2_diabetes_mellitus a biolink:Disease ;
+    rdfs:label "type 2 diabetes mellitus" ;
+    biolink:preventative_for_condition ex:Aspirin,
+        ex:D-glucopyranose,
+        ex:Rosiglitazone,
+        ex:Testosterone_cypionate ;
+    biolink:treats ex:Albiglutide,
+        ex:Alogliptin,
+        ex:Anagliptin,
+        ex:CANAGLIFLOZIN,
+        ...
+[GoTPlanner] === FINAL SYNTHESIZED ANSWER ===
+ The drugs that treat type 2 diabetes mellitus, as evidenced by the provided biomedical knowledge sources, include a variety of small molecules and molecular mixtures with different mechanisms of action. These drugs can be categorized based on their pharmacological effects and include:
+
+1. Biguanides:
+   - Metformin
+
+2. Sulfonylureas:
+   - Glipizide
+   - Glyburide
+   - Gliclazide
+   - Gliquidone
+   - Glimepiride
+
+3. Thiazolidinediones:
+   - Pioglitazone
+   - Rosiglitazone
+
+4. Alpha-glucosidase inhibitors:
+   - Acarbose
+   - Miglitol
+   - Voglibose
+
+5. Dipeptidyl peptidase-4 (DPP-4) inhibitors:
+   - Sitagliptin
+   - Alogliptin
+   - Linagliptin
+   - Saxagliptin
+   - Vildagliptin
+   - Anagliptin
+   - Teneligliptin
+   - Gemigliptin
+   - Omarigliptin
+   - Evogliptin
+
+6. Meglitinides:
+   - Repaglinide
+   - Nateglinide
+   - Mitiglinide
+
+7. Glucagon-like peptide-1 (GLP-1) receptor agonists:
+   - Liraglutide
+   - Exenatide
+   - Dulaglutide
+   - Semaglutide
+   - Albiglutide
+   - Lixisenatide
+
+8. Sodium-glucose co-transporter 2 (SGLT2) inhibitors:
+   - Dapagliflozin
+   - Empagliflozin
+   - Ertugliflozin
+   - Canagliflozin
+   - Ipragliflozin
+   - Luseogliflozin
+   - Tofogliflozin
+
+9. Insulin and insulin analogs:
+   - Insulin human
+
+10. Other antidiabetic agents:
+    - Tirzepatide
+    - Chlorpropamide
+    - Fenofibrate
+    - Finerenone
+    - Imeglimin
+    - Irbesartan
+    - Lobeglitazone
+    - Rosuvastatin
+    - Trelagliptin
+    - Troglitazone
+
+These drugs work through various mechanisms to lower blood glucose levels, improve insulin sensitivity, increase insulin secretion, slow the digestion of carbohydrates, or excrete glucose through the urine. It is important to note that the choice of medication depends on individual patient factors, including the severity of diabetes, the presence of comorbid conditions, and the patient's response to treatment. Additionally, some of these drugs may be used in combination to achieve better glycemic control.
+[DEBUG] Got final answer from GoTPlanner: The drugs that treat type 2 diabetes mellitus, as evidenced by the provided biomedical knowledge sources, include a variety of small molecules and molecular mixtures with different mechanisms of action. These drugs can be categorized based on their pharmacological effects and include:
+
+1. Biguanides:
+   - Metformin
+
+2. Sulfonylureas:
+   - Glipizide
+   - Glyburide
+   - Gliclazide
+   - Gliquidone
+   - Glimepiride
+
+3. Thiazolidinediones:
+   - Pioglitazone
+   - Rosiglitazone
+
+4. Alpha-glucosidase inhibitors:
+   - Acarbose
+   - Miglitol
+   - Voglibose
+
+5. Dipeptidyl peptidase-4 (DPP-4) inhibitors:
+   - Sitagliptin
+   - Alogliptin
+   - Linagliptin
+   - Saxagliptin
+   - Vildagliptin
+   - Anagliptin
+   - Teneligliptin
+   - Gemigliptin
+   - Omarigliptin
+   - Evogliptin
+
+6. Meglitinides:
+   - Repaglinide
+   - Nateglinide
+   - Mitiglinide
+
+7. Glucagon-like peptide-1 (GLP-1) receptor agonists:
+   - Liraglutide
+   - Exenatide
+   - Dulaglutide
+   - Semaglutide
+   - Albiglutide
+   - Lixisenatide
+
+8. Sodium-glucose co-transporter 2 (SGLT2) inhibitors:
+   - Dapagliflozin
+   - Empagliflozin
+   - Ertugliflozin
+   - Canagliflozin
+   - Ipragliflozin
+   - Luseogliflozin
+   - Tofogliflozin
+
+9. Insulin and insulin analogs:
+   - Insulin human
+
+10. Other antidiabetic agents:
+    - Tirzepatide
+    - Chlorpropamide
+    - Fenofibrate
+    - Finerenone
+    - Imeglimin
+    - Irbesartan
+    - Lobeglitazone
+    - Rosuvastatin
+    - Trelagliptin
+    - Troglitazone
+
+These drugs work through various mechanisms to lower blood glucose levels, improve insulin sensitivity, increase insulin secretion, slow the digestion of carbohydrates, or excrete glucose through the urine. It is important to note that the choice of medication depends on individual patient factors, including the severity of diabetes, the presence of comorbid conditions, and the patient's response to treatment. Additionally, some of these drugs may be used in combination to achieve better glycemic control.
+[AGENT] Finished GoTPlanner pipeline; intermediate and final GoT reasoning should now be fully logged.
+
+--- FINAL ANSWER ---
+The drugs that treat type 2 diabetes mellitus, as evidenced by the provided biomedical knowledge sources, include a variety of small molecules and molecular mixtures with different mechanisms of action. These drugs can be categorized based on their pharmacological effects and include:
+
+1. Biguanides:
+   - Metformin
+
+2. Sulfonylureas:
+   - Glipizide
+   - Glyburide
+   - Gliclazide
+   - Gliquidone
+   - Glimepiride
+
+3. Thiazolidinediones:
+   - Pioglitazone
+   - Rosiglitazone
+
+4. Alpha-glucosidase inhibitors:
+   - Acarbose
+   - Miglitol
+   - Voglibose
+
+5. Dipeptidyl peptidase-4 (DPP-4) inhibitors:
+   - Sitagliptin
+   - Alogliptin
+   - Linagliptin
+   - Saxagliptin
+   - Vildagliptin
+   - Anagliptin
+   - Teneligliptin
+   - Gemigliptin
+   - Omarigliptin
+   - Evogliptin
+
+6. Meglitinides:
+   - Repaglinide
+   - Nateglinide
+   - Mitiglinide
+
+7. Glucagon-like peptide-1 (GLP-1) receptor agonists:
+   - Liraglutide
+   - Exenatide
+   - Dulaglutide
+   - Semaglutide
+   - Albiglutide
+   - Lixisenatide
+
+8. Sodium-glucose co-transporter 2 (SGLT2) inhibitors:
+   - Dapagliflozin
+   - Empagliflozin
+   - Ertugliflozin
+   - Canagliflozin
+   - Ipragliflozin
+   - Luseogliflozin
+   - Tofogliflozin
+
+9. Insulin and insulin analogs:
+   - Insulin human
+
+10. Other antidiabetic agents:
+    - Tirzepatide
+    - Chlorpropamide
+    - Fenofibrate
+    - Finerenone
+    - Imeglimin
+    - Irbesartan
+    - Lobeglitazone
+    - Rosuvastatin
+    - Trelagliptin
+    - Troglitazone
+
+These drugs work through various mechanisms to lower blood glucose levels, improve insulin sensitivity, increase insulin secretion, slow the digestion of carbohydrates, or excrete glucose through the urine. It is important to note that the choice of medication depends on individual patient factors, including the severity of diabetes, the presence of comorbid conditions, and the patient's response to treatment. Additionally, some of these drugs may be used in combination to achieve better glycemic control.
+--- RAW OUTPUT ---
+Results: 0
+Stages: [<ProcessingStage.INITIALIZED: 'initialized'>, <ProcessingStage.ENTITY_EXTRACTION: 'entity_extraction'>, <ProcessingStage.STRATEGY_SELECTION: 'strategy_selection'>]
+
+2025-10-07 18:34:19,168 - agentic_bte.unified.performance - INFO - Resource monitoring stopped
+2025-10-07 18:34:19,168 - agentic_bte.unified.performance - INFO - Resource monitoring stopped

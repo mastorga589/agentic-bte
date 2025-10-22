@@ -1,0 +1,416 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: What genes are associated with Alzheimer disease and affect amyloid
+       processing?
+Timestamp: 2025-09-30 11:44:42
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 81.763s
+Entities Found: 5
+Total Results: 100
+Quality Score: 0.800
+Execution Steps: 8
+GoT Volume: 8 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+**🧬 Genetic Factors Analysis** Identified 96 genes/proteins:   1. A2M   2. ABCA1
+3. ABCA7   4. ACHE   5. ADNP   6. APBB1   7. APBB2   8. APOA1   ... and 88
+additional genes  **🏥 Associated Medical Conditions:**   • Alzheimer disease
+**🔗 Key Biomedical Relationships:**   • Alzheimer disease condition associated
+with gene PSEN2 (confidence: 0.80)   • Alzheimer disease condition associated
+with gene PSEN1 (confidence: 0.80)   • Alzheimer disease condition associated
+with gene Psn (confidence: 0.80)   • Alzheimer disease condition associated with
+gene APOE (confidence: 0.80)   • Alzheimer disease condition associated with
+gene psen1 (confidence: 0.80)  **📈 Analysis Quality Assessment:**   • Total
+results processed: 100   • Results with structured data: 100/100 (100%)   •
+Average confidence score: 0.80 (High)   • Data completeness: 100%  **🔬 Research
+Context:** This analysis is based on curated biomedical knowledge graphs and
+peer-reviewed data sources.  Results represent current scientific understanding
+but should be validated through additional research.
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 54.625s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 3.661s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 8.987s, Confidence: 0.80
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.352s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 1.131s
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.240s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 1.705s
+    ↓
+    📊 Aggregation ✅
+       Time: 0.005s, Confidence: 0.80
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759257801
+   Execution Time: 54.625s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 5 entities
+   📋 Entities Found:
+      • genes (gene) - ID: UMLS:C0017337, Conf: 0.85
+      • associated with (general) - ID: UMLS:C0332281, Conf: 0.85
+      • Alzheimer disease (disease) - ID: UMLS:C0002395, Conf: 0.85
+      • amyloid processing (biologicalProcess) - ID: GO:0050435, Conf: 0.85
+      • amyloid (protein) - ID: UMLS:C0002716, Conf: 0.85
+
+2. Query Building ✅
+   Step ID: query_building_1759257858_pair_0
+   Execution Time: 3.661s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759257862_pair_0
+   Execution Time: 8.987s
+   Confidence: 0.80
+   Input: dict with 1 keys
+   Output: 100 results
+   📊 API Results: 100 total
+      Result 1: result_1 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 2: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 3: result_3 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+4. Query Building ✅
+   Step ID: query_building_1759257871_pair_1
+   Execution Time: 4.352s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+5. Api Execution ✅
+   Step ID: api_execution_1759257875_pair_1
+   Execution Time: 1.131s
+   Input: dict with 1 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+6. Query Building ✅
+   Step ID: query_building_1759257876_pair_2
+   Execution Time: 4.240s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: TRAPI query
+
+7. Api Execution ✅
+   Step ID: api_execution_1759257881_pair_2
+   Execution Time: 1.705s
+   Input: dict with 1 keys
+   Output: 0 results
+   📊 API Results: 0 total
+
+8. Aggregation ✅
+   Step ID: aggregation_1759257882
+   Execution Time: 0.005s
+   Confidence: 0.80
+   Input: 5 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 0
+      Duplicates Removed: 0
+      Final Results: 100
+      Top Result Score: 0.000
+
+🐛 TRAPI QUERY DEBUGGING
+--------------------------------------------------
+
+TRAPI Query 1 (query_building):
+Step ID: query_building_1759257858_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0002395"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Gene"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:condition_associated_with_gene"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Disease)
+  n1: Unnamed (biolink:Gene)
+Edges:
+  e01: n0 → n1 (biolink:condition_associated_with_gene)
+
+TRAPI Query 2 (api_execution):
+Step ID: api_execution_1759257862_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Disease"
+          ],
+          "ids": [
+            "UMLS:C0002395"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Gene"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:condition_associated_with_gene"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Disease)
+  n1: Unnamed (biolink:Gene)
+Edges:
+  e01: n0 → n1 (biolink:condition_associated_with_gene)
+
+TRAPI Query 3 (query_building):
+Step ID: query_building_1759257871_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0050435"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Gene"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:Gene)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 4 (api_execution):
+Step ID: api_execution_1759257875_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0050435"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:Gene"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:PhysiologicalProcess)
+  n1: Unnamed (biolink:Gene)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 5 (query_building):
+Step ID: query_building_1759257876_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Gene"
+          ],
+          "ids": [
+            "UMLS:C0017337"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0050435"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Gene)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 6 (api_execution):
+Step ID: api_execution_1759257881_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:Gene"
+          ],
+          "ids": [
+            "UMLS:C0017337"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ],
+          "ids": [
+            "GO:0050435"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:Gene)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 8 thoughts
+Latency: 4 hops
+Total Thoughts: 8
+Quality Improvement: 1.06x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 2.00
+
+Thought Type Distribution:
+  entity_extraction: 1 (12.5%)
+  query_building: 3 (37.5%)
+  api_execution: 3 (37.5%)
+  aggregation: 1 (12.5%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+

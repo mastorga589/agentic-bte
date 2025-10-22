@@ -1,0 +1,417 @@
+====================================================================================================
+           GRAPH OF THOUGHTS (GoT) BIOMEDICAL QUERY RESULTS           
+====================================================================================================
+
+Query: How does aspirin affect inflammation pathways and cardiovascular
+       protection?
+Timestamp: 2025-09-30 11:46:46
+
+📋 EXECUTIVE SUMMARY
+--------------------------------------------------
+Status: ✅ SUCCESS
+Execution Time: 91.492s
+Entities Found: 4
+Total Results: 56
+Quality Score: 0.800
+Execution Steps: 8
+GoT Volume: 8 thoughts
+GoT Latency: 4 hops
+
+🎯 FINAL ANSWER
+--------------------------------------------------
+**📊 Biomedical Analysis Results** ⚠️ Limited specific entities were extracted
+from the results.  **🔗 Key Biomedical Relationships:**   • Aspirin affects
+Platelet aggregation (confidence: 0.80)   • Aspirin affects Platelet Activation
+(confidence: 0.80)   • Aspirin affects Blood Pressure (confidence: 0.80)   •
+Aspirin affects Pregnancy (confidence: 0.80)   • Aspirin affects Cessation of
+life (confidence: 0.80)  **📈 Analysis Quality Assessment:**   • Total results
+processed: 56   • Results with structured data: 56/56 (100%)   • Average
+confidence score: 0.80 (High)   • Data completeness: 100%
+
+🗂️  QUERY EXECUTION PLAN
+--------------------------------------------------
+Execution Flow:
+
+🔍 Entity Extraction ✅
+   Time: 53.605s, Confidence: 0.85
+    ↓
+    🛠️  Query Building ✅
+       Time: 5.123s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 6.978s, Confidence: 0.80
+    ↓
+    🛠️  Query Building ✅
+       Time: 4.339s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 3.630s, Confidence: 0.80
+    ↓
+    🛠️  Query Building ✅
+       Time: 6.193s, Confidence: 0.80
+    ↓
+    🌐 Api Execution ✅
+       Time: 5.139s, Confidence: 0.80
+    ↓
+    📊 Aggregation ✅
+       Time: 0.006s, Confidence: 0.80
+
+📖 STEP-BY-STEP RESULTS
+--------------------------------------------------
+
+1. Entity Extraction ✅
+   Step ID: entity_extraction_1759257914
+   Execution Time: 53.605s
+   Confidence: 0.85
+   Input: TRAPI query
+   Output: 4 entities
+   📋 Entities Found:
+      • aspirin (drug) - ID: UMLS:C0004057, Conf: 0.85
+      • inflammation pathways (biologicalProcess) - ID: GO:0006954, Conf: 0.85
+      • cardiovascular (biologicalEntity) - ID: UMLS:C3887460, Conf: 0.85
+      • inflammation (biologicalProcess) - ID: GO:0006954, Conf: 0.85
+
+2. Query Building ✅
+   Step ID: query_building_1759257974_pair_0
+   Execution Time: 5.123s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+3. Api Execution ✅
+   Step ID: api_execution_1759257979_pair_0
+   Execution Time: 6.978s
+   Confidence: 0.80
+   Input: dict with 1 keys
+   Output: 55 results
+   📊 API Results: 55 total
+      Result 1: result_1 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 2: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 3: result_3 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+4. Query Building ✅
+   Step ID: query_building_1759257986_pair_1
+   Execution Time: 4.339s
+   Confidence: 0.80
+   Input: 3 entities
+   Output: TRAPI query
+
+5. Api Execution ✅
+   Step ID: api_execution_1759257991_pair_1
+   Execution Time: 3.630s
+   Confidence: 0.80
+   Input: dict with 1 keys
+   Output: 55 results
+   📊 API Results: 55 total
+      Result 1: result_1 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 2: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 3: result_3 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+6. Query Building ✅
+   Step ID: query_building_1759257994_pair_2
+   Execution Time: 6.193s
+   Confidence: 0.80
+   Input: 2 entities
+   Output: TRAPI query
+
+7. Api Execution ✅
+   Step ID: api_execution_1759258000_pair_2
+   Execution Time: 5.139s
+   Confidence: 0.80
+   Input: dict with 1 keys
+   Output: 55 results
+   📊 API Results: 55 total
+      Result 1: result_1 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 2: result_2 (score: 0.800)
+        Nodes: 2, Edges: 1
+      Result 3: result_3 (score: 0.800)
+        Nodes: 2, Edges: 1
+
+8. Aggregation ✅
+   Step ID: aggregation_1759258006
+   Execution Time: 0.006s
+   Confidence: 0.80
+   Input: 4 entities
+   Output: dict with 6 keys
+   🔄 Aggregation Summary:
+      Conflicts Resolved: 109
+      Duplicates Removed: 109
+      Final Results: 56
+      Top Result Score: 0.000
+
+🐛 TRAPI QUERY DEBUGGING
+--------------------------------------------------
+
+TRAPI Query 1 (query_building):
+Step ID: query_building_1759257974_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0004057"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 2 (api_execution):
+Step ID: api_execution_1759257979_pair_0
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0004057"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 3 (query_building):
+Step ID: query_building_1759257986_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0004057"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 4 (api_execution):
+Step ID: api_execution_1759257991_pair_1
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "UMLS:C0004057"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 5 (query_building):
+Step ID: query_building_1759257994_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "CHEBI:15365"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+TRAPI Query 6 (api_execution):
+Step ID: api_execution_1759258000_pair_2
+```json
+{
+  "message": {
+    "query_graph": {
+      "nodes": {
+        "n0": {
+          "categories": [
+            "biolink:SmallMolecule"
+          ],
+          "ids": [
+            "CHEBI:15365"
+          ]
+        },
+        "n1": {
+          "categories": [
+            "biolink:PhysiologicalProcess"
+          ]
+        }
+      },
+      "edges": {
+        "e01": {
+          "subject": "n0",
+          "object": "n1",
+          "predicates": [
+            "biolink:affects"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+Query Graph: 2 nodes, 1 edges
+Nodes:
+  n0: Unnamed (biolink:SmallMolecule)
+  n1: Unnamed (biolink:PhysiologicalProcess)
+Edges:
+  e01: n0 → n1 (biolink:affects)
+
+📈 GOT FRAMEWORK METRICS
+--------------------------------------------------
+Volume: 8 thoughts
+Latency: 4 hops
+Total Thoughts: 8
+Quality Improvement: 1.06x
+Cost Reduction: 0.80x
+Parallel Speedup: 1.20x
+Volume-Latency Efficiency: 2.00
+
+Thought Type Distribution:
+  entity_extraction: 1 (12.5%)
+  query_building: 3 (37.5%)
+  api_execution: 3 (37.5%)
+  aggregation: 1 (12.5%)
+
+====================================================================================================
+                      🎉 QUERY EXECUTION COMPLETED SUCCESSFULLY 🎉                     
+====================================================================================================
+
