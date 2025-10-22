@@ -1,0 +1,26 @@
+question,ground_truth_id,ground_truth_name,LLM_only_picked,Agentic_BTE_final_picked,Agentic_BTE_results_picked,LLM_only_correct,Agentic_BTE_final_correct,Agentic_BTE_results_correct,LLM_only_output,Agentic_BTE_final_output,Agentic_BTE_results_output,LLM_only_answers_extracted,Agentic_BTE_final_answers_extracted,Agentic_BTE_results_answers_extracted
+"Which drugs can treat Respiratory Tract Infections by targeting peptidoglycan-based cell wall biogenesis? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:D002433,Cefaclor,CHEBI:17334,,,False,False,False,"**Penicillin**
+**Amoxicillin**
+**Cephalexin**
+**Vancomycin**
+**Meropenem**",name 'asyncio' is not defined,name 'asyncio' is not defined,"Penicillin, Amoxicillin, Cephalexin, Vancomycin, Meropenem",,
+"Which drugs can treat Follicular non-Hodgkin's lymphoma by targeting B cell proliferation? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:C552946,Idelalisib,CHEBI:82701,,,True,False,False,"**Rituximab**
+**Obinutuzumab**
+**Ibrutinib**
+**Idelalisib**
+**Copanlisib**",name 'asyncio' is not defined,name 'asyncio' is not defined,"Rituximab, Obinutuzumab, Ibrutinib, Idelalisib, Copanlisib",,
+"Which drugs can treat Endometritis by targeting peptidoglycan biosynthetic process? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:D015313,cefotetan,CHEBI:2676,,,False,False,False,"**Amoxicillin**
+**Ampicillin**
+**Ceftriaxone**
+**Metronidazole**
+**Clindamycin**",name 'asyncio' is not defined,name 'asyncio' is not defined,"Amoxicillin, Ampicillin, Ceftriaxone, Metronidazole, Clindamycin",,
+"Which drugs can treat Pharyngitis by targeting fungal-type cell wall? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:D000666,amphotericin B,CHEBI:3764,,,False,False,False,"**Clotrimazole**
+**Nystatin**
+**Fluconazole**
+**Itraconazole**
+**Ketoconazole**",name 'asyncio' is not defined,name 'asyncio' is not defined,"Clotrimazole, Nystatin, Fluconazole, Itraconazole, Ketoconazole",,
+"Which drugs can treat Acute lymphoblastic leukemia by targeting cell population proliferation? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:C042705,pegaspargase,CHEBI:45783,,,False,False,False,"**Imatinib**
+**Dasatinib**
+**Nilotinib**
+**Ponatinib**
+**Bosutinib**",name 'asyncio' is not defined,name 'asyncio' is not defined,"Imatinib, Dasatinib, Nilotinib, Ponatinib, Bosutinib",,

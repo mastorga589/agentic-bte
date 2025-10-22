@@ -1,0 +1,30 @@
+question,ground_truth_id,ground_truth_name,LLM_only_picked,Agentic_BTE_final_picked,Agentic_BTE_results_picked,LLM_only_correct,Agentic_BTE_final_correct,Agentic_BTE_results_correct,LLM_only_output,Agentic_BTE_final_output,Agentic_BTE_results_output,LLM_only_answers_extracted,Agentic_BTE_final_answers_extracted,Agentic_BTE_results_answers_extracted
+"Which drugs can treat Respiratory Tract Infections by targeting peptidoglycan-based cell wall biogenesis? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:D002433,Cefaclor,CHEBI:17334,RXCUI:197426,CHEBI:29013,False,False,False,"**Penicillin**
+**Amoxicillin**
+**Cephalexin**
+**Vancomycin**
+**Meropenem**",Found 50 biomedical relationships providing insights into your query.,"**Fusidic acid**
+**dexamethasone sodium phosphate**","Penicillin, Amoxicillin, Cephalexin, Vancomycin, Meropenem",Found 50 biomedical relationships providing insights into your query,"Fusidic acid, dexamethasone sodium phosphate"
+"Which drugs can treat Follicular non-Hodgkin's lymphoma by targeting B cell proliferation? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:C552946,Idelalisib,CHEBI:82701,RXCUI:197426,CHEBI:135515,True,False,False,"**Rituximab**
+**Obinutuzumab**
+**Ibrutinib**
+**Idelalisib**
+**Copanlisib**",Found 50 biomedical relationships providing insights into your query.,"**Bendamustine**
+**Chlorambucil**
+**vincristine**","Rituximab, Obinutuzumab, Ibrutinib, Idelalisib, Copanlisib",Found 50 biomedical relationships providing insights into your query,"Bendamustine, Chlorambucil, vincristine"
+"Which drugs can treat Endometritis by targeting peptidoglycan biosynthetic process? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:D015313,cefotetan,CHEBI:17334,UMLS:C0152229,,False,False,False,"**Penicillin**
+**Amoxicillin**
+**Cephalexin**
+**Vancomycin**
+**Meropenem**",No relevant biomedical results found for your query.,,"Penicillin, Amoxicillin, Cephalexin, Vancomycin, Meropenem",No relevant biomedical results found for your query,
+"Which drugs can treat Pharyngitis by targeting fungal-type cell wall? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:D000666,amphotericin B,CHEBI:3764,RXCUI:197426,CHEBI:15365,False,False,False,"**Clotrimazole**
+**Nystatin**
+**Fluconazole**
+**Itraconazole**
+**Ketoconazole**",Found 50 biomedical relationships providing insights into your query.,**Aspirin**,"Clotrimazole, Nystatin, Fluconazole, Itraconazole, Ketoconazole",Found 50 biomedical relationships providing insights into your query,Aspirin
+"Which drugs can treat Acute lymphoblastic leukemia by targeting cell population proliferation? Enumerate 5 drugs and do not include anything else in your response. Each of your answer entities MUST be tagged with ** at the start AND end of the phrase (**....**), otherwise it will not be assessed",MESH:C042705,pegaspargase,CHEBI:45783,RXCUI:197426,CHEBI:42068,False,False,False,"**Imatinib**
+**Dasatinib**
+**Nilotinib**
+**Ponatinib**
+**Bosutinib**",Found 50 biomedical relationships providing insights into your query.,"**Idarubicin hydrochloride**
+**asparaginase**","Imatinib, Dasatinib, Nilotinib, Ponatinib, Bosutinib",Found 50 biomedical relationships providing insights into your query,"Idarubicin hydrochloride, asparaginase"
