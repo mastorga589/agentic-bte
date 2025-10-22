@@ -5,953 +5,589 @@ This module provides functionality to convert natural language biomedical
 queries into TRAPI (Translator Reasoner API) format using LLMs and knowledge
 graph metadata.
 
-Migrated and enhanced from the original BTE-LLM implementation.
+Migrated and enhanced from the original BTE-LLM implementation, now with strict batching/context logic.
 """
 
 import json
 import logging
-import time
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from copy import deepcopy
-
 from langchain_openai import ChatOpenAI
-from typing_extensions import TypedDict, Literal
-
 from ...config.settings import get_settings
 from ...exceptions.base import ExternalServiceError
 from .bte_client import BTEClient
 
 logger = logging.getLogger(__name__)
 
+def build_trapi_query(query: str, entity_data: Dict[str, str], failed_trapis: List[Dict] = None) -> Dict[str, Any]:
+    """Convenience wrapper for class-based builder (for legacy/compat use)"""
+    builder = TRAPIQueryBuilder()
+    return builder.build_trapi_query(query, entity_data, failed_trapis)
 
 class TRAPIQueryBuilder:
-    """
-    TRAPI Query Builder for BioThings Explorer
-    
-    This class builds TRAPI (Translator Reasoner API) queries from natural language
-    biomedical questions, with support for entity mapping and predicate selection.
-    
-    Migrated from original BTE-LLM implementations with enhancements.
-    """
-    
     def __init__(self, openai_api_key: Optional[str] = None):
-        """
-        Initialize the TRAPI query builder
-        
-        Args:
-            openai_api_key: OpenAI API key for LLM operations
-        """
         self.settings = get_settings()
         self.openai_api_key = openai_api_key or self.settings.openai_api_key
-        
         if not self.openai_api_key:
             raise ExternalServiceError("OpenAI API key is required for TRAPI query building")
-        
-        # Initialize LLM
         self.llm = ChatOpenAI(
             temperature=0,
             model=self.settings.openai_model,
             api_key=self.openai_api_key
         )
-        
-        # Initialize BTE client for meta knowledge graph
         self.bte_client = BTEClient()
-        
-        # Cache for meta knowledge graph
         self._meta_kg = None
-    
+
     @property
     def meta_kg(self) -> Dict[str, Any]:
-        """Get cached meta knowledge graph"""
         if self._meta_kg is None:
             self._meta_kg = self.bte_client.get_meta_knowledge_graph()
         return self._meta_kg
-    
+
     def extract_dict(self, raw_string: str) -> Dict[str, Any]:
-        """
-        Extract dictionary from raw LLM response string
-        
-        Args:
-            raw_string: Raw response string from LLM
-            
-        Returns:
-            Parsed dictionary or error dict
-        """
-        # Strip whitespace
         raw_string = raw_string.strip()
-        
-        # Handle markdown code blocks
         if raw_string.startswith("```json"):
-            # Remove ```json from start and ``` from end
-            raw_string = raw_string[7:]  # Remove ```json
+            raw_string = raw_string[7:]
             if raw_string.endswith("```"):
-                raw_string = raw_string[:-3]  # Remove ```
+                raw_string = raw_string[:-3]
             raw_string = raw_string.strip()
         elif raw_string.startswith("```"):
-            # Handle generic code blocks
             lines = raw_string.split('\n')
             if lines[0].startswith("```"):
-                lines = lines[1:]  # Remove first line
+                lines = lines[1:]
             if lines[-1].strip() == "```":
-                lines = lines[:-1]  # Remove last line
+                lines = lines[:-1]
             raw_string = '\n'.join(lines).strip()
-        
-        # Try to find JSON object within the text
         start_index = raw_string.find("{")
         if start_index != -1:
-            # Find the matching closing brace
             brace_count = 0
             end_index = start_index
             for i, char in enumerate(raw_string[start_index:], start_index):
-                if char == '{':
-                    brace_count += 1
+                if char == '{': brace_count += 1
                 elif char == '}':
                     brace_count -= 1
                     if brace_count == 0:
                         end_index = i
                         break
-            
-            if brace_count == 0:  # Found matching brace
+            if brace_count == 0:
                 extracted_dict = raw_string[start_index:end_index + 1].strip()
                 try:
                     return json.loads(extracted_dict)
                 except json.JSONDecodeError as e:
                     logger.error(f"JSON parsing error: {e}")
-                    logger.debug(f"Attempted to parse: {extracted_dict}")
-        
-        # Try parsing the entire string as JSON
         try:
             return json.loads(raw_string)
         except json.JSONDecodeError:
             logger.error(f"Could not parse as JSON: {raw_string[:200]}...")
             return {"error": "could not parse dict"}
-    
+
     def find_predicates(self, subject: str, obj: str) -> List[str]:
-        """
-        Find predicates between subject and object types using meta knowledge graph
-        
-        Args:
-            subject: Subject biolink type (e.g., "biolink:Disease")
-            obj: Object biolink type (e.g., "biolink:SmallMolecule")
-            
-        Returns:
-            List of available predicates
-        """
         predicates = []
         meta_edges = self.meta_kg.get("edges", [])
-        
-        # Get excluded predicates from settings
         excluded_predicates = self.settings.excluded_predicates
-        
         for edge in meta_edges:
-            if (edge.get("subject", "").lower() == subject.lower() and 
-                edge.get("object", "").lower() == obj.lower()):
+            if (edge.get("subject", "").lower() == subject.lower() and edge.get("object", "").lower() == obj.lower()):
                 predicate = edge.get("predicate")
-                # Only add predicate if it's not in the excluded list
                 if predicate and predicate not in excluded_predicates:
                     predicates.append(predicate)
-        
         logger.debug(f"Found {len(predicates)} predicates for {subject} -> {obj}")
         return predicates
-    
+
     def choose_predicate(self, predicate_list: List[str], query: str) -> str:
-        """
-        Choose the most appropriate predicate for the query using LLM
-        
-        Args:
-            predicate_list: List of available predicates
-            query: Original natural language query
-            
-        Returns:
-            Selected predicate
-        """
         if not predicate_list:
             logger.warning("No predicates available for selection")
             return ""
-        
         if len(predicate_list) == 1:
             return predicate_list[0]
-        
         try:
-            predicate_prompt = f"""Choose the most specific predicate by examining the query closely and choosing the closest answer.  
-                
-                Here is the query: {query}
-                Here are the available predicates: {predicate_list}
-                
-                Return only the chosen predicate string.
-                """
-            
+            predicate_prompt = f"""Choose the most specific predicate by examining the query closely and choosing the closest answer.\n\nHere is the query: {query}\nHere are the available predicates: {predicate_list}\nReturn only the chosen predicate string.\n"""
             response = self.llm.invoke(predicate_prompt)
             chosen = response.content.strip()
-            
-            # Find the predicate that matches the response
             for predicate in predicate_list:
                 if predicate in chosen:
                     logger.debug(f"Selected predicate '{predicate}' for query: {query}")
                     return predicate
-            
-            # If no exact match, return the first one
             logger.warning(f"No exact predicate match found, using first: {predicate_list[0]}")
             return predicate_list[0]
-            
         except Exception as e:
             logger.error(f"Error choosing predicate: {e}")
             return predicate_list[0] if predicate_list else ""
-    
-    def invoke_with_retries(self, prompt: str, parser_func, max_retries: int = 3, delay: int = 5):
-        """
-        Invoke LLM with retry logic
-        
-        Args:
-            prompt: LLM prompt
-            parser_func: Function to parse the response
-            max_retries: Maximum number of retries
-            delay: Delay between retries in seconds
-            
-        Returns:
-            Parsed response or None on failure
-        """
-        for attempt in range(max_retries):
-            try:
-                response = self.llm.invoke(prompt)
-                return parser_func(response.content)
-            except Exception as e:
-                logger.warning(f"Retry {attempt+1}/{max_retries} failed: {e}")
-                if attempt < max_retries - 1:  # Don't sleep on last attempt
-                    time.sleep(delay)
-        
-        logger.error(f"All {max_retries} attempts failed")
-        return None
-    
-    def identify_nodes(self, query: str) -> Dict[str, str]:
-        """
-        Identify subject and object nodes for TRAPI query using LLM
-        
-        Args:
-            query: Natural language query
-            
-        Returns:
-            Dictionary with subject and object biolink types
-        """
-        node_prompt = f"""
-        Your task is to help build a TRAPI query by identifying the correct subject and object nodes from the list of nodes below. 
 
-        In biomedical knowledge graphs:
-        - Subject: The starting entity (what we know or are querying FROM)
-        - Object: The target entity (what we want to find or are querying TO)
-        
-        For queries like "Which drugs treat diabetes?", diabetes (Disease) is the subject and drugs (SmallMolecule) is the object.
-        For queries like "What genes are associated with cancer?", cancer (Disease) is the subject and genes (Gene) is the object.
-        
-        Each of these must have the prefix "biolink:". You must use the context and intent behind the user query to make the correct choice.
-
-        Available node types: Disease, PhysiologicalProcess, BiologicalEntity, Gene, PathologicalProcess, Polypeptide, SmallMolecule, PhenotypicFeature
-
-        Here is the user query: {query}
-
-        Be as specific as possible as downstream results will be affected by your node choices.
-        Your response must be a JSON object with "subject" and "object" as keys and their biolink node types as values.
+    def build_trapi_query(self, query: str, entity_data: Dict[str, str], failed_trapis: List[Dict] = None) -> Dict[str, Any]:
         """
-        
-        result = self.invoke_with_retries(node_prompt, self.extract_dict)
-        if result and "error" not in result:
-            logger.info(f"Identified nodes for query '{query}': {result}")
-            return result
-        else:
-            logger.error(f"Failed to identify nodes for query: {query}")
-            return {"error": "Could not determine subject/object nodes"}
-    
-    def build_trapi_query_structure(self, query: str, subject_object: Dict[str, str], predicate: str, 
-                                  entity_data: Dict[str, str], failed_trapis: List[Dict]) -> Dict[str, Any]:
+        Direct LangGraph/Prototype TRAPI batch/context builder (LLM-driven with all relevant prompt context).
+        Returns a single TRAPI query (first batch). Use build_trapi_query_batches for all batches.
         """
-        Build the actual TRAPI query structure using LLM
-        
-        Args:
-            query: Original natural language query
-            subject_object: Dictionary with subject and object types
-            predicate: Selected predicate
-            entity_data: Entity names to IDs mapping
-            failed_trapis: List of previously failed TRAPI queries
-            
-        Returns:
-            TRAPI query dictionary
-        """
-        logger.debug("Building TRAPI structure...")
-        
-        # TRAPI example for reference
+        failed_trapis = failed_trapis or []
         trapi_example = {
             "message": {
                 "query_graph": {
                     "nodes": {
-                        "n0": {
-                            "categories": [
-                                "biolink:Disease"
-                            ],
-                            "ids": [
-                                "MONDO:0016575"
-                            ]
-                        },
-                        "n1": {
-                            "categories": [
-                                "biolink:PhenotypicFeature"
-                            ]
-                        }
+                        "n0": {"categories": ["biolink:Disease"], "ids": ["MONDO:0005148"]},
+                        "n1": {"categories": ["biolink:SmallMolecule"]},
                     },
                     "edges": {
-                        "e01": {
-                            "subject": "n0",
-                            "object": "n1",
-                            "predicates": [
-                                "biolink:has_phenotype"
-                            ]
-                        }
+                        "e01": {"subject": "n1", "object": "n0", "predicates": ["biolink:treats"]}
                     }
                 }
             }
         }
+        # Important biolink category mappings for the LLM
+        category_guidance = """
+IMPORTANT BIOLINK CATEGORY MAPPINGS:
+- Drugs, medications, compounds, chemicals → biolink:SmallMolecule (NOT biolink:Drug!)
+- Diseases, disorders, conditions → biolink:Disease
+- Genes → biolink:Gene  
+- Proteins → biolink:Protein
+- Biological processes, pathways → biolink:BiologicalProcess
+- Phenotypes, symptoms → biolink:PhenotypicFeature
+"""
         
-        trapi_prompt = f"""
-            You are a smart assistant that has access to a knowledge graph. 
-            You are tasked with correctly parsing the user prompt into a TRAPI query. 
-            Here's an example TRAPI query:
-            {json.dumps(trapi_example, indent=2)}
+        # Compose full LLM prompt for prompt transparency
+        prompt = f"""
+You are a biomedical knowledge graph assistant and need to appropriately construct a TRAPI batch query.
 
-            Here is the actual user query: "{query}"
+{category_guidance}
 
-            Here are the biological entities and their IDs extracted from the query:
-            {json.dumps(entity_data, indent=2)}
+- Query: {query}
+- Entities and IDs: {json.dumps(entity_data, indent=2)}
+Example TRAPI: {json.dumps(trapi_example, indent=2)}
 
-            Here are the nodes you MUST use:
-            {json.dumps(subject_object, indent=2)}
+Rules:
+1. Use biolink:SmallMolecule for drugs/chemicals, NOT biolink:Drug
+2. Only create one 'ids' field on one node
+3. Set IDs for the most informative/relevant node for this subquery
+4. Use correct subject-predicate-object direction
 
-            Here is the chosen predicate:
-            {predicate}
-
-            Do NOT use the following TRAPI queries as they have failed to get results: 
-            {failed_trapis}
-
-            Some predicates have directionality ("treated_by" is NOT the same as "treats"). When defining the edges, you MUST use the correct predicate with the correct directionality.
-            (e.g., biolink:Disease is "treated_by" (NOT "treats") biolink:SmallMolecule; 
-            biolink:Disease as subject and biolink:Gene as object should result in "condition_associated_with_gene", NOT "gene_associated_with_condition")
-
-            In this KG, the subject of the predicate is always the source (domain), and the object is the target (range). For example, if 'X treats Y', then X is the subject and Y is the object.
-            
-            Please make sure that only one node in the TRAPI query has the "ids" field (either "n0" or "n1" but NOT both); 
-            decide which one would result in more useful results (for "Which of these genes are involved in a physiological process?", including the IDs for Gene would result in more useful results. In this case DO NOT include the ID for Physiological Process)
-            
-            CRITICAL ENTITY SELECTION GUIDANCE:
-            When you have multiple entities that could match a node type, choose the most specific and relevant one:
-            
-            1. For Disease nodes: Choose the most specific disease mentioned in the query
-               - "Age related macular degeneration" > "Age" > generic disease terms
-               - "breast cancer" > "cancer" > "disease"
-            
-            2. For SmallMolecule nodes: Choose specific drug names over general terms
-               - "aspirin" > "NSAIDs" > "drugs"
-               - "metformin" > "antidiabetics" > "medications"
-            
-            3. For Gene nodes: Choose specific gene names over general terms
-               - "BRCA1" > "tumor suppressor genes" > "genes"
-            
-            4. Always analyze the query context to determine which entity is most relevant
-               - Query: "What drugs treat age-related macular degeneration?"
-               - Use: "macular degeneration" ID (specific) not "Age" ID (too general)
-            
-            5. If you need multiple entities for a complex query, include them strategically
-               - For multi-hop queries, you may need entities for multiple nodes
-               - Always ensure the primary focus entity gets the most specific ID
-
-            Using these guidelines, output a JSON object containing the completed TRAPI query.
-        """
+Here are failed attempts: {failed_trapis}
+Output only a valid JSON TRAPI query (no surrounding text or explanations).
+"""
+        llm_result = self.llm.invoke(prompt).content.strip()
+        trapi_query = self.extract_dict(llm_result)
+        # Validate and repair with meta-KG coverage awareness
+        try:
+            trapi_query = self._validate_and_repair_trapi(trapi_query, query, entity_data)
+        except Exception as e:
+            logger.warning(f"TRAPI validation/repair failed, using raw LLM output: {e}")
         
-        result = self.invoke_with_retries(trapi_prompt, self.extract_dict)
+        # Sanitize categories and enforce single 'ids' node
+        try:
+            trapi_query = self._sanitize_trapi_categories_and_ids(trapi_query)
+        except Exception as e:
+            logger.debug(f"Sanitization skipped: {e}")
         
-        if result and "error" not in result:
-            logger.info(f"Successfully built TRAPI query for: {query}")
-            return result
+        # Inject IDs from entity_data when possible (ensure at most one node has ids)
+        try:
+            self._inject_ids_from_entity_data(trapi_query, entity_data, query)
+        except Exception as e:
+            logger.debug(f"ID injection skipped: {e}")
+        
+        # Batching (Prototype pattern, >50 IDs)
+        key = None
+        if "n0" in trapi_query.get("message", {}).get("query_graph", {}).get("nodes", {}):
+            if "ids" in trapi_query["message"]["query_graph"]["nodes"]["n0"]:
+                key = "n0"
+            elif "ids" in trapi_query["message"]["query_graph"]["nodes"].get("n1", {}):
+                key = "n1"
+        batch_size = 50
+        batched_queries = []
+        if key:
+            all_ids = trapi_query["message"]["query_graph"]["nodes"][key]["ids"]
+            for i in range(0, len(all_ids), batch_size):
+                trapi_copy = deepcopy(trapi_query)
+                trapi_copy["message"]["query_graph"]["nodes"][key]["ids"] = all_ids[i:i + batch_size]
+                batched_queries.append(trapi_copy)
         else:
-            logger.error(f"Failed to build TRAPI query for: {query}")
-            return {"error": "Could not build TRAPI query"}
-    
-    def extract_context_entities(self, query: str, accumulated_results: List[Dict[str, Any]], target_type: str) -> List[str]:
+            batched_queries = [trapi_query]
+        logger.info(f"\n====== [TRAPI PROMPT CONTEXT] ======\n{prompt}\n======\n")
+        logger.info(f"LLM TRAPI output: {json.dumps(trapi_query,indent=2)}")
+        logger.info(f"Batch count: {len(batched_queries)}")
+        # Return the first batch; executor handles splitting into multiple requests when needed
+        return batched_queries[0] if batched_queries else trapi_query
+
+    def build_trapi_query_batches(self, query: str, entity_data: Dict[str, str], failed_trapis: List[Dict] = None) -> List[Dict[str, Any]]:
+        """Build TRAPI queries and return all batches (each <=50 ids on the ids-carrying node)."""
+        failed_trapis = failed_trapis or []
+        trapi = self.build_trapi_query(query, entity_data, failed_trapis)
+        # Recompute batching on sanitized/injected query to produce all batches
+        qg = trapi.get("message", {}).get("query_graph", {})
+        nodes = qg.get("nodes", {})
+        key = None
+        if "n0" in nodes and isinstance(nodes["n0"].get("ids"), list):
+            key = "n0"
+        elif "n1" in nodes and isinstance(nodes["n1"].get("ids"), list):
+            key = "n1"
+        if not key:
+            return [trapi]
+        all_ids = nodes[key].get("ids", [])
+        batch_size = 50
+        batches = []
+        for i in range(0, len(all_ids), batch_size):
+            t = deepcopy(trapi)
+            t["message"]["query_graph"]["nodes"][key]["ids"] = all_ids[i:i+batch_size]
+            batches.append(t)
+        return batches
+
+    def _validate_and_repair_trapi(self, trapi_query: Dict[str, Any], user_query: str, entity_data: Dict[str, str]) -> Dict[str, Any]:
         """
-        Extract relevant entity IDs from accumulated results based on query context
-        
-        Args:
-            query: Natural language query (e.g., "What genes do these drugs target?")
-            accumulated_results: Previous query results to analyze
-            target_type: Target biolink type to extract (e.g., "SmallMolecule", "Gene")
-            
-        Returns:
-            List of entity IDs matching the target type
+        Ensure the LLM-produced TRAPI query uses subject/object category pairs and predicates
+        that are supported by the BTE meta knowledge graph. If coverage appears weak (no predicates
+        available for the selected categories), rewrite categories/predicates using robust fallbacks.
         """
-        entity_ids = set()
-        
-        # Convert biolink type to match result format
-        type_variations = {
-            "SmallMolecule": ["small molecule", "drug", "compound", "chemical"],
-            "Gene": ["gene", "protein", "polypeptide"],
-            "Disease": ["disease", "condition", "disorder"],
-            "PhysiologicalProcess": ["process", "pathway", "function"],
-            "PhenotypicFeature": ["phenotype", "trait", "feature"]
-        }
-        
-        # Determine which field to extract from (subject or object)
-        # If query asks about "these drugs", we want to extract drug subjects/objects
-        query_lower = query.lower()
-        extract_from_subject = False
-        extract_from_object = False
-        
-        # Analyze query to determine extraction strategy
-        if any(term in query_lower for term in ["these", "those", "identified", "found"]):
-            # Context-referencing query
-            target_terms = type_variations.get(target_type, [target_type.lower()])
-            
-            for term in target_terms:
-                if term in query_lower:
-                    extract_from_subject = True
-                    extract_from_object = True
+        qg = trapi_query.get("message", {}).get("query_graph", {})
+        nodes = qg.get("nodes", {})
+        edges = qg.get("edges", {})
+        if not nodes or not edges:
+            return trapi_query
+
+        # We assume a single edge (common in subqueries)
+        edge_key = next(iter(edges.keys()))
+        edge = edges[edge_key]
+        subj_key = edge.get("subject")
+        obj_key = edge.get("object")
+        if subj_key not in nodes or obj_key not in nodes:
+            return trapi_query
+
+        subj_node = nodes[subj_key]
+        obj_node = nodes[obj_key]
+        subj_cat = (subj_node.get("categories") or [None])[0]
+        obj_cat = (obj_node.get("categories") or [None])[0]
+
+        # Helper to check coverage via meta-KG
+        def has_coverage(scat: str, ocat: str) -> List[str]:
+            if not scat or not ocat:
+                return []
+            preds = self.find_predicates(scat, ocat)
+            return preds
+
+        # If there are no predicates for the chosen category pair, attempt repairs
+        preds = has_coverage(subj_cat, obj_cat)
+        if preds:
+            # Ensure predicates are set when missing or clearly unsupported
+            if not edge.get("predicates"):
+                edge["predicates"] = [preds[0]]
+            return trapi_query
+
+        # Repair strategies
+        repaired = False
+
+        # Strategy A: If the query involves a GO term (BiologicalProcess) on either side,
+        # prefer Gene ↔ BiologicalProcess with participates_in/related_to
+        def is_biological_process(node):
+            cats = node.get("categories", [])
+            return any(c for c in cats if isinstance(c, str) and c.endswith(":BiologicalProcess"))
+
+        if is_biological_process(subj_node) or is_biological_process(obj_node):
+            # Identify which side is the process
+            proc_on_subject = is_biological_process(subj_node)
+            proc_node = subj_node if proc_on_subject else obj_node
+            other_node = obj_node if proc_on_subject else subj_node
+
+            # Rewrite other side to Gene for robust coverage
+            other_node["categories"] = ["biolink:Gene"]
+            # Check coverage for Gene -> BiologicalProcess
+            subj_cand = "biolink:Gene" if proc_on_subject else proc_node.get("categories")[0]
+            obj_cand = proc_node.get("categories")[0] if proc_on_subject else "biolink:Gene"
+            cand_preds = has_coverage(subj_cand, obj_cand)
+            # Choose a robust predicate if available
+            preferred = None
+            for p in cand_preds:
+                if p.endswith(":participates_in"):
+                    preferred = p
                     break
-        
-        # Extract entity IDs from accumulated results
-        for result in accumulated_results:
-            if extract_from_subject and 'subject' in result:
-                # Check if subject matches target type context
-                subject = result['subject']
-                if self._is_relevant_entity(subject, target_type, type_variations):
-                    # Try to find corresponding ID in entity mappings
-                    entity_id = self._find_entity_id(subject)
-                    if entity_id:
-                        entity_ids.add(entity_id)
-            
-            if extract_from_object and 'object' in result:
-                # Check if object matches target type context
-                obj = result['object']
-                if self._is_relevant_entity(obj, target_type, type_variations):
-                    # Try to find corresponding ID
-                    entity_id = self._find_entity_id(obj)
-                    if entity_id:
-                        entity_ids.add(entity_id)
-        
-        result_list = list(entity_ids)[:10]  # Limit to 10 entities for batch queries
-        logger.info(f"Extracted {len(result_list)} context entities of type {target_type} for batch query")
-        
-        return result_list
-    
-    def _is_relevant_entity(self, entity_name: str, target_type: str, type_variations: Dict[str, List[str]]) -> bool:
-        """
-        Check if an entity name is relevant to the target type
-        
-        Args:
-            entity_name: Name of the entity
-            target_type: Target biolink type
-            type_variations: Dictionary of type variations
-            
-        Returns:
-            True if entity is relevant to target type
-        """
-        entity_lower = entity_name.lower()
-        target_terms = type_variations.get(target_type, [target_type.lower()])
-        
-        # For drugs/small molecules, check if it's a known drug name pattern
-        if target_type == "SmallMolecule":
-            # Common drug name patterns or known drugs
-            drug_indicators = [
-                "mab",  # monoclonal antibodies
-                "ine", "ole", "ide", "ate",  # common drug suffixes
-                "aflib", "ranibi", "pegap",  # specific AMD drugs
-            ]
-            if any(indicator in entity_lower for indicator in drug_indicators):
-                return True
-                
-        # For genes, check if it matches gene name patterns
-        elif target_type == "Gene":
-            # Gene name patterns (uppercase, short names)
-            if (len(entity_name) <= 10 and 
-                (entity_name.isupper() or any(c.isupper() for c in entity_name))):
-                return True
-        
-        # Default: check against type variations
-        return any(term in entity_lower for term in target_terms)
-    
-    def _find_entity_id(self, entity_name: str) -> Optional[str]:
-        """
-        Find entity ID for a given entity name using common biomedical ID patterns
-        
-        Args:
-            entity_name: Name of the entity
-            
-        Returns:
-            Entity ID if found, None otherwise
-        """
-        # This is a simplified approach - in practice, you might want to
-        # maintain a reverse lookup from the original entity extraction
-        
-        # For now, return the entity name as a placeholder ID
-        # In a full implementation, this would look up the proper ID
-        return None  # Will be handled by the batch query builder
-    
-    def build_batch_trapi_query(self, query: str, accumulated_results: List[Dict[str, Any]], 
-                               entity_data: Optional[Dict[str, str]] = None,
-                               failed_trapis: Optional[List[Dict]] = None) -> Dict[str, Any]:
-        """
-        Build a TRAPI query that can handle batch queries based on accumulated context
-        
-        Args:
-            query: Natural language query (e.g., "What genes do these drugs target?")
-            accumulated_results: Previous results to extract context from
-            entity_data: Optional entity name to ID mapping
-            failed_trapis: Optional list of failed TRAPI queries
-            
-        Returns:
-            TRAPI query dictionary with batch entity IDs
-        """
-        if entity_data is None:
-            entity_data = {}
-        if failed_trapis is None:
-            failed_trapis = []
-        
-        logger.info(f"Building batch TRAPI query for: {query}")
-        logger.info(f"Analyzing {len(accumulated_results)} accumulated results for context")
-        
-        try:
-            # Step 1: Identify subject and object nodes
-            subject_object = self.identify_nodes(query)
-            if not subject_object or "error" in subject_object:
-                logger.error("Could not determine subject/object nodes for batch query")
-                return {"error": "Could not determine subject/object nodes"}
-            
-            # Step 2: Determine which entity type to extract from context
-            # If query asks "What genes do these drugs target?", extract drugs from context
-            query_lower = query.lower()
-            context_type = None
-            
-            if any(term in query_lower for term in ["these", "those", "identified", "found"]):
-                # Determine what "these" refers to based on subject/object analysis
-                if "drug" in query_lower or "compound" in query_lower:
-                    context_type = "SmallMolecule"
-                elif "gene" in query_lower and "do" not in query_lower.split("gene")[0]:
-                    context_type = "Gene"
-                elif "disease" in query_lower:
-                    context_type = "Disease"
-            
-            # Step 3: Extract context entities if identified
-            context_entity_ids = []
-            if context_type and accumulated_results:
-                # Extract entity names from accumulated results
-                context_entities = self._extract_entity_names_from_results(accumulated_results, context_type)
-                
-                # Try to find IDs for these entities in entity_data
-                for entity_name in context_entities:
-                    entity_id = entity_data.get(entity_name)
-                    if entity_id:
-                        context_entity_ids.append(entity_id)
-                    else:
-                        # Try variations of the entity name
-                        for mapped_name, mapped_id in entity_data.items():
-                            if (entity_name.lower() in mapped_name.lower() or 
-                                mapped_name.lower() in entity_name.lower()):
-                                context_entity_ids.append(mapped_id)
-                                break
-            
-            # Step 4: Build enhanced entity_data with context
-            enhanced_entity_data = entity_data.copy()
-            if context_entity_ids:
-                # Add context entities to the entity_data for TRAPI building
-                context_key = f"{context_type.lower()}s" if context_type else "entities"
-                enhanced_entity_data[context_key] = context_entity_ids
-                logger.info(f"Added {len(context_entity_ids)} context entities to batch query")
-            
-            # Step 5: Find predicates and build query as usual
-            predicate_list = self.find_predicates(
-                subject_object.get("subject", ""), 
-                subject_object.get("object", "")
-            )
-            
-            if not predicate_list:
-                logger.error("No valid predicates found for batch query")
-                return {"error": "No valid predicates found"}
-            
-            predicate = self.choose_predicate(predicate_list, query)
-            
-            # Step 6: Build enhanced TRAPI structure with batch support
-            trapi = self._build_batch_trapi_structure(
-                query, subject_object, predicate, enhanced_entity_data, 
-                context_entity_ids, failed_trapis
-            )
-            
-            if trapi and "error" not in trapi:
-                logger.info("Successfully built batch TRAPI query")
-                return trapi
-            else:
-                logger.error("Failed to build batch TRAPI query")
-                return {"error": "Could not build batch TRAPI query"}
-            
-        except Exception as e:
-            logger.error(f"Error building batch TRAPI query: {e}")
-            return {"error": f"Batch TRAPI query building failed: {str(e)}"}
-    
-    def _extract_entity_names_from_results(self, results: List[Dict[str, Any]], target_type: str) -> List[str]:
-        """
-        Extract entity names of a specific type from accumulated results
-        
-        Args:
-            results: List of result dictionaries
-            target_type: Target biolink type to extract
-            
-        Returns:
-            List of entity names
-        """
-        entity_names = set()
-        
-        for result in results:
-            # Extract from both subject and object
-            for field in ['subject', 'object']:
-                if field in result:
-                    entity_name = result[field]
-                    if self._is_relevant_entity(entity_name, target_type, {
-                        "SmallMolecule": ["mab", "ine", "ole", "ide", "ate"],
-                        "Gene": ["gene", "protein"],
-                        "Disease": ["disease", "syndrome", "disorder"],
-                    }):
-                        entity_names.add(entity_name)
-        
-        return list(entity_names)[:8]  # Limit for performance
-    
-    def _build_batch_trapi_structure(self, query: str, subject_object: Dict[str, str], 
-                                   predicate: str, entity_data: Dict[str, str],
-                                   context_entity_ids: List[str],
-                                   failed_trapis: List[Dict]) -> Dict[str, Any]:
-        """
-        Build TRAPI structure with support for batch entity IDs
-        
-        Args:
-            query: Original query
-            subject_object: Subject and object types
-            predicate: Selected predicate
-            entity_data: Entity mappings
-            context_entity_ids: List of context entity IDs for batch query
-            failed_trapis: Previously failed queries
-            
-        Returns:
-            Enhanced TRAPI query with batch support
-        """
-        # Use the regular TRAPI builder but with enhanced entity data
-        if context_entity_ids:
-            # Create a modified prompt that emphasizes batch querying
-            batch_query_prompt = f"""You are building a TRAPI query for a batch operation.
-            
-            Original query: "{query}"
-            
-            The query references multiple entities from previous results. You should include 
-            MULTIPLE entity IDs in the appropriate node to create a batch query.
-            
-            Context entity IDs to include: {context_entity_ids}
-            
-            Subject/Object types: {subject_object}
-            Predicate: {predicate}
-            Entity mappings: {entity_data}
-            
-            Build a TRAPI query that includes these entity IDs in the appropriate node 
-            (either n0 or n1) to query for all of them simultaneously.
-            """
-            
-            result = self.invoke_with_retries(batch_query_prompt, self.extract_dict)
-            
-            if result and "error" not in result:
-                # Enhance the result with batch entity IDs if not already included
-                self._inject_batch_ids(result, context_entity_ids, subject_object)
-                return result
-        
-        # Fallback to regular TRAPI building
-        return self.build_trapi_query_structure(query, subject_object, predicate, entity_data, failed_trapis)
-    
-    def _handle_grouped_query(self, query: str, entity_data: Dict[str, str], failed_trapis: List[Dict]) -> Dict[str, Any]:
-        """
-        Handle grouped queries with multiple comma-separated entities
-        
-        Args:
-            query: Grouped query string (e.g., "What genes do donepezil, acetylcarnitine interact with?")
-            entity_data: Available entity mappings
-            failed_trapis: Previously failed queries
-            
-        Returns:
-            TRAPI query dictionary
-        """
-        try:
-            # Extract entity names from the query
-            import re
-            
-            # Find comma-separated list in the query
-            # Pattern matches: "What X do A, B, C Y with?" or "What X do A, B, C Y?"
-            pattern = r"what\s+\w+\s+do\s+([^?]+?)\s+(\w+)\s*(?:with)?\?"
-            match = re.search(pattern, query.lower())
-            
-            if not match:
-                logger.warning(f"Could not parse grouped query: {query}")
-                return {"error": "Could not parse grouped query"}
-            
-            entity_list_str = match.group(1).strip()
-            
-            # Split by comma and clean up entity names
-            entity_names = [name.strip() for name in entity_list_str.split(",")]
-            logger.info(f"Extracted entity names from grouped query: {entity_names}")
-            
-            # Find corresponding entity IDs
-            entity_ids = []
-            for entity_name in entity_names:
-                # Try exact match first
-                if entity_name in entity_data:
-                    entity_ids.append(entity_data[entity_name])
-                else:
-                    # Try fuzzy matching (case insensitive)
-                    for key, value in entity_data.items():
-                        if entity_name.lower() in key.lower() or key.lower() in entity_name.lower():
-                            entity_ids.append(value)
-                            break
-            
-            logger.info(f"Found {len(entity_ids)} entity IDs for grouped query: {entity_ids[:5]}...")  # Show first 5
-            
-            if not entity_ids:
-                logger.warning("No entity IDs found for grouped query")
-                return {"error": "No entity IDs found for grouped query"}
-            
-            # Create a modified query with a single placeholder entity for TRAPI building
-            single_entity_query = query.replace(entity_list_str, entity_names[0])
-            logger.info(f"Building TRAPI with simplified query: {single_entity_query}")
-            
-            # Build base TRAPI query using the simplified query
-            subject_object = self.identify_nodes(single_entity_query)
-            if not subject_object or "error" in subject_object:
-                logger.error("Could not determine subject/object nodes for grouped query")
-                return {"error": "Could not determine subject/object nodes"}
-            
-            # Find predicate
-            predicate_list = self.find_predicates(
-                subject_object.get("subject", ""),
-                subject_object.get("object", "")
-            )
-            
-            if not predicate_list:
-                logger.error("No predicates found for grouped query")
-                return {"error": "No predicates found"}
-            
-            predicate = self.choose_predicate(predicate_list, query)
-            
-            # Build the TRAPI structure
-            trapi_query = self.build_trapi_query_structure(single_entity_query, subject_object, predicate, entity_data, failed_trapis)
-            
-            if trapi_query and "error" not in trapi_query:
-                # Inject multiple entity IDs into the appropriate node
-                self._inject_batch_ids(trapi_query, entity_ids, subject_object)
-                logger.info(f"Successfully built grouped TRAPI query with {len(entity_ids)} entities")
-                return trapi_query
-            else:
-                logger.error("Failed to build base TRAPI query for grouped query")
-                return {"error": "Failed to build base TRAPI query"}
-                
-        except Exception as e:
-            logger.error(f"Error handling grouped query: {e}")
-            return {"error": f"Error handling grouped query: {str(e)}"}
-    
-    def _inject_batch_ids(self, trapi_query: Dict[str, Any], entity_ids: List[str], 
-                         subject_object: Dict[str, str]) -> None:
-        """
-        Inject batch entity IDs into the appropriate TRAPI query node
-        
-        Args:
-            trapi_query: TRAPI query to modify
-            entity_ids: List of entity IDs to inject
-            subject_object: Subject and object type information
-        """
-        try:
-            query_graph = trapi_query.get("message", {}).get("query_graph", {})
-            nodes = query_graph.get("nodes", {})
-            
-            # Determine which node should get the batch IDs
-            # Usually the node that already has IDs or the subject node
-            target_node = None
-            
-            for node_id, node_data in nodes.items():
-                if "ids" in node_data:
-                    target_node = node_id
+            if not preferred and cand_preds:
+                preferred = cand_preds[0]
+            if preferred:
+                edge["predicates"] = [preferred]
+                # Ensure subject/object alignment with the chosen direction
+                if proc_on_subject:
+                    # We want Gene (subject) -> BiologicalProcess (object)
+                    edge["subject"], edge["object"] = obj_key, subj_key
+                repaired = True
+
+        # Strategy B: If the query involves a Disease, prefer SmallMolecule ↔ Disease with treats
+        def is_disease(node):
+            cats = node.get("categories", [])
+            return any(c for c in cats if isinstance(c, str) and c.endswith(":Disease"))
+
+        if not repaired and (is_disease(subj_node) or is_disease(obj_node)):
+            dis_on_subject = is_disease(subj_node)
+            dis_node = subj_node if dis_on_subject else obj_node
+            other_node = obj_node if dis_on_subject else subj_node
+
+            # Rewrite other side to SmallMolecule
+            other_node["categories"] = ["biolink:SmallMolecule"]
+            subj_cand = other_node.get("categories")[0]
+            obj_cand = dis_node.get("categories")[0]
+            cand_preds = has_coverage(subj_cand, obj_cand)
+            preferred = None
+            for p in cand_preds:
+                if p.endswith(":treats"):
+                    preferred = p
                     break
-            
-            # If no node has IDs, use the first node
-            if not target_node and nodes:
-                target_node = list(nodes.keys())[0]
-            
-            # Inject the batch IDs
-            if target_node and entity_ids:
-                if "ids" not in nodes[target_node]:
-                    nodes[target_node]["ids"] = []
-                
-                # Add unique IDs only
-                existing_ids = set(nodes[target_node]["ids"])
-                for entity_id in entity_ids:
-                    if entity_id and entity_id not in existing_ids:
-                        nodes[target_node]["ids"].append(entity_id)
-                        existing_ids.add(entity_id)
-                
-                logger.info(f"Injected {len(entity_ids)} batch entity IDs into node {target_node}")
-            
-        except Exception as e:
-            logger.warning(f"Could not inject batch IDs: {e}")
-    
-    def build_trapi_query(self, query: str, entity_data: Optional[Dict[str, str]] = None, 
-                         failed_trapis: Optional[List[Dict]] = None, 
-                         accumulated_results: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+            if not preferred and cand_preds:
+                preferred = cand_preds[0]
+            if preferred:
+                edge["predicates"] = [preferred]
+                # Subject should be SmallMolecule, object Disease
+                if dis_on_subject:
+                    edge["subject"], edge["object"] = obj_key, subj_key
+                repaired = True
+
+        # If still no coverage, try flipping direction or generic related_to
+        if not repaired:
+            flipped_preds = has_coverage(obj_cat, subj_cat)
+            if flipped_preds:
+                edge["predicates"] = [flipped_preds[0]]
+                edge["subject"], edge["object"] = obj_key, subj_key
+                repaired = True
+
+        if not repaired:
+            # Fallback: set predicate to related_to (if allowed), keep original direction
+            # This is a last resort when meta-KG doesn't list the pair (LLM might still be right)
+            edge["predicates"] = ["biolink:related_to"]
+
+        return trapi_query
+
+    def _sanitize_trapi_categories_and_ids(self, trapi_query: Dict[str, Any]) -> Dict[str, Any]:
+        """Ensure each node has exactly one valid category and only one node carries 'ids'.
+        - If multiple categories, prefer more specific ones (drop biolink:NamedThing).
+        - If both biolink:Gene and biolink:Protein present, prefer biolink:Gene.
+        - If multiple nodes have 'ids', keep on the first and remove from others.
+        - If a node has ids, align its category to the ID namespace (CHEBI→SmallMolecule, NCBIGene/HGNC→Gene, GO→BiologicalProcess, MONDO/DOID/UMLS→Disease).
         """
-        Main method to build a complete TRAPI query from natural language
-        Enhanced to support batch queries based on accumulated context
+        qg = trapi_query.get("message", {}).get("query_graph", {})
+        nodes = qg.get("nodes", {})
+        if not isinstance(nodes, dict):
+            return trapi_query
+
+        def category_for_id(eid: str) -> Optional[str]:
+            if not isinstance(eid, str):
+                return None
+            if eid.startswith('CHEBI:') or eid.startswith('ChEMBL:') or eid.startswith('DRUGBANK:'):
+                return 'biolink:SmallMolecule'
+            if eid.startswith('NCBIGene:') or eid.startswith('HGNC:') or eid.startswith('ENSEMBL:'):
+                return 'biolink:Gene'
+            if eid.startswith('GO:'):
+                return 'biolink:BiologicalProcess'
+            if eid.startswith('MONDO:') or eid.startswith('DOID:') or eid.startswith('UMLS:'):
+                return 'biolink:Disease'
+            if eid.startswith('PR:') or eid.startswith('UniProtKB:'):
+                return 'biolink:Protein'
+            return None
+
+        # Normalize categories and strip non-TRAPI fields; align categories to ids when present
+        for nid, ndata in nodes.items():
+            # Remove non-standard fields such as 'name'
+            if 'name' in ndata:
+                ndata.pop('name', None)
+            cats = ndata.get("categories", [])
+            if isinstance(cats, list) and cats:
+                # Remove duplicates while preserving order
+                seen = set()
+                unique = []
+                for c in cats:
+                    if c not in seen and isinstance(c, str):
+                        seen.add(c)
+                        unique.append(c)
+                # Drop NamedThing if more specific exists
+                if len(unique) > 1 and "biolink:NamedThing" in unique:
+                    unique = [c for c in unique if c != "biolink:NamedThing"]
+                # Prefer Gene over Protein if both present
+                if "biolink:Gene" in unique and "biolink:Protein" in unique:
+                    unique = [c for c in unique if c != "biolink:Protein"]
+                # Keep only the first category
+                ndata["categories"] = [unique[0]] if unique else ["biolink:NamedThing"]
+            # Align category to ID namespace if this node already has ids
+            ids = ndata.get('ids')
+            if isinstance(ids, list) and ids:
+                cat = category_for_id(str(ids[0]))
+                if cat:
+                    ndata['categories'] = [cat]
+
+        # Enforce single 'ids' node
+        nodes_with_ids = [nid for nid, ndata in nodes.items() if isinstance(ndata.get("ids"), list) and ndata.get("ids")]
+        if len(nodes_with_ids) > 1:
+            # Keep IDs on the first node, remove from the rest
+            for nid in nodes_with_ids[1:]:
+                nodes[nid].pop("ids", None)
         
-        Args:
-            query: Natural language biomedical query
-            entity_data: Optional mapping of entity names to IDs
-            failed_trapis: Optional list of previously failed TRAPI queries
-            accumulated_results: Optional accumulated results for context-aware batch queries
-            
-        Returns:
-            Complete TRAPI query dictionary
-        """
-        if entity_data is None:
-            entity_data = {}
-        if failed_trapis is None:
-            failed_trapis = []
-        
-        # Check if this is a context-referencing query that could benefit from batch processing
-        query_lower = query.lower()
-        is_context_query = any(term in query_lower for term in ["these", "those", "identified", "found"])
-        
-        # Also check if this is a grouped query with multiple entities (comma-separated)
-        is_grouped_query = ", " in query and any(term in query_lower for term in ["what", "which", "do", "does"])
-        
-        if is_grouped_query:
-            logger.info("Detected grouped query with multiple entities")
-            logger.info(f"Query: {query}")
-            return self._handle_grouped_query(query, entity_data, failed_trapis)
-        
-        if is_context_query and accumulated_results:
-            logger.info("Detected context-referencing query, attempting batch TRAPI query")
-            logger.info(f"Query: {query}")
-            logger.info(f"Entity data: {entity_data}")
-            logger.info(f"Accumulated results available: {len(accumulated_results)}")
-            
-            batch_result = self.build_batch_trapi_query(query, accumulated_results, entity_data, failed_trapis)
-            
-            # If batch query was successful, return it
-            if batch_result and "error" not in batch_result:
-                logger.info(f"Batch TRAPI query successful: {json.dumps(batch_result, indent=2)}")
-                return batch_result
-            else:
-                logger.warning(f"Batch query failed: {batch_result.get('error', 'Unknown error')}, falling back to regular TRAPI query")
-        
-        # Fallback to regular TRAPI query building (original implementation)
-        max_retries = 3
-        
+        # Prune dangling nodes: keep only nodes referenced by edges (single-hop -> exactly two nodes)
+        edges = qg.get("edges", {})
         try:
-            # Step 1: Identify subject and object nodes
-            subject_object = self.identify_nodes(query)
-            if not subject_object or "error" in subject_object:
-                logger.error("Could not determine subject/object nodes")
-                return {"error": "Could not determine subject/object nodes"}
-            
-            logger.debug(f"Identified subject/object: {json.dumps(subject_object)}")
-            
-            # Step 2: Find available predicates
-            predicate_list = self.find_predicates(
-                subject_object.get("subject", ""), 
-                subject_object.get("object", "")
-            )
-            
-            # Step 3: Remove failed predicates from previous attempts
-            failed_predicates = set()
-            for trapi_query in failed_trapis:
-                try:
-                    edges = (trapi_query.get("message", {})
-                            .get("query_graph", {})
-                            .get("edges", {}))
-                    for edge_data in edges.values():
-                        predicates = edge_data.get("predicates", [])
-                        failed_predicates.update(predicates)
-                except Exception as e:
-                    logger.warning(f"Error extracting predicates from failed_trapis: {e}")
-            
-            # Remove failed predicates from predicate list
-            predicate_list = [p for p in predicate_list if p not in failed_predicates]
-            
-            if not predicate_list:
-                logger.error("No valid predicates found")
-                return {"error": "No valid predicates found"}
-            
-            # Step 4: Choose the best predicate
-            predicate = self.choose_predicate(predicate_list, query)
-            
-            # Step 5: Build the TRAPI query structure
-            trapi = self.build_trapi_query_structure(query, subject_object, predicate, entity_data, failed_trapis)
-            
-            if trapi and "error" not in trapi:
-                logger.info("Successfully built TRAPI query")
-                return trapi
-            
-            # Step 6: Retry if initial attempt fails
-            for attempt in range(max_retries):
-                logger.warning(f"TRAPI build failed, retry {attempt + 1}/{max_retries}")
-                trapi = self.build_trapi_query_structure(query, subject_object, predicate, entity_data, failed_trapis)
-                if trapi and "error" not in trapi:
-                    logger.info(f"TRAPI query built successfully on retry {attempt + 1}")
-                    return trapi
-            
-            logger.error("All TRAPI build attempts failed")
-            return {"error": "Invalid TRAPI"}
-            
-        except Exception as e:
-            logger.error(f"Error building TRAPI query: {e}")
-            raise ExternalServiceError(
-                f"TRAPI query building failed: {str(e)}",
-                service_name="trapi_builder"
-            ) from e
-
-
-# Convenience functions
-def build_trapi_query(query: str, entity_data: Optional[Dict[str, str]] = None, 
-                     failed_trapis: Optional[List[Dict]] = None,
-                     openai_api_key: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Convenience function to build a TRAPI query
-    
-    Args:
-        query: Natural language biomedical query
-        entity_data: Optional entity name to ID mapping
-        failed_trapis: Optional list of failed TRAPI queries
-        openai_api_key: Optional OpenAI API key
+            if isinstance(edges, dict) and edges:
+                # collect referenced node ids
+                referenced = set()
+                for e_id, e_data in edges.items():
+                    sk = e_data.get("subject")
+                    ok = e_data.get("object")
+                    if sk:
+                        referenced.add(sk)
+                    if ok:
+                        referenced.add(ok)
+                # keep only referenced nodes
+                pruned_nodes = {nid: ndata for nid, ndata in nodes.items() if nid in referenced}
+                if pruned_nodes:
+                    qg["nodes"] = pruned_nodes
+        except Exception:
+            # Non-fatal: leave as-is if anything unexpected occurs
+            pass
         
-    Returns:
-        TRAPI query dictionary
-    """
-    builder = TRAPIQueryBuilder(openai_api_key)
-    return builder.build_trapi_query(query, entity_data, failed_trapis)
+        return trapi_query
 
+    def identify_nodes(self, query: str) -> Dict[str, str]:
+        """
+        LLM-driven, context-sensitive determination of subject/object node types based on query (LangGraph Prototype logic)
+        """
+        node_types = [
+            "biolink:Disease", "biolink:Gene", "biolink:SmallMolecule", "biolink:PathologicalProcess",
+            "biolink:PhysiologicalProcess", "biolink:Polypeptide", "biolink:BiologicalEntity", "biolink:PhenotypicFeature"
+        ]
+        prompt = f"""
+Help construct a TRAPI query.
+- Query: {query}
+Available node types:
+{node_types}
+For the given query, determine which node type should be subject and which should be object, using the vocabulary above. Output only a dictionary: {{'subject': ..., 'object': ...}}. Example output: {{'subject': 'biolink:Disease', 'object': 'biolink:SmallMolecule'}}
+"""
+        llm_result = self.llm.invoke(prompt).content.strip()
+        node_map = self.extract_dict(llm_result)
+        if not isinstance(node_map, dict) or 'subject' not in node_map or 'object' not in node_map:
+            logger.warning(f"LLM failed to parse node types for query '{query}'. Falling back to Disease-SmallMolecule.")
+            return {"subject": "biolink:Disease", "object": "biolink:SmallMolecule"}
+        return node_map
+
+# Simple TRAPI validation function used by MCP TRAPI tool
+from typing import Tuple
 
 def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
     """
-    Validate TRAPI query structure
-    
-    Args:
-        trapi_query: TRAPI query to validate
-        
-    Returns:
-        Tuple of (is_valid, error_message)
+    Validate TRAPI query structure and enforce minimal checks.
+    Returns (is_valid, message).
     """
     try:
-        if "message" not in trapi_query:
+        if not isinstance(trapi_query, dict):
+            return False, "TRAPI query must be a dict"
+        message = trapi_query.get("message")
+        if not isinstance(message, dict):
             return False, "Missing 'message' key"
-        message = trapi_query["message"]
-        if "query_graph" not in message:
+        qg = message.get("query_graph")
+        if not isinstance(qg, dict):
             return False, "Missing 'query_graph' key in message"
-        query_graph = message["query_graph"]
-        if "nodes" not in query_graph or "edges" not in query_graph:
-            return False, "Missing 'nodes' or 'edges' in query_graph"
-        return True, "Valid TRAPI query"
+        nodes = qg.get("nodes", {})
+        edges = qg.get("edges", {})
+        if not isinstance(nodes, dict) or not isinstance(edges, dict):
+            return False, "'nodes' or 'edges' is not a dict"
+        # Basic single-hop sanity: at most 1 edge
+        if len(edges) > 1:
+            return False, f"Multi-hop query detected: {len(edges)} edges found"
+        if len(edges) == 0:
+            return False, "No edges specified"
+        # Ensure referenced nodes exist and have categories
+        (edge_id, edge_data) = next(iter(edges.items()))
+        subj = edge_data.get("subject")
+        obj = edge_data.get("object")
+        if subj not in nodes or obj not in nodes:
+            return False, f"Edge {edge_id} references missing nodes"
+        for nid, ndata in nodes.items():
+            cats = ndata.get("categories")
+            if not isinstance(cats, list) or not cats or not all(isinstance(c, str) for c in cats):
+                return False, f"Node {nid} has invalid categories"
+        return True, "Valid single-hop TRAPI query"
     except Exception as e:
-        return False, f"Validation error: {str(e)}"
+        return False, f"Validation error: {e}"
+
+    
+    # ID injection helper
+    def _inject_ids_from_entity_data(self, trapi_query: Dict[str, Any], entity_data: Dict[str, str], query_text: str) -> None:
+        """Inject category-consistent IDs from entity_data onto missing node(s).
+        Behavior:
+        - If neither node has ids: inject onto one node using category-consistent prefixes (legacy behavior).
+        - If exactly one node already has ids: inject onto the other node (unblocks autonomous multi-hop chaining).
+        """
+        if not isinstance(trapi_query, dict):
+            return
+        qg = trapi_query.get("message", {}).get("query_graph", {})
+        nodes = qg.get("nodes", {})
+        edges = qg.get("edges", {})
+        if not nodes or not edges:
+            return
+        node_keys = list(nodes.keys())
+        if len(node_keys) < 2:
+            return
+
+        prefix_map = {
+            'biolink:Disease': ['MONDO:', 'DOID:', 'UMLS:'],
+            'biolink:SmallMolecule': ['CHEBI:', 'ChEMBL:', 'DRUGBANK:'],
+            'biolink:Gene': ['HGNC:', 'NCBIGene:', 'ENSEMBL:'],
+            'biolink:Protein': ['PR:', 'UniProtKB:'],
+            'biolink:BiologicalProcess': ['GO:']
+        }
+        # Heuristic: prefer IDs whose source names occur in the query text (use entity_data keys)
+        qt = (query_text or "").lower()
+        matched_ids = []
+        try:
+            for name, cid in (entity_data or {}).items():
+                if isinstance(name, str) and name and name.lower() in qt:
+                    matched_ids.append(str(cid))
+        except Exception:
+            matched_ids = []
+
+        def collect_for(node_key: str, limit: int = 500) -> list:
+            cat = (nodes.get(node_key, {}).get('categories') or [None])[0]
+            if not cat:
+                return []
+            # First, use ids whose names appear in the query text
+            out = []
+            seen = set()
+            for scid in matched_ids:
+                if scid not in seen:
+                    seen.add(scid)
+                    out.append(scid)
+                    if len(out) >= limit:
+                        return out
+            # Fallback to category-consistent pool from entity_data (keeps autonomy but prevents mismatched namespaces)
+            prefixes = prefix_map.get(cat, [])
+            for _, cid in (entity_data or {}).items():
+                scid = str(cid)
+                if any(scid.startswith(p) for p in prefixes):
+                    if scid not in seen:
+                        seen.add(scid)
+                        out.append(scid)
+                        if len(out) >= limit:
+                            break
+            return out
+
+        # Identify subject/object from the single edge
+        e_id, e_data = next(iter(edges.items()))
+        subj = e_data.get('subject', node_keys[0])
+        obj = e_data.get('object', node_keys[1] if len(node_keys) > 1 else node_keys[0])
+
+        # Determine pinned state
+        def has_ids(nk: str) -> bool:
+            v = nodes.get(nk, {}).get('ids')
+            return isinstance(v, list) and len(v) > 0
+        subj_has = has_ids(subj)
+        obj_has = has_ids(obj)
+
+        # Case 1: neither has ids → legacy behavior (inject on one node)
+        if not subj_has and not obj_has:
+            subj_ids = collect_for(subj)
+            if subj_ids:
+                nodes.setdefault(subj, {})['ids'] = subj_ids
+                return
+            obj_ids = collect_for(obj)
+            if obj_ids:
+                nodes.setdefault(obj, {})['ids'] = obj_ids
+            return
+
+        # Case 2: exactly one side has ids → inject on the other to enable chaining
+        if subj_has != obj_has:
+            target = obj if subj_has else subj
+            t_ids = collect_for(target)
+            if t_ids:
+                nodes.setdefault(target, {})['ids'] = t_ids
+            return
+
+        # Case 3: both have ids → do nothing (avoid exploding combinations here)
+        return

@@ -335,7 +335,7 @@ class BTESearchNode:
         """Execute TRAPI query building and BTE search"""
         
         # Build TRAPI query
-        trapi_query = self.trapi_builder.build_query(
+        trapi_query = self.trapi_builder.build_trapi_query(
             subquery, entity_data, failed_trapis
         )
         

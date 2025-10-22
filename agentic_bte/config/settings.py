@@ -143,6 +143,53 @@ class AgenticBTESettings(BaseSettings):
         description="Enable query optimization strategies"
     )
     
+    # Graph of Thoughts (GoT) Settings
+    got_max_iterations: int = Field(
+        default=5,
+        description="Maximum iterations for GoT framework",
+        ge=1,
+        le=15
+    )
+    
+    got_quality_threshold: float = Field(
+        default=0.1,
+        description="Quality threshold for GoT iterative refinement",
+        ge=0.01,
+        le=1.0
+    )
+    
+    got_enable_refinement: bool = Field(
+        default=True,
+        description="Enable GoT iterative result refinement"
+    )
+    
+    got_enable_parallel_execution: bool = Field(
+        default=True,
+        description="Enable parallel execution in GoT framework"
+    )
+    
+    got_max_concurrent: int = Field(
+        default=3,
+        description="Maximum concurrent operations for GoT",
+        ge=1,
+        le=6
+    )
+    
+    got_default_output_format: str = Field(
+        default="comprehensive",
+        description="Default output format for GoT MCP tool"
+    )
+    
+    got_enable_graph_visualization: bool = Field(
+        default=False,
+        description="Enable graph visualization in GoT (disabled for MCP by default)"
+    )
+    
+    got_save_results_default: bool = Field(
+        default=False,
+        description="Default setting for saving GoT results to files"
+    )
+    
     # Development Settings
     debug_mode: bool = Field(
         default=False,

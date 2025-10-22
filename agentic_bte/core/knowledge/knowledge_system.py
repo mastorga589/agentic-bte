@@ -74,18 +74,36 @@ class BiomedicalKnowledgeSystem:
                     "step_failed": "entity_extraction"
                 }
             
-            entities = entity_result.get("entities", {})
+            raw_entities = entity_result.get("entities", [])
+            # Normalize entities to a list of dicts [{name, id, ...}]
+            if isinstance(raw_entities, dict):
+                entities = [{"name": k, "id": v, "type": "general"} for k, v in raw_entities.items()]
+            elif isinstance(raw_entities, list):
+                entities = raw_entities
+            else:
+                entities = []
+
+            # Build a simple name->id mapping expected by downstream components
             entity_ids = entity_result.get("entity_ids", {})
+            if not isinstance(entity_ids, dict) or not entity_ids:
+                try:
+                    entity_ids = {e.get("name"): e.get("id") for e in entities if isinstance(e, dict) and e.get("name") and e.get("id")}
+                except Exception:
+                    entity_ids = {}
             
             if not entities:
                 return {
                     "message": "No biomedical entities found in the query",
                     "query": query,
-                    "entities": {},
+                    "entities": [],
                     "results": []
                 }
             
-            logger.info(f"Found {len(entities)} entities: {list(entities.keys())}")
+            try:
+                example_names = [e.get("name", "") for e in entities][:5]
+                logger.info(f"Found {len(entities)} entities: {example_names}")
+            except Exception:
+                logger.info(f"Found {len(entities)} entities")
             
             # Step 2: Classify query type
             logger.info("Step 2: Classifying query type...")
