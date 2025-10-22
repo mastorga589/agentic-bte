@@ -1,0 +1,56 @@
+"""
+Prototype-aligned BioNERTool: use spaCy+scispacy_linker exclusively for local ID linking, canonical name/synonym resolution; filter generics.
+"""
+import spacy
+import json
+from langchain_openai import ChatOpenAI
+
+# Singleton model instantiation only!
+_nlp_global = spacy.load("en_core_sci_lg")
+_drug_disease_nlp_global = spacy.load("en_ner_bc5cdr_md")
+try:
+    if "scispacy_linker" not in _nlp_global.pipe_names:
+        _nlp_global.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "linker_name": "umls"})
+except Exception:
+    pass
+
+class BioNERTool:
+    def __init__(self, openai_api_key=None):
+        self.nlp = _nlp_global
+        self.drug_disease_nlp = _drug_disease_nlp_global
+        self.llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=openai_api_key)
+
+    def extract_and_link(self, query: str, include_types: bool = True):
+        ents = []
+        seen = set()
+        for doc in [self.nlp(query), self.drug_disease_nlp(query)]:
+            for ent in doc.ents:
+                candidate = ent.text.strip()
+                if candidate not in seen:
+                    ents.append(ent)
+                    seen.add(candidate)
+        # Optionally: biological process LLM extraction, etc, from above
+        resolved = {}
+        generic_substrings = [
+            "pharmaceutical preparation", "pharmaceutical product", "drug",
+            "genes", "gene", "chemical", "biological process", "entity", "compound",
+            "molecule", "disease", "diseases", "disorder", "trait", "phenotype", "organism"
+        ]
+        linker = self.nlp.get_pipe("scispacy_linker")
+        for ent in ents:
+            cui = None
+            if ent._.kb_ents:
+                cui, score = ent._.kb_ents[0]
+                entity_info = linker.kb.cui_to_entity[cui]
+                canonical_name = entity_info.canonical_name
+                definition = entity_info.definition or entity_info.name
+                if any(gen in definition.lower() for gen in generic_substrings):
+                    continue
+                resolved[ent.text.strip()] = {
+                    "name": canonical_name,
+                    "id": cui,
+                    "type": "general", # optionally augment with LLM
+                    "synonyms": entity_info.aliases,
+                    "definition": definition
+                }
+        return {"entities": [dict(name=k, id=v["id"], type=v["type"], synonyms=v.get("synonyms", []), definition=v.get("definition", "")) for k,v in resolved.items()]}

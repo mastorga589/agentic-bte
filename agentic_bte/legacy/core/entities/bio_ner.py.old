@@ -1,0 +1,67 @@
+"""
+Prototype-aligned BioNERTool: multi-NER, singleton spaCy, synonym, SRI resolution.
+"""
+import spacy
+import requests
+import json
+from langchain_openai import ChatOpenAI
+
+# Singleton model instantiation pattern
+_nlp_global = spacy.load("en_core_sci_lg")
+_drug_disease_nlp_global = spacy.load("en_ner_bc5cdr_md")
+try:
+    if "scispacy_linker" not in _nlp_global.pipe_names:
+        _nlp_global.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "linker_name": "umls"})
+except Exception:
+    pass
+
+class BioNERTool:
+    def __init__(self, openai_api_key=None):
+        self.nlp = _nlp_global
+        self.drug_disease_nlp = _drug_disease_nlp_global
+        self.llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=openai_api_key)
+
+    def extract_and_link(self, query: str, include_types: bool = True):
+        ents = []
+        for doc in [self.nlp(query), self.drug_disease_nlp(query)]:
+            for ent in doc.ents:
+                ents.append(ent.text.strip())
+        bp_prompt = f"Extract any biological processes/entities in this query (return as list!): {query}"
+        try:
+            bp = self.llm.invoke(bp_prompt).content.strip()
+            if bp and bp.startswith('['):
+                bp_list = json.loads(bp)
+                if isinstance(bp_list, list):
+                    ents += [b for b in bp_list if isinstance(b, str)]
+        except Exception:
+            pass
+        ents = list(dict.fromkeys([e.strip() for e in ents if e.strip()]))
+        resolved = {}
+        generic_substrings = [
+            "pharmaceutical preparation", "pharmaceutical product", "drug",
+            "genes", "gene", "chemical", "biological process", "entity", "compound",
+            "molecule", "disease", "diseases", "disorder", "trait", "phenotype", "organism"
+        ]
+        for e in ents:
+            entity_type = "general"
+            type_prompt = f"Classify the entity from the query into: genetic,bio-process,small-molecule,disease,general/context: {e} in [{query}]\nReturn just a single type label."
+            try:
+                entity_type = self.llm.invoke(type_prompt).content.strip()
+            except Exception:
+                pass
+            curie = ""
+            definition = ""
+            try:
+                result = requests.get(
+                    f"https://name-lookup.ci.transltr.io/lookup?string={e.replace(' ', '%20')}&autocomplete=true&limit=1", headers={"accept": "application/json"})
+                answer = result.json()
+                if answer and isinstance(answer, list):
+                    curie = answer[0]["curie"] if "curie" in answer[0] else ""
+                    definition = answer[0].get("label","") + ": " + (answer[0]["description"] if "description" in answer[0] else "")
+            except Exception:
+                pass
+            # Filter: skip generic definitions
+            if any(gen in definition.lower() for gen in generic_substrings):
+                continue
+            resolved[e] = {"name": e, "id": curie, "type": entity_type, "synonyms": [], "definition": definition}
+        return {"entities": [dict(name=k, id=v["id"], type=v["type"], synonyms=v.get("synonyms", []), definition=v.get("definition","")) for k,v in resolved.items()]}

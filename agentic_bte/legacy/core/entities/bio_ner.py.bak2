@@ -1,0 +1,56 @@
+"""
+Multi-model, LLM-augmented BioNER with type mapping, synonym expansion, and batch ID linking (LangGraph-aligned)
+"""
+import spacy
+import requests
+import json
+from langchain_openai import ChatOpenAI
+
+class BioNERTool:
+    def __init__(self, openai_api_key=None):
+        self.nlp = spacy.load("en_core_sci_lg")
+        self.drug_disease_nlp = spacy.load("en_ner_bc5cdr_md")
+        try:
+            self.nlp.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "linker_name": "umls"})
+        except Exception:  # already added
+            pass
+        self.llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=openai_api_key)
+
+    def extract_and_link(self, query: str):
+        # Step 1: Get entities from both models
+        ents = []
+        for doc in [self.nlp(query), self.drug_disease_nlp(query)]:
+            for ent in doc.ents:
+                ents.append(ent.text.strip())
+        # Step 2: LLM extraction for biological processes if available
+        bp_prompt = f"Extract any biological processes/entities in this query (return as list!): {query}"
+        try:
+            bp = self.llm.invoke(bp_prompt).content.strip()
+            if bp and bp.startswith('['):
+                bp_list = json.loads(bp)
+                if isinstance(bp_list, list):
+                    ents += [b for b in bp_list if isinstance(b, str)]
+        except Exception:
+            pass
+        # Deduplicate preserving order
+        ents = list(dict.fromkeys([e.strip() for e in ents if e.strip()]))
+        # Step 3: Entity-linking and type classification
+        resolved = {}
+        for e in ents:
+            entity_type = "general"
+            type_prompt = f"Classify the entity from the query into: genetic,bio-process,small-molecule,disease,general/context: {e} in [{query}]\nReturn just a single type label."
+            try:
+                entity_type = self.llm.invoke(type_prompt).content.strip()
+            except Exception:
+                pass
+            # ID linking, try UMLS SRI Name Resolver (BioNER Prototype logic)
+            curie = ""
+            try:
+                result = requests.get(
+                    f"https://name-lookup.ci.transltr.io/lookup?string={e.replace(' ', '%20')}&autocomplete=true&limit=1", headers={"accept": "application/json"})
+                answer = result.json()
+                curie = answer[0]["curie"] if answer and isinstance(answer, list) and "curie" in answer[0] else ""
+            except Exception:
+                pass
+            resolved[e] = {"name": e, "id": curie, "type": entity_type, "synonyms": []}
+        return {"entities": [dict(name=k, id=v["id"], type=v["type"], synonyms=v.get("synonyms", [])) for k,v in resolved.items()]}
