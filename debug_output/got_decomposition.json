@@ -1,0 +1,47 @@
+{
+  "nodes": [
+    {
+      "id": "Q1",
+      "content": "Which small molecules interact with the PI3K/AKT signaling pathway?",
+      "dependencies": []
+    },
+    {
+      "id": "Q2",
+      "content": "Which small molecules are associated with breast cancer?",
+      "dependencies": []
+    },
+    {
+      "id": "Q3",
+      "content": "Which small molecules modulate the PI3K/AKT signaling pathway?",
+      "dependencies": ["Q1_result"]
+    },
+    {
+      "id": "Q4",
+      "content": "Which small molecules are involved in breast cancer?",
+      "dependencies": ["Q2_result"]
+    },
+    {
+      "id": "Q5",
+      "content": "Which small molecules modulate the PI3K/AKT signaling pathway and are associated with breast cancer?",
+      "dependencies": ["Q3_result", "Q4_result"]
+    }
+  ],
+  "edges": [
+    {
+      "from": "Q1",
+      "to": "Q3"
+    },
+    {
+      "from": "Q2",
+      "to": "Q4"
+    },
+    {
+      "from": "Q3",
+      "to": "Q5"
+    },
+    {
+      "from": "Q4",
+      "to": "Q5"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+/Users/mastorga/miniforge3/lib/python3.12/site-packages/spacy/language.py:2195: FutureWarning: Possible set union at position 6328
+  deserializers["tokenizer"] = lambda p: self.tokenizer.from_disk(  # type: ignore[union-attr]
+/Users/mastorga/miniforge3/lib/python3.12/site-packages/sklearn/base.py:442: InconsistentVersionWarning: Trying to unpickle estimator TfidfTransformer from version 1.1.2 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+/Users/mastorga/miniforge3/lib/python3.12/site-packages/sklearn/base.py:442: InconsistentVersionWarning: Trying to unpickle estimator TfidfVectorizer from version 1.1.2 when using version 1.7.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+Traceback (most recent call last):
+  File "<frozen runpy>", line 189, in _run_module_as_main
+  File "<frozen runpy>", line 112, in _get_module_details
+  File "/Users/mastorga/Documents/agentic-bte/agentic_bte/unified/__init__.py", line 54, in <module>
+    from .strategy_router import (
+ImportError: cannot import name 'UnifiedStrategyRouter' from 'agentic_bte.unified.strategy_router' (/Users/mastorga/Documents/agentic-bte/agentic_bte/unified/strategy_router.py)
