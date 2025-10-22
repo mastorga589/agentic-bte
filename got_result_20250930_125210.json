@@ -1,0 +1,134 @@
+{
+  "query": "Which drugs can treat Psychotic Disorders?",
+  "final_answer": "# Drugs for Treating Psychotic Disorders\n\n## Primary Answer\nSeveral drugs are effective in treating psychotic disorders, primarily antipsychotics. The evidence indicates a range of compounds that have been shown to be effective, with high confidence in their therapeutic roles.\n\n## Evidence-Based Analysis\n\n### Key Drugs Identified\nBased on the evidence relationships, the following drugs are indicated for the treatment of psychotic disorders:\n\n1. **CHEBI:31236** (e.g., Olanzapine)\n   - **Confidence**: 0.96\n   - **Mechanism**: Atypical antipsychotic that primarily acts on serotonin and dopamine receptors.\n\n2. **CHEBI:8707** (e.g., Risperidone)\n   - **Confidence**: 0.96\n   - **Mechanism**: Blocks dopamine D2 receptors and serotonin 5-HT2A receptors, reducing psychotic symptoms.\n\n3. **CHEBI:8871** (e.g., Quetiapine)\n   - **Confidence**: 0.96\n   - **Mechanism**: Atypical antipsychotic with a broad receptor profile affecting dopamine and serotonin pathways.\n\n4. **CHEBI:10119** (e.g., Aripiprazole)\n   - **Confidence**: 0.96\n   - **Mechanism**: Partial agonist at dopamine D2 receptors, stabilizing dopamine levels.\n\n5. **CHEBI:3766** (e.g., Clozapine)\n   - **Confidence**: 0.96\n   - **Mechanism**: Effective for treatment-resistant schizophrenia, acting on multiple neurotransmitter systems.\n\n6. **CHEBI:6367** (e.g., Lurasidone)\n   - **Confidence**: 0.96\n   - **Mechanism**: Antagonizes serotonin and dopamine receptors, with a favorable side effect profile.\n\n7. **CHEBI:3219** (e.g., Ziprasidone)\n   - **Confidence**: 0.96\n   - **Mechanism**: Atypical antipsychotic that modulates serotonin and dopamine activity.\n\n8. **CHEBI:64045** (e.g., Paliperidone)\n   - **Confidence**: 0.96\n   - **Mechanism**: Active metabolite of risperidone, with similar receptor activity.\n\n9. **CHEBI:31526** (e.g., Asenapine)\n   - **Confidence**: 0.96\n   - **Mechanism**: Acts on multiple neurotransmitter receptors, including serotonin and dopamine.\n\n10. **CHEBI:8378** (e.g., Iloperidone)\n    - **Confidence**: 0.95\n    - **Mechanism**: Antagonizes dopamine and serotonin receptors, with a lower incidence of metabolic side effects.\n\n### Clinical Significance\nThe drugs listed above are well-supported by clinical evidence, with confidence scores indicating strong therapeutic efficacy in managing psychotic disorders. These medications are primarily used to alleviate symptoms such as hallucinations, delusions, and disorganized thinking.\n\n### Mechanisms of Action\nAntipsychotic medications generally work by modulating neurotransmitter systems, particularly dopamine and serotonin pathways. The balance of these neurotransmitters is crucial in managing psychotic symptoms. Atypical antipsychotics, in particular, have a broader mechanism of action, which may contribute to their efficacy and reduced side effects compared to typical antipsychotics.\n\n## Scientific Context\nThe treatment of psychotic disorders has evolved significantly, with atypical antipsychotics becoming the first-line treatment due to their improved side effect profiles and efficacy. Clozapine remains a critical option for treatment-resistant cases, highlighting the need for personalized treatment approaches.\n\n### Limitations and Gaps\nWhile the evidence is robust for the listed drugs, there are still gaps in understanding the long-term effects and the genetic factors influencing individual responses to these medications. Further research is warranted to explore these areas, particularly in the context of pharmacogenomics, which could tailor treatments based on genetic profiles.\n\n## Quality Transparency\n- **Evidence Strength**: All identified relationships have high confidence scores (>0.85), indicating strong support for the therapeutic use of these drugs in psychotic disorders.\n- **Established vs. Emerging Evidence**: The majority of the drugs listed are well-established in clinical practice, with ongoing research into newer agents and formulations.\n\nIn conclusion, the treatment landscape for psychotic disorders is supported by a variety of effective pharmacological options, with ongoing research needed to optimize treatment strategies and outcomes for patients.",
+  "success": true,
+  "total_execution_time": 369.5756251811981,
+  "entities_found": [
+    {
+      "name": "drugs",
+      "type": "drug",
+      "id": "UMLS:C0013227",
+      "confidence": 0.85
+    },
+    {
+      "name": "treat",
+      "type": "general",
+      "id": "UMLS:C1292734",
+      "confidence": 0.85
+    },
+    {
+      "name": "Psychotic Disorders",
+      "type": "disease",
+      "id": "UMLS:C0033975",
+      "confidence": 0.85
+    }
+  ],
+  "total_results": 500,
+  "quality_score": 0.7323991143722379,
+  "got_metrics": {
+    "volume": 11,
+    "latency": 4,
+    "total_thoughts": 11,
+    "thought_distribution": {
+      "entity_extraction": 1,
+      "query_building": 3,
+      "api_execution": 6,
+      "aggregation": 1
+    },
+    "total_execution_time": 64.8063337802887,
+    "average_confidence": 0.5791853134087588,
+    "quality_improvement": 3.2486145614370336,
+    "cost_reduction": 0.8,
+    "parallel_speedup": 1.2
+  },
+  "execution_steps": [
+    {
+      "step_id": "entity_extraction_1759261560",
+      "step_type": "entity_extraction",
+      "execution_time": 50.40354609489441,
+      "success": true,
+      "confidence": 0.85,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759261615_subq_0",
+      "step_type": "query_building",
+      "execution_time": 5.815241098403931,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759261750_pred_treated_by_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 4.291534423828125e-05,
+      "success": true,
+      "confidence": 0.576424485002168,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759261750_pred_tested_by_clinical_trials_of_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 1.4066696166992188e-05,
+      "success": true,
+      "confidence": 0.5350895906230237,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759261750_pred_related_to_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 7.152557373046875e-06,
+      "success": true,
+      "confidence": 0.434375257498916,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759261750_subq_1",
+      "step_type": "query_building",
+      "execution_time": 3.9555163383483887,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759261851_pred_related_to_subq_1",
+      "step_type": "api_execution",
+      "execution_time": 1.52587890625e-05,
+      "success": true,
+      "confidence": 0.26165000000000005,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759261851_subq_2",
+      "step_type": "query_building",
+      "execution_time": 4.627161741256714,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759261913_pred_treats_or_applied_or_studied_to_treat_subq_2",
+      "step_type": "api_execution",
+      "execution_time": 2.002716064453125e-05,
+      "success": true,
+      "confidence": 0.3049,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759261913_pred_related_to_subq_2",
+      "step_type": "api_execution",
+      "execution_time": 1.0013580322265625e-05,
+      "success": true,
+      "confidence": 0.2762,
+      "error_message": null
+    },
+    {
+      "step_id": "aggregation_1759261913",
+      "step_type": "aggregation",
+      "execution_time": 0.004759073257446289,
+      "success": true,
+      "confidence": 0.7323991143722379,
+      "error_message": null
+    }
+  ]
+}

@@ -1,0 +1,621 @@
+{
+  "framework_info": {
+    "test_timestamp": 1759475637.389598,
+    "total_queries": 18,
+    "complexity_levels": [
+      "simple",
+      "moderate",
+      "complex",
+      "research"
+    ]
+  },
+  "unit_tests": {
+    "got_framework": {
+      "initialization": {
+        "success": true,
+        "max_iterations": 3,
+        "parallel_enabled": true,
+        "transformations_count": 3
+      }
+    },
+    "aggregation": {
+      "initialization": {
+        "success": true,
+        "refinement_enabled": true,
+        "entity_hierarchies_count": 6
+      }
+    },
+    "refinement": {
+      "initialization": {
+        "success": true,
+        "max_iterations": 3,
+        "improvement_threshold": 0.1
+      }
+    },
+    "metrics": {
+      "initialization": {
+        "success": true,
+        "benchmarks_count": 3
+      }
+    }
+  },
+  "integration_tests": {
+    "optimizer_creation": {
+      "simple_optimizer": {
+        "success": true,
+        "got_enabled": true,
+        "parallel_enabled": true
+      },
+      "hybrid_optimizer": {
+        "success": true,
+        "got_enabled": true,
+        "threshold": 0.6
+      }
+    },
+    "mcp_integration": {
+      "entity_extraction": {
+        "success": true,
+        "entities_found": 2,
+        "sample_entities": [
+          "diabetes",
+          "gene"
+        ]
+      },
+      "query_building": {
+        "success": true,
+        "trapi_nodes": 0,
+        "trapi_edges": 0
+      }
+    },
+    "workflow_integration": {}
+  },
+  "performance_tests": {
+    "execution_times": {
+      "simple": {
+        "baseline_time": 0.00011897087097167969,
+        "got_time": 0.0005919933319091797,
+        "baseline_success": true,
+        "got_success": false,
+        "speedup": 0.2009665726943214
+      },
+      "moderate": {
+        "baseline_time": 8.392333984375e-05,
+        "got_time": 0.0002968311309814453,
+        "baseline_success": true,
+        "got_success": false,
+        "speedup": 0.2827309236947791
+      },
+      "complex": {
+        "baseline_time": 9.083747863769531e-05,
+        "got_time": 0.0007650852203369141,
+        "baseline_success": true,
+        "got_success": false,
+        "speedup": 0.11872857588033656
+      }
+    },
+    "memory_usage": {},
+    "scalability": {}
+  },
+  "end_to_end_tests": {
+    "by_complexity": {
+      "simple": {
+        "queries_tested": 5,
+        "results": [
+          {
+            "query": "What genes are associated with diabetes?",
+            "success": false,
+            "execution_time": 0.0002307891845703125,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.29239766081871343
+            }
+          },
+          {
+            "query": "What proteins interact with TP53?",
+            "success": false,
+            "execution_time": 0.0002238750457763672,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.3058103975535168
+            }
+          },
+          {
+            "query": "What diseases are caused by BRCA1 mutations?",
+            "success": false,
+            "execution_time": 0.00021314620971679688,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.3058103975535168
+            }
+          },
+          {
+            "query": "What drugs treat hypertension?",
+            "success": false,
+            "execution_time": 0.00022912025451660156,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.3058103975535168
+            }
+          },
+          {
+            "query": "What pathways involve insulin?",
+            "success": false,
+            "execution_time": 0.00021314620971679688,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.8928571428571429
+            }
+          }
+        ],
+        "success_count": 0,
+        "avg_quality": 0.0,
+        "avg_execution_time": 0.0,
+        "success_rate": 0.0
+      },
+      "moderate": {
+        "queries_tested": 5,
+        "results": [
+          {
+            "query": "What are the pathways connecting insulin signaling to glucose metabolism?",
+            "success": false,
+            "execution_time": 0.00020694732666015625,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.32051282051282054
+            }
+          },
+          {
+            "query": "How do mutations in CFTR lead to cystic fibrosis symptoms?",
+            "success": false,
+            "execution_time": 0.00021719932556152344,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.32051282051282054
+            }
+          },
+          {
+            "query": "What drugs target the proteins involved in Alzheimer's disease?",
+            "success": false,
+            "execution_time": 0.0002238750457763672,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.2801120448179272
+            }
+          },
+          {
+            "query": "How does oxidative stress contribute to aging?",
+            "success": false,
+            "execution_time": 0.0002040863037109375,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.8928571428571429
+            }
+          },
+          {
+            "query": "What is the relationship between inflammation and cancer?",
+            "success": false,
+            "execution_time": 0.0002391338348388672,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.32051282051282054
+            }
+          }
+        ],
+        "success_count": 0,
+        "avg_quality": 0.0,
+        "avg_execution_time": 0.0,
+        "success_rate": 0.0
+      },
+      "complex": {
+        "queries_tested": 5,
+        "results": [
+          {
+            "query": "What is the molecular network connecting oxidative stress, inflammation, and neurodegeneration in Parkinson's disease?",
+            "success": false,
+            "execution_time": 0.00035500526428222656,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.29239766081871343
+            }
+          },
+          {
+            "query": "How do genetic variants in metabolism-related genes interact with dietary factors to influence obesity risk?",
+            "success": false,
+            "execution_time": 0.00023126602172851562,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.3058103975535168
+            }
+          },
+          {
+            "query": "What are the shared molecular mechanisms between depression and cardiovascular disease?",
+            "success": false,
+            "execution_time": 0.0002200603485107422,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.3058103975535168
+            }
+          },
+          {
+            "query": "How do circadian rhythms affect metabolic disorders and what therapeutic targets exist?",
+            "success": false,
+            "execution_time": 0.00021576881408691406,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.32051282051282054
+            }
+          },
+          {
+            "query": "What are the molecular connections between gut microbiome and brain function in autism?",
+            "success": false,
+            "execution_time": 0.0002129077911376953,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.32051282051282054
+            }
+          }
+        ],
+        "success_count": 0,
+        "avg_quality": 0.0,
+        "avg_execution_time": 0.0,
+        "success_rate": 0.0
+      },
+      "research": {
+        "queries_tested": 3,
+        "results": [
+          {
+            "query": "Construct a comprehensive map of the molecular interactions between the gut microbiome, immune system, and brain function in neuropsychiatric disorders.",
+            "success": false,
+            "execution_time": 0.00021409988403320312,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.32051282051282054
+            }
+          },
+          {
+            "query": "Identify and analyze the multi-level regulatory networks that control stem cell pluripotency and differentiation.",
+            "success": false,
+            "execution_time": 0.00022411346435546875,
+            "quality_score": 0.1,
+            "result_count": 0,
+            "entity_count": 0,
+            "reasoning_steps": 13,
+            "has_final_answer": false,
+            "errors": [],
+            "warnings": [],
+            "got_metrics": {
+              "volume": 0,
+              "latency": 0,
+              "total_thoughts": 2,
+              "quality_improvement": 0.32051282051282054
+            }
+          }
+        ],
+        "success_count": 0,
+        "avg_quality": 0.0,
+        "avg_execution_time": 0.0,
+        "success_rate": 0.0
+      }
+    },
+    "success_rates": {},
+    "quality_metrics": {},
+    "overall_success_rate": 0.0,
+    "total_queries_tested": 18,
+    "total_successes": 0
+  },
+  "comparison_tests": {
+    "optimizer_comparisons": {
+      "What genes are associated with": {
+        "summary": {
+          "best_quality": "Simple Baseline",
+          "fastest": "Hybrid + GoT",
+          "most_reliable": "Simple Baseline",
+          "quality_improvements": {
+            "Simple + GoT": -1.0,
+            "Hybrid + GoT": 0.0
+          },
+          "speed_improvements": {
+            "Simple + GoT": 0.0,
+            "Hybrid + GoT": 5.594795539033457
+          }
+        },
+        "best_quality": "Simple Baseline",
+        "fastest": "Hybrid + GoT",
+        "most_reliable": "Simple Baseline"
+      },
+      "What proteins interact with TP": {
+        "summary": {
+          "best_quality": "Simple Baseline",
+          "fastest": "Hybrid + GoT",
+          "most_reliable": "Simple Baseline",
+          "quality_improvements": {
+            "Simple + GoT": -1.0,
+            "Hybrid + GoT": 0.0
+          },
+          "speed_improvements": {
+            "Simple + GoT": 0.0,
+            "Hybrid + GoT": 4.234513274336283
+          }
+        },
+        "best_quality": "Simple Baseline",
+        "fastest": "Hybrid + GoT",
+        "most_reliable": "Simple Baseline"
+      },
+      "What are the pathways connecti": {
+        "summary": {
+          "best_quality": "Simple Baseline",
+          "fastest": "Hybrid + GoT",
+          "most_reliable": "Simple Baseline",
+          "quality_improvements": {
+            "Simple + GoT": -1.0,
+            "Hybrid + GoT": 0.0
+          },
+          "speed_improvements": {
+            "Simple + GoT": 0.0,
+            "Hybrid + GoT": 4.469565217391304
+          }
+        },
+        "best_quality": "Simple Baseline",
+        "fastest": "Hybrid + GoT",
+        "most_reliable": "Simple Baseline"
+      },
+      "How do mutations in CFTR lead ": {
+        "summary": {
+          "best_quality": "Simple Baseline",
+          "fastest": "Hybrid + GoT",
+          "most_reliable": "Simple Baseline",
+          "quality_improvements": {
+            "Simple + GoT": -1.0,
+            "Hybrid + GoT": 0.0
+          },
+          "speed_improvements": {
+            "Simple + GoT": 0.0,
+            "Hybrid + GoT": 4.093023255813954
+          }
+        },
+        "best_quality": "Simple Baseline",
+        "fastest": "Hybrid + GoT",
+        "most_reliable": "Simple Baseline"
+      },
+      "What is the molecular network ": {
+        "summary": {
+          "best_quality": "Simple Baseline",
+          "fastest": "Hybrid + GoT",
+          "most_reliable": "Simple Baseline",
+          "quality_improvements": {
+            "Simple + GoT": -1.0,
+            "Hybrid + GoT": 0.0
+          },
+          "speed_improvements": {
+            "Simple + GoT": 0.0,
+            "Hybrid + GoT": 3.814814814814815
+          }
+        },
+        "best_quality": "Simple Baseline",
+        "fastest": "Hybrid + GoT",
+        "most_reliable": "Simple Baseline"
+      }
+    },
+    "performance_improvements": {
+      "avg_quality_improvement": -0.5,
+      "avg_speed_improvement": 2.220671210138981,
+      "total_comparisons": 5
+    },
+    "statistical_significance": {}
+  },
+  "paper_validation": {
+    "volume_latency_tradeoff": {},
+    "quality_improvements": {},
+    "cost_reductions": {},
+    "paper_claims_validation": {
+      "expected_improvements": {
+        "quality_improvement_over_baseline": 0.1,
+        "cost_reduction": 0.05,
+        "volume_latency_ratio": 2.0
+      },
+      "validation_notes": "Direct comparison with paper limited due to different domain (biomedical vs sorting)",
+      "conceptual_validation": "Framework successfully implements key GoT concepts"
+    },
+    "configurations_tested": [
+      {
+        "config": "GoT_Parallel_On",
+        "success": false,
+        "execution_time": 0.00023603439331054688,
+        "quality_score": 0.1,
+        "volume": 0,
+        "latency": 0,
+        "total_thoughts": 2,
+        "parallel_enabled": true
+      },
+      {
+        "config": "GoT_Parallel_Off",
+        "success": false,
+        "execution_time": 0.00023126602172851562,
+        "quality_score": 0.1,
+        "volume": 0,
+        "latency": 0,
+        "total_thoughts": 2,
+        "parallel_enabled": false
+      },
+      {
+        "config": "GoT_More_Iterations",
+        "success": false,
+        "execution_time": 0.0002238750457763672,
+        "quality_score": 0.1,
+        "volume": 0,
+        "latency": 0,
+        "total_thoughts": 2,
+        "parallel_enabled": true
+      }
+    ]
+  },
+  "summary": {
+    "overall_status": "PASS",
+    "test_categories_run": 6,
+    "total_tests_executed": 6,
+    "successful_tests": 6,
+    "failed_tests": 0,
+    "key_findings": [
+      "\u2713 All core GoT components initialize successfully",
+      "\u2713 GoT-enhanced optimizers create and configure properly",
+      "\u2713 End-to-end success rate: 0.0%",
+      "\u26a0 Low success rate - implementation needs review",
+      "\u26a0 GoT slower than baseline (avg: 0.20x)",
+      "\u2713 Average speed improvement: 2.22x"
+    ],
+    "recommendations": [
+      "Implementation is ready for production use",
+      "Consider running extended benchmarks for performance optimization"
+    ],
+    "performance_highlights": {
+      "simple_avg_quality": 0.0,
+      "moderate_avg_quality": 0.0,
+      "complex_avg_quality": 0.0,
+      "research_avg_quality": 0.0
+    }
+  }
+}

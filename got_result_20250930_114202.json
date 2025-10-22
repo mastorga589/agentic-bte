@@ -1,0 +1,122 @@
+{
+  "query": "Which drugs can treat Psychotic Disorders by targeting neurotransmitter uptake?",
+  "final_answer": "**\ud83d\udd2c Therapeutic Compounds Analysis**\nFound 1 therapeutic compounds relevant to your query:\n  1. Pharmaceutical Preparations\n\n**\ud83d\udd17 Key Biomedical Relationships:**\n  \u2022 psychosis treated by Aripiprazole (confidence: 0.80)\n  \u2022 psychosis treated by Quetiapine (confidence: 0.80)\n  \u2022 psychosis treated by Risperidone (confidence: 0.80)\n  \u2022 psychosis tested by clinical trials of Olanzapine (confidence: 0.80)\n  \u2022 psychosis treated by Dexmedetomidine (confidence: 0.80)\n\n**\ud83d\udcc8 Analysis Quality Assessment:**\n  \u2022 Total results processed: 173\n  \u2022 Results with structured data: 173/173 (100%)\n  \u2022 Average confidence score: 0.80 (High)\n  \u2022 Data completeness: 100%\n\n**\ud83d\udd2c Research Context:**\nThis analysis is based on curated biomedical knowledge graphs and peer-reviewed data sources. \nResults represent current scientific understanding but should be validated through additional research.",
+  "success": true,
+  "total_execution_time": 110.78376913070679,
+  "entities_found": [
+    {
+      "name": "drugs",
+      "type": "drug",
+      "id": "UMLS:C0013227",
+      "confidence": 0.85
+    },
+    {
+      "name": "treat",
+      "type": "general",
+      "id": "UMLS:C1292734",
+      "confidence": 0.85
+    },
+    {
+      "name": "Psychotic Disorders",
+      "type": "disease",
+      "id": "UMLS:C0033975",
+      "confidence": 0.85
+    },
+    {
+      "name": "neurotransmitter",
+      "type": "biologicalEntity",
+      "id": "UMLS:C0597064",
+      "confidence": 0.85
+    },
+    {
+      "name": "uptake",
+      "type": "biologicalProcess",
+      "id": "GO:0001504",
+      "confidence": 0.85
+    }
+  ],
+  "total_results": 173,
+  "quality_score": 0.7999999999999999,
+  "got_metrics": {
+    "volume": 8,
+    "latency": 4,
+    "total_thoughts": 8,
+    "thought_distribution": {
+      "entity_extraction": 1,
+      "query_building": 3,
+      "api_execution": 3,
+      "aggregation": 1
+    },
+    "total_execution_time": 104.91331028938293,
+    "average_confidence": 0.8071428571428572,
+    "quality_improvement": 1.0625,
+    "cost_reduction": 0.8,
+    "parallel_speedup": 1.2
+  },
+  "execution_steps": [
+    {
+      "step_id": "entity_extraction_1759257611",
+      "step_type": "entity_extraction",
+      "execution_time": 66.71666097640991,
+      "success": true,
+      "confidence": 0.85,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759257683_pair_0",
+      "step_type": "query_building",
+      "execution_time": 4.0238196849823,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759257687_pair_0",
+      "step_type": "api_execution",
+      "execution_time": 18.33581805229187,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759257706_pair_1",
+      "step_type": "query_building",
+      "execution_time": 3.866501808166504,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759257710_pair_1",
+      "step_type": "api_execution",
+      "execution_time": 6.055635929107666,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759257716_pair_2",
+      "step_type": "query_building",
+      "execution_time": 4.2974770069122314,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759257720_pair_2",
+      "step_type": "api_execution",
+      "execution_time": 1.6091737747192383,
+      "success": true,
+      "confidence": 0.0,
+      "error_message": null
+    },
+    {
+      "step_id": "aggregation_1759257722",
+      "step_type": "aggregation",
+      "execution_time": 0.00822305679321289,
+      "success": true,
+      "confidence": 0.7999999999999999,
+      "error_message": null
+    }
+  ]
+}

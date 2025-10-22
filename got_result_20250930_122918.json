@@ -1,0 +1,134 @@
+{
+  "query": "Which drugs can treat Psychotic Disorders?",
+  "final_answer": "**\ud83d\udd2c Therapeutic Compounds Analysis**\n\u26a0\ufe0f No specific therapeutic compounds were identified with sufficient confidence.\nThis may indicate that:\n  \u2022 The query requires more specific terminology\n  \u2022 The knowledge graph has limited coverage for this area\n  \u2022 The relationships exist but have low confidence scores\n\n**\ud83d\udcc8 Analysis Quality Assessment:**\n  \u2022 Total results processed: 341\n  \u2022 Results with structured data: 0/341 (0%)\n  \u2022 Average confidence score: 0.41 (Medium)\n  \u2022 Data completeness: 0%\n\n**\ud83d\udca1 Recommendations:**\n  \u2022 No therapeutic compounds found - try alternative terminology or broader search terms\n  \u2022 Limited structured data available - results may need expert interpretation\n  \u2022 Consider consulting additional biomedical databases or literature",
+  "success": true,
+  "total_execution_time": 603.1078832149506,
+  "entities_found": [
+    {
+      "name": "drugs",
+      "type": "drug",
+      "id": "UMLS:C0013227",
+      "confidence": 0.85
+    },
+    {
+      "name": "treat",
+      "type": "general",
+      "id": "UMLS:C1292734",
+      "confidence": 0.85
+    },
+    {
+      "name": "Psychotic Disorders",
+      "type": "disease",
+      "id": "UMLS:C0033975",
+      "confidence": 0.85
+    }
+  ],
+  "total_results": 341,
+  "quality_score": 0.7574755792697185,
+  "got_metrics": {
+    "volume": 11,
+    "latency": 4,
+    "total_thoughts": 11,
+    "thought_distribution": {
+      "entity_extraction": 1,
+      "query_building": 3,
+      "api_execution": 6,
+      "aggregation": 1
+    },
+    "total_execution_time": 67.64323043823242,
+    "average_confidence": 0.648507212488203,
+    "quality_improvement": 3.0014124293785303,
+    "cost_reduction": 0.8,
+    "parallel_speedup": 1.2
+  },
+  "execution_steps": [
+    {
+      "step_id": "entity_extraction_1759259955",
+      "step_type": "entity_extraction",
+      "execution_time": 50.859439849853516,
+      "success": true,
+      "confidence": 0.85,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759260011_subq_0",
+      "step_type": "query_building",
+      "execution_time": 4.915001153945923,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759260273_pred_treated_by_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 2.8133392333984375e-05,
+      "success": true,
+      "confidence": 0.576424485002168,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759260273_pred_tested_by_clinical_trials_of_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 1.4066696166992188e-05,
+      "success": true,
+      "confidence": 0.5350895906230237,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759260273_pred_related_to_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 6.198883056640625e-06,
+      "success": true,
+      "confidence": 0.434375257498916,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759260273_subq_1",
+      "step_type": "query_building",
+      "execution_time": 5.433604001998901,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759260373_pred_treats_subq_1",
+      "step_type": "api_execution",
+      "execution_time": 5.7220458984375e-06,
+      "success": true,
+      "confidence": 0.0,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759260373_pred_related_to_subq_1",
+      "step_type": "api_execution",
+      "execution_time": 1.0013580322265625e-05,
+      "success": true,
+      "confidence": 0.28320000000000006,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759260373_subq_2",
+      "step_type": "query_building",
+      "execution_time": 6.429603099822998,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759260558_pred_related_to_subq_2",
+      "step_type": "api_execution",
+      "execution_time": 2.8133392333984375e-05,
+      "success": true,
+      "confidence": 0.0,
+      "error_message": null
+    },
+    {
+      "step_id": "aggregation_1759260558",
+      "step_type": "aggregation",
+      "execution_time": 0.00549006462097168,
+      "success": true,
+      "confidence": 0.7574755792697185,
+      "error_message": null
+    }
+  ]
+}

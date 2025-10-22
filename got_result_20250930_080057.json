@@ -1,0 +1,94 @@
+{
+  "query": "What genes are associated with diabetes?",
+  "final_answer": "Based on the analysis of gene, genes, diabetes Found 8 high-confidence results out of 20 total results. The analysis identified 2 key biomedical entities and 1 relationships between them. Results have an average confidence score of 0.68. Note that some results have lower confidence and should be validated with additional research.",
+  "success": true,
+  "total_execution_time": 0.0006401538848876953,
+  "entities_found": [
+    {
+      "name": "gene",
+      "type": "gene",
+      "id": "GENE:2131",
+      "confidence": 0.7
+    },
+    {
+      "name": "genes",
+      "type": "gene",
+      "id": "GENE:7411",
+      "confidence": 0.7
+    },
+    {
+      "name": "diabetes",
+      "type": "disease",
+      "id": "DISEASE:4528",
+      "confidence": 0.7
+    }
+  ],
+  "total_results": 20,
+  "quality_score": 0.7649909771568267,
+  "got_metrics": {
+    "volume": 5,
+    "latency": 4,
+    "total_thoughts": 6,
+    "thought_distribution": {
+      "entity_extraction": 1,
+      "query_building": 2,
+      "api_execution": 2,
+      "aggregation": 1
+    },
+    "total_execution_time": 0.0005695819854736328,
+    "average_confidence": 0.76,
+    "quality_improvement": 1.259259259259259,
+    "cost_reduction": 0.8,
+    "parallel_speedup": 1.2
+  },
+  "execution_steps": [
+    {
+      "step_id": "entity_extraction_1759244457",
+      "step_type": "entity_extraction",
+      "execution_time": 0.00018978118896484375,
+      "success": true,
+      "confidence": 0.85,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759244457_pair_0",
+      "step_type": "query_building",
+      "execution_time": 8.702278137207031e-05,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759244457_pair_0",
+      "step_type": "api_execution",
+      "execution_time": 9.703636169433594e-05,
+      "success": true,
+      "confidence": 0.675,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759244457_pair_1",
+      "step_type": "query_building",
+      "execution_time": 9.298324584960938e-05,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759244457_pair_1",
+      "step_type": "api_execution",
+      "execution_time": 9.393692016601562e-05,
+      "success": true,
+      "confidence": 0.675,
+      "error_message": null
+    },
+    {
+      "step_id": "aggregation_1759244457",
+      "step_type": "aggregation",
+      "execution_time": 8.821487426757812e-06,
+      "success": false,
+      "confidence": 0.0,
+      "error_message": "'BiomedicalAggregator' object has no attribute 'aggregate_results'"
+    }
+  ]
+}

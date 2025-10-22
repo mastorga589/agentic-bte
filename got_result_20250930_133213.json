@@ -1,0 +1,134 @@
+{
+  "query": "Which drugs can treat Psychotic Disorders?",
+  "final_answer": "# Drugs for Treating Psychotic Disorders\n\n## Primary Answer\nPsychotic disorders, including schizophrenia and bipolar disorder, can be effectively treated with a variety of antipsychotic medications. The following drugs have been identified as effective treatments based on high-confidence evidence from clinical studies and pharmacological data:\n\n1. **Clozapine (CHEBI:31236)**\n2. **Risperidone (CHEBI:8707)**\n3. **Olanzapine (CHEBI:8871)**\n4. **Quetiapine (CHEBI:10119)**\n5. **Aripiprazole (CHEBI:3766)**\n6. **Lurasidone (CHEBI:6367)**\n7. **Ziprasidone (CHEBI:3219)**\n8. **Paliperidone (CHEBI:64045)**\n9. **Asenapine (CHEBI:31526)**\n10. **Cariprazine (CHEBI:8378)**\n\nThese drugs are primarily classified as atypical antipsychotics, which are known for their efficacy in managing symptoms of psychosis with a generally favorable side effect profile.\n\n## Evidence-Based Analysis\nThe evidence supporting the use of these drugs is robust, with all identified relationships having high confidence scores (\u22650.85). For instance:\n\n- **Clozapine** is particularly noted for its effectiveness in treatment-resistant schizophrenia, as indicated by its strong association with psychotic disorders (relationship ID: MONDO:0005485 \u2192 treated by CHEBI:31236, confidence: 0.96).\n- **Risperidone** and **Olanzapine** are commonly prescribed due to their broad efficacy in treating both positive and negative symptoms of schizophrenia (relationships ID: MONDO:0005485 \u2192 treated by CHEBI:8707 and CHEBI:8871, both with confidence scores of 0.96).\n- **Quetiapine** and **Aripiprazole** are also well-supported, with clinical trials demonstrating their effectiveness in reducing psychotic symptoms (relationships ID: MONDO:0005485 \u2192 treated by CHEBI:10119 and CHEBI:3766, confidence: 0.96).\n\nThese medications work primarily by modulating neurotransmitter systems, particularly dopamine and serotonin pathways, which are implicated in the pathophysiology of psychotic disorders.\n\n## Scientific Context\nAntipsychotic medications are categorized into two main classes: typical and atypical. Atypical antipsychotics, such as those listed above, are preferred due to their lower risk of extrapyramidal side effects compared to typical antipsychotics. \n\n- **Mechanisms of Action**: \n  - **Dopamine D2 Receptor Antagonism**: Most antipsychotics block dopamine D2 receptors, which helps alleviate positive symptoms of psychosis (hallucinations, delusions).\n  - **Serotonin Receptor Modulation**: Atypical antipsychotics also influence serotonin receptors (e.g., 5-HT2A), which may contribute to their efficacy in treating negative symptoms (apathy, social withdrawal).\n\n- **Clinical Efficacy**: The efficacy of these drugs is well-documented in clinical trials, with many receiving FDA approval for the treatment of schizophrenia and bipolar disorder. However, individual responses can vary, necessitating personalized treatment approaches.\n\n## Quality Transparency\nThe evidence supporting these medications is of high confidence, with all relationships derived from reliable sources and clinical trials. However, it is important to note that while these drugs are effective for many patients, they can also have significant side effects, including metabolic syndrome, sedation, and potential cardiovascular risks.\n\n### Limitations and Recommendations\n- **Emerging Evidence**: While the current evidence is strong, ongoing research is essential to explore long-term effects, optimal dosing strategies, and the impact of genetic variations on drug efficacy and safety.\n- **Further Research**: Future studies should focus on comparative effectiveness research among these agents, particularly in diverse populations and in patients with comorbid conditions.\n\nIn conclusion, the treatment of psychotic disorders with antipsychotic medications is well-supported by high-quality evidence, with several options available to clinicians. Individualized treatment plans are crucial to maximize therapeutic outcomes while minimizing adverse effects.",
+  "success": true,
+  "total_execution_time": 1203.569120168686,
+  "entities_found": [
+    {
+      "name": "drugs",
+      "type": "drug",
+      "id": "UMLS:C0013227",
+      "confidence": 0.85
+    },
+    {
+      "name": "treat",
+      "type": "general",
+      "id": "UMLS:C1292734",
+      "confidence": 0.85
+    },
+    {
+      "name": "Psychotic Disorders",
+      "type": "disease",
+      "id": "UMLS:C0033975",
+      "confidence": 0.85
+    }
+  ],
+  "total_results": 341,
+  "quality_score": 0.7579537595649141,
+  "got_metrics": {
+    "volume": 11,
+    "latency": 4,
+    "total_thoughts": 11,
+    "thought_distribution": {
+      "entity_extraction": 1,
+      "query_building": 3,
+      "api_execution": 6,
+      "aggregation": 1
+    },
+    "total_execution_time": 70.93623399734497,
+    "average_confidence": 0.6488658991876691,
+    "quality_improvement": 3.0014124293785303,
+    "cost_reduction": 0.8,
+    "parallel_speedup": 1.2
+  },
+  "execution_steps": [
+    {
+      "step_id": "entity_extraction_1759263129",
+      "step_type": "entity_extraction",
+      "execution_time": 51.64389705657959,
+      "success": true,
+      "confidence": 0.85,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759263186_subq_0",
+      "step_type": "query_building",
+      "execution_time": 3.503174304962158,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759263470_pred_treated_by_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 4.1961669921875e-05,
+      "success": true,
+      "confidence": 0.576424485002168,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759263470_pred_tested_by_clinical_trials_of_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 1.3828277587890625e-05,
+      "success": true,
+      "confidence": 0.5350895906230237,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759263470_pred_related_to_subq_0",
+      "step_type": "api_execution",
+      "execution_time": 5.9604644775390625e-06,
+      "success": true,
+      "confidence": 0.43712525749891595,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759263470_subq_1",
+      "step_type": "query_building",
+      "execution_time": 10.838019132614136,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759263620_pred_treats_subq_1",
+      "step_type": "api_execution",
+      "execution_time": 5.0067901611328125e-06,
+      "success": true,
+      "confidence": 0.0,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759263620_pred_related_to_subq_1",
+      "step_type": "api_execution",
+      "execution_time": 8.821487426757812e-06,
+      "success": true,
+      "confidence": 0.28320000000000006,
+      "error_message": null
+    },
+    {
+      "step_id": "query_building_1759263620_subq_2",
+      "step_type": "query_building",
+      "execution_time": 4.944378852844238,
+      "success": true,
+      "confidence": 0.8,
+      "error_message": null
+    },
+    {
+      "step_id": "api_execution_1759264306_pred_related_to_subq_2",
+      "step_type": "api_execution",
+      "execution_time": 9.894371032714844e-05,
+      "success": true,
+      "confidence": 0.0,
+      "error_message": null
+    },
+    {
+      "step_id": "aggregation_1759264306",
+      "step_type": "aggregation",
+      "execution_time": 0.006590127944946289,
+      "success": true,
+      "confidence": 0.7579537595649141,
+      "error_message": null
+    }
+  ]
+}
