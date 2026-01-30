@@ -40,7 +40,34 @@ venv.bak/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Test and coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.prof
+.tox/
+
+# Logs
 *.log
+logs/
+
+# Data files (should not be in repo)
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
 temp/
-cache/.env
+tmp/
+*.tmp
+
+# Benchmarks cache
+tests/benchmarks/.cache/
+
+# Development scripts with personal paths
+compare_prototype_unified.py
+demo_got_functionality.py
