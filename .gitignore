@@ -81,4 +81,10 @@ ENHANCED_DAILY_LOG*.md
 
 # JSON cache files (hash-named)
 [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*.json
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Data directory
 data/
