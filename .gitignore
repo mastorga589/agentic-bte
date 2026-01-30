@@ -81,3 +81,4 @@ ENHANCED_DAILY_LOG*.md
 
 # JSON cache files (hash-named)
 [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*.json
+data/
