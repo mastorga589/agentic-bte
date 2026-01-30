@@ -88,3 +88,12 @@ ENHANCED_DAILY_LOG*.md
 
 # Data directory
 data/
+
+# Development and internal documentation
+WARP.md
+SESSION_COMMIT_HISTORY_*.md
+PUBLIC_READINESS_REPORT.md
+PUBLIC_RELEASE_FIXES_APPLIED.md
+FINAL_RELEASE_CHECKLIST.md
+clean_notebooks.py
+warp-mcp-config.json
