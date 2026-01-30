@@ -35,7 +35,7 @@
 pip install agentic-bte
 
 # Or install from source
-git clone https://github.com/example/agentic-bte.git
+git clone https://github.com/mastorga589/agentic-bte.git
 cd agentic-bte
 pip install -e .
 ```
@@ -274,7 +274,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
 
 ```bash
 # Clone repository
-git clone https://github.com/example/agentic-bte.git
+git clone https://github.com/mastorga589/agentic-bte.git
 cd agentic-bte
 
 # Install development dependencies
@@ -331,4 +331,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Happy Researching!** 🧬✨
 
-For questions, issues, or collaboration opportunities, please [open an issue](https://github.com/example/agentic-bte/issues) or reach out to our team.
+For questions, issues, or collaboration opportunities, please [open an issue](https://github.com/mastorga589/agentic-bte/issues) or reach out to our team.
