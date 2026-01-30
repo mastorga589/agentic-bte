@@ -188,9 +188,14 @@ graph TB
     A[Query] --> B[Annotator Agent]
     B --> C[Planner Agent] 
     C --> D[BTE Search Agent]
-    D --> E[Synthesis Agent]
+    D --> C
+    C --> E[Synthesis Agent]
     E --> F[Final Research Report]
 ```
+
+The complex biomedical query is first processed by the **Annotator Agent** to tag all biomedical entities in the query with their standardized IDs. The **Planner Agent** then decomposes the query into single-hop subqueries, which are converted into actionable TRAPI queries by the **BTE Search Agent** and executed against BioThings Explorer. 
+
+This is an **iterative process** where results accumulate in an RDF knowledge graph. After each search, the Planner evaluates whether sufficient information has been gathered to answer the original query. If more information is needed, it generates the next subquery based on existing results. Once complete, all accumulated results and the original query are passed to the **Synthesis Agent**, which generates the final comprehensive research report.
 
 ## 🔧 Configuration
 
