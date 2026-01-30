@@ -170,17 +170,22 @@ agentic_bte/
 
 ### 🤖 Agent Architectures
 
-#### MCP Server Agent
+#### MCP Server
 ```mermaid
 graph LR
-    A[User Query] --> B[MCP Server]
-    B --> C[Entity Recognition]
-    B --> D[Query Planning]
-    B --> E[BTE Execution]
-    C --> F[Final Answer]
-    D --> F
-    E --> F
+    A[User Query] --> B[MCP Server Wrapper]
+    B --> C[Core Processing Pipeline]
+    C --> D[Entity Recognition]
+    C --> E[Query Planning]
+    C --> F[BTE Execution]
+    D --> G[Final Answer]
+    E --> G
+    F --> G
+    G --> B
+    B --> H[MCP Client]
 ```
+
+The **MCP Server** acts as a lightweight wrapper that exposes the core biomedical processing pipeline as MCP-compatible tools. It provides a standardized interface for AI assistants (Claude, ChatGPT, etc.) to access the same entity recognition, query planning, and knowledge graph execution capabilities used by the LangGraph agents. This allows seamless integration with any MCP-compatible client while maintaining a single unified codebase.
 
 #### LangGraph Multi-Agent
 ```mermaid
