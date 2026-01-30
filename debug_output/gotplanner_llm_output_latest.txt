@@ -1,9 +1,8 @@
 ```json
 {
   "nodes": [
-    {"id": "Q1", "content": "What drugs treat Spinal muscular atrophy?", "dependencies": []},
-    {"id": "Q2", "content": "What drugs target Alternative mRNA splicing?", "dependencies": []},
-    {"id": "Q3", "content": "What drugs target spliceosome?", "dependencies": []}
+    {"id": "Q1", "content": "What drugs affect the biological process of histamine secretion by mast cells?", "dependencies": []},
+    {"id": "Q2", "content": "What drugs treat Allergic conjunctivitis?", "dependencies": []}
   ],
   "edges": []
 }
