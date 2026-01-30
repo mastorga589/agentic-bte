@@ -212,6 +212,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "agents: Tests for LangGraph multi-agent system"
     )
+    config.addinivalue_line(
+        "markers", "benchmark: Benchmark tests for system accuracy and performance"
+    )
 
 # Test environment setup
 @pytest.fixture(autouse=True)
@@ -227,3 +230,65 @@ def temp_data_dir():
     """Create temporary data directory for tests"""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
+
+# Benchmark test fixtures
+@pytest.fixture
+def mock_llm_for_benchmarks():
+    """Mock LLM for benchmark testing"""
+    mock_llm = Mock()
+    
+    # Mock LLM response for baseline queries
+    def mock_invoke(query):
+        mock_response = Mock()
+        # Return a realistic but deterministic response
+        mock_response.content = (
+            "Based on current medical knowledge, several drugs may be relevant:\n"
+            "- Metformin\n"
+            "- Insulin\n"
+            "- Sulfonylureas\n"
+            "However, specific targeting information requires deeper analysis."
+        )
+        return mock_response
+    
+    mock_llm.invoke = mock_invoke
+    return mock_llm
+
+@pytest.fixture
+def mock_unified_agent():
+    """Mock UnifiedBiomedicalAgent for benchmark testing"""
+    from unittest.mock import AsyncMock
+    import random
+    
+    mock_agent = AsyncMock()
+    
+    # Common drug names that might appear in DMDB dataset
+    common_drugs = [
+        "Metformin", "Aspirin", "Doxorubicin", "Ibuprofen", "Acetaminophen",
+        "Warfarin", "Insulin", "Prednisone", "Simvastatin", "Lisinopril",
+        "Amoxicillin", "Ciprofloxacin", "Omeprazole", "Atorvastatin", "Furosemide"
+    ]
+    
+    # Mock process_query to return realistic response with variety
+    async def mock_process_query(text, **kwargs):
+        # Randomly select drugs to simulate realistic retrieval
+        # With 50% chance, include common drugs that might be in ground truth
+        num_drugs = random.randint(3, 8)
+        selected_drugs = random.sample(common_drugs, min(num_drugs, len(common_drugs)))
+        
+        mock_response = Mock()
+        drug_list = "\n".join([f"{i+1}. {drug}" for i, drug in enumerate(selected_drugs)])
+        mock_response.final_answer = (
+            f"Based on the knowledge graph, the following drugs target the specified biological process:\n"
+            f"{drug_list}\n"
+            f"\nThese drugs have been shown to affect the biological process in the context of the disease."
+        )
+        mock_response.results = [
+            {"subject": "Disease", "predicate": "treated_by", "object": drug}
+            for drug in selected_drugs
+        ]
+        mock_response.processing_time = 2.5
+        mock_response.error = None
+        return mock_response
+    
+    mock_agent.process_query = mock_process_query
+    return mock_agent
