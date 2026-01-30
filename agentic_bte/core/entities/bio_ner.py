@@ -99,16 +99,62 @@ def modifiedBioNERTool(query: str, openai_api_key: str = None):
     
     global nlp, drug_disease_nlp
 
+    def _sanitize_query_for_ner(original_query: str) -> str:
+        """Remove instruction-like phrases and markup that confuse NER (e.g., 'tag them with **drug name**')."""
+        try:
+            q = original_query or ""
+            # Drop markdown bold segments entirely for NER
+            q = re.sub(r"\*\*[^*]+\*\*", "", q)
+            # Remove common instruction phrases from the dataset prompt
+            q = re.sub(r"enumerate\s+\d+\s+drugs[^.?!]*", "", q, flags=re.IGNORECASE)
+            q = re.sub(r"tag\s+them\s+with[^.?!]*", "", q, flags=re.IGNORECASE)
+            q = re.sub(r"each\s+of\s+your\s+answer\s+entities[^.?!]*", "", q, flags=re.IGNORECASE)
+            q = re.sub(r"must\s+be\s+tagged[^.?!]*", "", q, flags=re.IGNORECASE)
+            q = re.sub(r"do\s+not\s+include\s+anything\s+else[^.?!]*", "", q, flags=re.IGNORECASE)
+            # Remove leftover paired quotes/brackets lists like ["..."]
+            q = re.sub(r"\[[\s\S]*?\]", "", q)
+            # Collapse extra whitespace
+            q = re.sub(r"\s+", " ", q).strip()
+            return q or (original_query or "")
+        except Exception:
+            return original_query
+
+    def _parse_bp_list(raw: str) -> list:
+        """Parse LLM-returned biological process list; accept JSON arrays or simple comma/newline lists."""
+        if not raw:
+            return []
+        txt = raw.strip()
+        # Try JSON first
+        try:
+            parsed = json.loads(txt)
+            if isinstance(parsed, list):
+                return [str(x).strip() for x in parsed if str(x).strip()]
+        except Exception:
+            pass
+        # Try to extract JSON array inside code fences
+        try:
+            m = re.search(r"\[\s*\".*?\"\s*\]", txt, flags=re.DOTALL)
+            if m:
+                arr = json.loads(m.group(0))
+                if isinstance(arr, list):
+                    return [str(x).strip() for x in arr if str(x).strip()]
+        except Exception:
+            pass
+        # Fallback: split by comma/newline
+        parts = re.split(r"[\n,]", txt)
+        return [p.strip().strip('"\'') for p in parts if p and p.strip()]
+
     def extractEnts(query: str):
         logger.info(f"=== Starting extractEnts for query: '{query}' ===")
         entities = []
         
         try:
-            # Process with both spaCy models
+            # Process with both spaCy models (use sanitized query to avoid noise like 'tag them with **drug name**')
             logger.debug("Processing query with spaCy models...")
+            ner_query = _sanitize_query_for_ner(query)
             docs = [
-                nlp(query),
-                drug_disease_nlp(query)
+                nlp(ner_query),
+                drug_disease_nlp(ner_query)
             ]
             logger.debug(f"Created {len(docs)} spaCy docs for processing")
 
@@ -130,22 +176,19 @@ def modifiedBioNERTool(query: str, openai_api_key: str = None):
 
             # Extract biological process terms using LLM
             logger.debug("Extracting biological processes using LLM...")
-            bp_prompt = f"""You are a helpful assistant that can extract biological processes from a given query. 
-                        These might include concepts such as "cholesterol biosynthesis", "Aminergic neurotransmitter loading into synaptic vesicle", etc. Each entity should be a noun.
-
-                        You must always return the full phrase/long form of each biomedical entity 
-                        
-                        Return results as a list. Return "" if no biological processes are in the query. DO NOT INCLUDE YOUR THOUGHTS
-                        Here is your query: {query}"""
+            bp_prompt = f"""You are a helpful assistant that extracts biological processes from a query.
+                        Return ONLY a JSON array of strings (each a full process phrase). If none, return [].
+                        Query: {ner_query}"""
 
             logger.debug("Sending biological process extraction prompt to LLM...")
             bp_response = llm.invoke(bp_prompt)
-            bp_list = bp_response.content.strip()
-            logger.debug(f"LLM biological process response: '{bp_list}'")
+            bp_raw = (bp_response.content or "").strip()
+            logger.debug(f"LLM biological process raw response: '{bp_raw}'")
             
-            if bp_list and bp_list != "":
-                entities.append(bp_list)
-                logger.info(f"Added biological process list: '{bp_list}'")
+            bp_items = _parse_bp_list(bp_raw)
+            if bp_items:
+                entities.extend(bp_items)
+                logger.info(f"Added {len(bp_items)} biological process term(s) from LLM")
             else:
                 logger.info("No biological processes found by LLM")
         
@@ -168,7 +211,7 @@ def modifiedBioNERTool(query: str, openai_api_key: str = None):
         logger.debug(f"Query context: '{query}'")
         
         try:
-            supportedEntTypes = ["biologicalProcess", "general"]
+            supportedEntTypes = ["biologicalProcess", "disease", "chemical", "gene", "protein", "general"]
             logger.debug(f"Supported entity types: {supportedEntTypes}")
             
             class entType(TypedDict):
@@ -212,9 +255,9 @@ def modifiedBioNERTool(query: str, openai_api_key: str = None):
         
         idList = {}
 
-        def sriNameResolver(ent: str, base_url = "https://name-lookup.ci.transltr.io/lookup", is_bp: bool = False, k = 50) -> list:    
+        def sriNameResolver(ent: str, base_url = "https://name-lookup.ci.transltr.io/lookup", is_bp: bool = False, k = 50, allowed_prefixes: list = None, biolink_type: str = None) -> list:    
             logger.debug(f"=== Starting sriNameResolver for entity: '{ent}' ===")
-            logger.debug(f"Parameters - is_bp: {is_bp}, k: {k}, base_url: {base_url}")
+            logger.debug(f"Parameters - is_bp: {is_bp}, k: {k}, base_url: {base_url}, allowed_prefixes={allowed_prefixes}, biolink_type={biolink_type}")
             
             try:
                 candidates = []
@@ -227,6 +270,10 @@ def modifiedBioNERTool(query: str, openai_api_key: str = None):
 
                 if is_bp:
                     final_url = final_url + "&only_prefixes=GO&biolink_type=BiologicalProcess"
+                else:
+                    if allowed_prefixes and isinstance(allowed_prefixes, list) and allowed_prefixes:
+                        final_url = final_url + "&only_prefixes=" + ",".join(allowed_prefixes)
+                    # Avoid over-restricting type for non-BP; let resolver return best candidates
                     
                 logger.info(f"Making SRI Name Resolver request to: {final_url}")
                 
@@ -415,6 +462,80 @@ def modifiedBioNERTool(query: str, openai_api_key: str = None):
                         logger.debug(f"Got {len(sri_candidates)} SRI candidates for biological process")
                         chosenID = selectIDbp(entity, sri_candidates)
                         logger.info(f"Biological process linking result: '{chosenID}'")
+                    elif entclass == "chemical":
+                        logger.debug(f"Processing chemical entity: '{entity}' with CHEBI-first preference")
+                        sri_candidates = sriNameResolver(
+                            entity,
+                            is_bp=False,
+                            k=50,
+                            allowed_prefixes=["CHEBI", "DRUGBANK", "ChEMBL", "UNII", "PUBCHEM", "NCIT", "INCHIKEY"],
+                            biolink_type="ChemicalEntity"
+                        )
+                        # Reorder candidates to prefer desired prefixes and higher score
+                        pref_order = ["CHEBI:", "DRUGBANK:", "ChEMBL", "UNII:", "PUBCHEM", "NCIT:", "INCHIKEY:"]
+                        sri_candidates = sorted(
+                            sri_candidates,
+                            key=lambda x: (
+                                next((i for i, p in enumerate(pref_order) if str(x.get("curie", "")).startswith(p)), len(pref_order)),
+                                -float(x.get("score", 0.0))
+                            )
+                        )
+                        chosenID = selectIDbp(entity, sri_candidates)
+                        logger.info(f"Chemical linking result: '{chosenID}'")
+                    elif entclass == "disease":
+                        logger.debug(f"Processing disease entity: '{entity}' with MONDO/DOID/MESH preference")
+                        sri_candidates = sriNameResolver(
+                            entity,
+                            is_bp=False,
+                            k=50,
+                            allowed_prefixes=["MONDO", "DOID", "MESH", "UMLS", "OMIM"],
+                            biolink_type=None
+                        )
+                        # Fallback: if empty, relax prefix filters and try singular form
+                        if not sri_candidates:
+                            sri_candidates = sriNameResolver(entity, is_bp=False, k=50)
+                            if not sri_candidates:
+                                def _singularize(term: str) -> str:
+                                    try:
+                                        w = term.strip()
+                                        return w[:-1] if len(w) > 4 and w.lower().endswith('s') else w
+                                    except Exception:
+                                        return term
+                                alt = _singularize(entity)
+                                if alt != entity:
+                                    sri_candidates = sriNameResolver(alt, is_bp=False, k=50)
+                        pref_order = ["MONDO:", "DOID:", "MESH:", "UMLS:", "OMIM:"]
+                        sri_candidates = sorted(
+                            sri_candidates,
+                            key=lambda x: (
+                                next((i for i, p in enumerate(pref_order) if str(x.get("curie", "")).startswith(p)), len(pref_order)),
+                                -float(x.get("score", 0.0))
+                            )
+                        )
+                        chosenID = selectIDbp(entity, sri_candidates)
+                        logger.info(f"Disease linking result: '{chosenID}'")
+                    elif entclass in ("gene", "protein"):
+                        logger.debug(f"Processing {entclass} entity: '{entity}' with HGNC/NCBIGene preference")
+                        biolink_t = "Gene" if entclass == "gene" else "Protein"
+                        sri_candidates = sriNameResolver(
+                            entity,
+                            is_bp=False,
+                            k=50,
+                            allowed_prefixes=["HGNC", "NCBIGene", "ENSEMBL", "UniProtKB", "PR"],
+                            biolink_type=None
+                        )
+                        if not sri_candidates:
+                            sri_candidates = sriNameResolver(entity, is_bp=False, k=50)
+                        pref_order = ["HGNC:", "NCBIGene:", "ENSEMBL:", "UniProtKB:", "PR:"]
+                        sri_candidates = sorted(
+                            sri_candidates,
+                            key=lambda x: (
+                                next((i for i, p in enumerate(pref_order) if str(x.get("curie", "")).startswith(p)), len(pref_order)),
+                                -float(x.get("score", 0.0))
+                            )
+                        )
+                        chosenID = selectIDbp(entity, sri_candidates)
+                        logger.info(f"{entclass.capitalize()} linking result: '{chosenID}'")
                     else:
                         logger.debug(f"Processing general entity: '{entity}'")
                         # First try UMLS linker
@@ -457,12 +578,36 @@ def modifiedBioNERTool(query: str, openai_api_key: str = None):
     
     try:
         # Execute the main pipeline
-        logger.info("=== Starting entity extraction phase ===")
+        logger.info(f"=== Starting entity extraction phase ===")
         entityList = extractEnts(query)
         logger.info(f"Entity extraction completed: {len(entityList)} entities found")
         
+        # Filter out generic/noise entities before linking (prevents junk IDs like 'drugs', 'MUST', etc.)
+        def _is_generic_noise(name: str) -> bool:
+            if not isinstance(name, str):
+                return True
+            n = name.strip().lower()
+            generic_terms = {
+                'drug', 'drugs', 'treat', 'treatment', 'target', 'targets', 'targeting', 'these', 'those',
+                'response', 'phrase', 'assessed', 'entity', 'entities', 'molecule', 'small molecule',
+                'enumerate 5 drugs', 'tag', 'tags', 'tagging', 'tagged', 'drug name', 'must'
+            }
+            if n in generic_terms:
+                return True
+            if '**' in n:
+                return True
+            # Drop obvious JSON/list artifacts like ["..."]
+            if (n.startswith('["') or n.startswith('[\"') or n.startswith('[')) and n.endswith(']'):
+                return True
+            return False
+        filtered_entityList = [e for e in (entityList or []) if not _is_generic_noise(e)]
+        if len(filtered_entityList) < len(entityList):
+            logger.info(f"Filtered generic/noise entities: {len(entityList)} -> {len(filtered_entityList)}")
+        else:
+            logger.info("No generic/noise entities filtered")
+        
         logger.info("=== Starting entity linking phase ===")
-        bioIDs = linkEnt(entityList, query)
+        bioIDs = linkEnt(filtered_entityList, query)
         logger.info(f"Entity linking completed: {len(bioIDs)} entities linked")
         
         # Calculate timing
@@ -509,17 +654,56 @@ class BioNERTool:
             
             # Convert to expected format
             logger.debug(f"Converting {len(bio_ids)} bio_ids to expected format...")
+            def _is_generic_noise(name: str) -> bool:
+                if not isinstance(name, str):
+                    return True
+                n = name.strip().lower()
+                generic_terms = {
+                    'drug', 'drugs', 'treat', 'treatment', 'target', 'targets', 'targeting', 'these', 'those',
+                    'response', 'phrase', 'assessed', 'entity', 'entities', 'molecule', 'small molecule',
+                    'enumerate 5 drugs', 'tag', 'tags', 'tagging', 'tagged', 'drug name', 'must'
+                }
+                if n in generic_terms:
+                    return True
+                if '**' in n:
+                    return True
+                if (n.startswith('["') or n.startswith('[\"') or n.startswith('[')) and n.endswith(']'):
+                    return True
+                return False
             entities_list = []
             for entity_text, entity_id in bio_ids.items():
+                if _is_generic_noise(entity_text):
+                    logger.debug(f"Skipping generic/noise entity in output: '{entity_text}' -> '{entity_id}'")
+                    continue
+                def _infer_type(name: str, eid: str) -> str:
+                    if not isinstance(eid, str):
+                        return "general"
+                    # Strong prefix clues
+                    if eid.startswith(('CHEBI:', 'ChEMBL:', 'DRUGBANK:', 'UNII:', 'PUBCHEM', 'NCIT:')):
+                        return 'ChemicalSubstance'
+                    if eid.startswith(('NCBIGene:', 'HGNC:', 'ENSEMBL:')):
+                        return 'Gene'
+                    if eid.startswith('GO:'):
+                        return 'BiologicalProcess'
+                    if eid.startswith(('PR:', 'UniProtKB:')):
+                        return 'Protein'
+                    if eid.startswith(('MONDO:', 'DOID:', 'SNOMEDCT:', 'OMIM:', 'MESH:D')):
+                        return 'Disease'
+                    # UMLS or other: infer by name heuristics
+                    nm = (name or '').lower()
+                    disease_terms = ('disease','syndrome','fever','infection','arthritis','cancer','tumor','failure','deficiency','sepsis','pneumonia','depression','diabetes','embolism','hemorrhage','itis','osis','emia','oma')
+                    if any(t in nm for t in disease_terms) or nm.endswith(('itis','osis','emia','oma')):
+                        return 'Disease'
+                    return 'general'
+
                 entity_obj = {
                     "name": entity_text,
                     "id": entity_id,
-                    "type": "general",
+                    "type": _infer_type(entity_text, entity_id),
                     "synonyms": [],
                     "definition": ""
                 }
                 entities_list.append(entity_obj)
-                logger.debug(f"Converted entity: {entity_obj}")
             
             result = {"entities": entities_list}
             logger.info(f"BioNERTool.extract_and_link returning {len(entities_list)} entities")

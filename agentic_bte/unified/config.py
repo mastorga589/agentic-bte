@@ -163,9 +163,9 @@ class DomainConfig:
 class IntegrationConfig:
     """External service integration settings"""
     # BTE settings
-    bte_url: str = "http://localhost:3000"
-    enable_local_bte: bool = True
-    enable_remote_bte: bool = False
+    bte_url: str = "https://bte.transltr.io"
+    enable_local_bte: bool = False
+    enable_remote_bte: bool = True
     
     # OpenAI settings
     openai_api_key: Optional[str] = None

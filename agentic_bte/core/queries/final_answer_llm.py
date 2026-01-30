@@ -8,6 +8,8 @@ to generate comprehensive, research-quality responses.
 
 import logging
 import json
+import asyncio
+import requests
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 
@@ -35,15 +37,20 @@ class LLMFinalAnswerGenerator:
     from knowledge graph exploration and parallel predicate execution.
     """
     
-    def __init__(self, model_name: str = "gpt-4o-mini", temperature: float = 0.1):
+    def __init__(self, model_name: Optional[str] = None, temperature: float = 0.1):
         """
         Initialize the LLM answer generator
         
         Args:
-            model_name: OpenAI model to use for generation
+            model_name: OpenAI model to use for generation (defaults to settings.openai_model)
             temperature: Temperature setting for generation
         """
-        self.model_name = model_name
+        # Default to configured model if not explicitly provided
+        try:
+            from ...config.settings import get_settings
+            self.model_name = model_name or get_settings().openai_model
+        except Exception:
+            self.model_name = model_name or "gpt-4o"
         self.temperature = temperature
         self.llm = None
         self._initialize_llm()
@@ -103,9 +110,10 @@ class LLMFinalAnswerGenerator:
             
             # Generate answer using LLM
             logger.info(f"Generating LLM final answer for query: {query[:100]}...")
-            response = await self.llm.ainvoke([{"role": "user", "content": prompt}])
+            # Use synchronous invoke in a thread to avoid async httpx client lifecycle issues
+            response = await asyncio.to_thread(self.llm.invoke, [{"role": "user", "content": prompt}])
             
-            final_answer = response.content.strip()
+            final_answer = (response.content if hasattr(response, "content") else str(response)).strip()
             logger.info(f"Generated LLM final answer ({len(final_answer)} characters)")
             
             return final_answer
@@ -127,73 +135,64 @@ class LLMFinalAnswerGenerator:
         resolved_names = {}
         
         try:
-            import httpx
-            import asyncio
-            
             async def resolve_single_id(entity_id: str) -> Optional[Tuple[str, str]]:
-                """Resolve a single entity ID using multiple strategies"""
+                """Resolve a single entity ID using multiple strategies (synchronously in threads)."""
                 try:
-                    # Strategy 1: Try MyGene.info for gene IDs  
+                    # Strategy 1: MyGene.info for gene IDs
                     if 'NCBIGene:' in entity_id or 'HGNC:' in entity_id or 'ENSEMBL:' in entity_id:
-                        async with httpx.AsyncClient(timeout=10.0) as client:
-                            gene_id = entity_id.split(':')[-1]
-                            response = await client.get(f"https://mygene.info/v3/gene/{gene_id}")
-                            if response.status_code == 200:
-                                data = response.json()
-                                name = data.get('name') or data.get('symbol')
-                                if name:
-                                    return entity_id, name
-                    
-                    # Strategy 2: Try MyChemical.info for chemical IDs
+                        gene_id = entity_id.split(':')[-1]
+                        def _req_gene():
+                            return requests.get(f"https://mygene.info/v3/gene/{gene_id}", timeout=10)
+                        resp = await asyncio.to_thread(_req_gene)
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            name = data.get('name') or data.get('symbol')
+                            if name:
+                                return entity_id, name
+                    # Strategy 2: MyChemical.info for chemical IDs
                     elif 'CHEBI:' in entity_id or 'ChEMBL:' in entity_id or 'DRUGBANK:' in entity_id:
-                        async with httpx.AsyncClient(timeout=10.0) as client:
-                            chem_id = entity_id.replace(':', '%3A')
-                            response = await client.get(f"https://mychem.info/v1/chem/{chem_id}")
-                            if response.status_code == 200:
-                                data = response.json()
-                                name = data.get('_id') or data.get('chebi', {}).get('name') 
+                        chem_id = entity_id.replace(':', '%3A')
+                        def _req_chem():
+                            return requests.get(f"https://mychem.info/v1/chem/{chem_id}", timeout=10)
+                        resp = await asyncio.to_thread(_req_chem)
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            name = data.get('_id') or (data.get('chebi', {}) if isinstance(data.get('chebi', {}), dict) else {}).get('name')
+                            if name:
+                                return entity_id, name
+                    # Strategy 3: OLS for GO/HP
+                    elif 'GO:' in entity_id or 'HP:' in entity_id:
+                        def _req_ols():
+                            return requests.get(
+                                f"https://www.ebi.ac.uk/ols/api/terms?iri=http://purl.obolibrary.org/obo/{entity_id.replace(':', '_')}",
+                                timeout=10,
+                            )
+                        resp = await asyncio.to_thread(_req_ols)
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            terms = data.get('_embedded', {}).get('terms', [])
+                            if terms:
+                                name = terms[0].get('label')
                                 if name:
                                     return entity_id, name
-                    
-                    # Strategy 3: Try ontology lookup service
-                    elif 'GO:' in entity_id or 'HP:' in entity_id:
-                        async with httpx.AsyncClient(timeout=10.0) as client:
-                            response = await client.get(
-                                f"https://www.ebi.ac.uk/ols/api/terms?iri=http://purl.obolibrary.org/obo/{entity_id.replace(':', '_')}"
-                            )
-                            if response.status_code == 200:
-                                data = response.json()
-                                terms = data.get('_embedded', {}).get('terms', [])
-                                if terms and len(terms) > 0:
-                                    name = terms[0].get('label')
-                                    if name:
-                                        return entity_id, name
-                    
-                    # Strategy 4: Try simplified parsing from the ID itself
+                    # Strategy 4: simple heuristics
                     if ':' in entity_id:
-                        # For IDs like MONDO:0005683 -> "Disease 0005683"
                         prefix, suffix = entity_id.split(':', 1)
                         if prefix in ['MONDO', 'UMLS', 'DOID']:
                             return entity_id, f"{prefix} {suffix}"
-                        elif prefix == 'CHEBI':
+                        if prefix == 'CHEBI':
                             return entity_id, f"Chemical {suffix}"
-                        elif prefix == 'NCBIGene':
+                        if prefix == 'NCBIGene':
                             return entity_id, f"Gene {suffix}"
-                    
                     return None
-                    
                 except Exception as e:
                     logger.debug(f"Failed to resolve {entity_id}: {e}")
                     return None
-            
-            # Resolve all IDs concurrently with limited concurrency
-            semaphore = asyncio.Semaphore(5)  # Limit concurrent API calls
-            
+            # Resolve concurrently with a small semaphore
+            semaphore = asyncio.Semaphore(5)
             async def resolve_with_semaphore(entity_id: str):
                 async with semaphore:
                     return await resolve_single_id(entity_id)
-            
-            # Execute all resolutions
             resolution_tasks = [resolve_with_semaphore(entity_id) for entity_id in entity_ids]
             results = await asyncio.gather(*resolution_tasks, return_exceptions=True)
             
@@ -380,6 +379,8 @@ class LLMFinalAnswerGenerator:
                                 results_found += len(step_results)
                                 top_confidence = max(top_confidence, step.get('confidence', 0.0))
                     
+                    # Consider a subquery failed if it produced zero results overall
+                    execution_success = bool(execution_success and results_found > 0)
                     subquery_plan.append({
                         'subquery_number': i + 1,
                         'query_text': sq_info.get('query', f'Subquery {i + 1}'),
@@ -467,25 +468,24 @@ class LLMFinalAnswerGenerator:
     
     def _group_results_by_subquery_concepts(self, final_results: List[Dict[str, Any]], 
                                           subquery_plan: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-        """Group results by subquery concepts for showcasing"""
-        grouped_results = {}
+        """Group results by originating subquery (using annotated source_subquery)."""
+        grouped_results: Dict[str, List[Dict[str, Any]]] = {}
         
-        # For each subquery, find the most relevant results
+        # Index results by annotated source_subquery
+        results_by_src: Dict[int, List[Dict[str, Any]]] = {}
+        for r in final_results:
+            idx = r.get('source_subquery')
+            if isinstance(idx, int):
+                results_by_src.setdefault(idx, []).append(r)
+        
+        # For each subquery in the plan, collect top results truly from that subquery
         for i, subquery in enumerate(subquery_plan):
-            subquery_key = f"subquery_{i+1}"
-            
-            # Take results proportionally based on results found in each subquery
-            results_per_subquery = max(3, min(8, subquery.get('results_found', 0) // 2))
-            start_idx = i * results_per_subquery
-            end_idx = start_idx + results_per_subquery
-            
-            relevant_results = final_results[start_idx:end_idx]
-            
-            # If we don't have enough results, take from the top results
-            if len(relevant_results) < 3 and len(final_results) >= 3:
-                relevant_results = final_results[i*3:(i+1)*3] if i*3 < len(final_results) else final_results[:3]
-            
-            grouped_results[subquery_key] = relevant_results
+            subq_num = i + 1
+            subquery_key = f"subquery_{subq_num}"
+            candidates = results_by_src.get(subq_num, [])
+            # Sort by score desc if available
+            candidates = sorted(candidates, key=lambda x: x.get('score', 0.0), reverse=True)
+            grouped_results[subquery_key] = candidates[:5]  # show up to 5
         
         return grouped_results
     
@@ -772,7 +772,33 @@ Generate your evidence-based response now, ensuring you include the required QUE
         return "\n".join(showcase_parts)
     
     def _extract_entity_name(self, result: Dict[str, Any], role: str) -> str:
-        """Extract entity name from result for the given role (subject/object)"""
+        """Extract entity name from result for the given role (subject/object) with robust fallbacks"""
+        def _looks_generic(name: str) -> bool:
+            if not isinstance(name, str):
+                return True
+            n = name.strip().lower()
+            return n in {"unknown", "namedthing", "molecule", "small molecule", "chemical", "biological process", "gene", "protein"}
+
+        def _resolve_via_node_norm(eid: str) -> str:
+            try:
+                import requests
+                url = "https://nodenormalization-sri.renci.org/1.5/get_normalized_nodes"
+                r = requests.post(url, json={"curies": [eid], "conflate": True, "description": True}, timeout=8)
+                r.raise_for_status()
+                data = r.json() or {}
+                entry = data.get(eid)
+                if isinstance(entry, dict):
+                    lbl = ((entry.get('id') or {}).get('label'))
+                    if isinstance(lbl, str) and lbl.strip():
+                        return lbl
+                    for eq in entry.get('equivalent_identifiers', []) or []:
+                        lbl = eq.get('label')
+                        if isinstance(lbl, str) and lbl.strip():
+                            return lbl
+            except Exception:
+                pass
+            return eid
+
         try:
             # Try knowledge graph structure first
             kg = result.get('knowledge_graph', {})
@@ -784,16 +810,24 @@ Generate your evidence-based response now, ensuring you include the required QUE
                     edge_id, edge_data = next(iter(edges.items()))
                     entity_id = edge_data.get(role)
                     if entity_id in nodes:
-                        return nodes[entity_id].get('name', entity_id)
+                        name = nodes[entity_id].get('name', entity_id)
+                        if _looks_generic(name) and isinstance(entity_id, str):
+                            # Attempt to resolve a better label on the fly
+                            return _resolve_via_node_norm(entity_id)
+                        return name
             
             # Fallback to direct result structure
             entity_id_key = f'{role}_id'
             entity_name_key = f'{role}_name'
             
             if entity_name_key in result:
-                return result[entity_name_key]
+                name = result[entity_name_key]
+                return name
             elif entity_id_key in result:
-                return result[entity_id_key]
+                eid = result[entity_id_key]
+                if isinstance(eid, str) and eid:
+                    return _resolve_via_node_norm(eid)
+                return eid
             else:
                 return f"Unknown {role}"
                 

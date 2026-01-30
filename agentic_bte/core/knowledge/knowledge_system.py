@@ -91,6 +91,26 @@ class BiomedicalKnowledgeSystem:
                 except Exception:
                     entity_ids = {}
             
+            # Filter out generic/noise terms that pollute TRAPI IDs (e.g., 'drugs', 'MUST', 'response', bracketed '**' artifacts)
+            def _is_generic_noise(name: str) -> bool:
+                if not isinstance(name, str):
+                    return True
+                n = name.strip().lower()
+                generic_terms = {
+                    'drug', 'drugs', 'treat', 'treatment', 'target', 'targets', 'targeting', 'these', 'those',
+                    'response', 'phrase', 'assessed', 'entity', 'entities', 'molecule', 'small molecule',
+                    'enumerate 5 drugs'
+                }
+                if n in generic_terms:
+                    return True
+                if '**' in n:
+                    return True
+                if n.startswith('["**') or n.startswith('[\"**'):
+                    return True
+                return False
+            if isinstance(entity_ids, dict):
+                entity_ids = {k: v for k, v in entity_ids.items() if not _is_generic_noise(k)}
+            
             if not entities:
                 return {
                     "message": "No biomedical entities found in the query",

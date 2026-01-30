@@ -33,11 +33,14 @@ def get_cached_bte_client() -> BTEClient:
     
     if _cached_bte_client is None:
         logger.info("Initializing cached BTE client (first time)")
-        _cached_bte_client = BTEClient()
+        # Reduce timeout to avoid long stalls in interactive runs
+        _cached_bte_client = BTEClient(timeout=120)
+        # Enable async by default for better performance
+        _cached_bte_client.prefer_async = True
         # Preload meta-KG to cache it
         try:
             _cached_bte_client.get_meta_knowledge_graph()
-            logger.info("BTE client cached with meta-KG loaded")
+            logger.info("BTE client cached with meta-KG loaded (async enabled)")
         except Exception as e:
             logger.warning(f"Could not preload meta-KG: {e}")
     else:
@@ -182,7 +185,12 @@ async def handle_bte_call(arguments: Dict[str, Any]) -> Dict[str, Any]:
                 response_text += f"Execution Summary:\n"
                 response_text += f"- Total batches: {metadata.get('total_batches', 1)}\n"
                 response_text += f"- Successful batches: {metadata.get('successful_batches', 1)}\n"
-                response_text += f"- Total results: {metadata.get('total_results', len(results))}\n\n"
+                response_text += f"- Total results: {metadata.get('total_results', len(results))}\n"
+                if 'original_entity_count' in metadata:
+                    response_text += f"- Original entity IDs: {metadata.get('original_entity_count')}\n"
+                    response_text += f"- Batch size: {metadata.get('batch_limit')}\n"
+                    response_text += f"- Batches planned: {metadata.get('planned_batch_count')}\n"
+                response_text += "\n"
             
             # Show sample results
             sample_size = min(10, len(results))

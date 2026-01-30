@@ -55,6 +55,24 @@ class AgenticBTESettings(BaseSettings):
         description="Meta knowledge graph endpoint"
     )
     
+    # BTE async behavior
+    bte_prefer_async: bool = Field(
+        default=False,
+        description="Prefer using asyncquery endpoints; if false, use /query directly"
+    )
+    bte_async_poll_seconds: int = Field(
+        default=300,
+        description="Max seconds to poll async result before fallback",
+        ge=1,
+        le=1800
+    )
+    bte_async_poll_interval: float = Field(
+        default=2.0,
+        description="Polling interval seconds for async result",
+        ge=0.1,
+        le=30.0
+    )
+    
     # SRI Name Resolver Settings
     sri_name_resolver_url: str = Field(
         default="https://name-lookup.ci.transltr.io/lookup",
@@ -74,6 +92,14 @@ class AgenticBTESettings(BaseSettings):
         description="Maximum results to retrieve per query",
         ge=1,
         le=1000
+    )
+    
+    # TRAPI batching
+    trapi_batch_limit: int = Field(
+        default=10,
+        description="Maximum entity IDs per TRAPI query (batch size)",
+        ge=1,
+        le=500
     )
     
     confidence_threshold: float = Field(
@@ -131,6 +157,16 @@ class AgenticBTESettings(BaseSettings):
     enable_semantic_classification: bool = Field(
         default=True,
         description="Enable LLM-based semantic query classification"
+    )
+
+    # Query shaping policy (flexible by default)
+    enforce_two_node: bool = Field(
+        default=False,
+        description="If true, force TRAPI to a single-edge, two-node graph; if false, allow LLM-shaped graphs"
+    )
+    bp_prefilter_mode: str = Field(
+        default="off",
+        description="Biological process gene prefilter mode: off | suggest | enforce"
     )
     
     enable_entity_name_resolution: bool = Field(

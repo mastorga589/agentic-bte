@@ -48,9 +48,12 @@ class ProductionConfig:
     
     # Parallel predicate settings
     enable_parallel_predicates: bool = True
-    max_predicates_per_subquery: int = 4
+    max_predicates_per_subquery: int = 2
     max_concurrent_predicate_calls: int = 3
     enable_evidence_scoring: bool = True
+    
+    # Follow-up subquery controls
+    max_seed_drugs_for_followup: int = 20  # limit drugs passed from Q1 into Q2 to reduce blast radius
 
 
 class ProductionGoTOptimizer:
@@ -61,14 +64,25 @@ class ProductionGoTOptimizer:
     comprehensive result presentation with debugging capabilities.
     """
     
-    def __init__(self, config: Optional[ProductionConfig] = None):
+    def __init__(self, config: Optional[ProductionConfig] = None,
+                 entity_service: Optional["EntityExtractionService"] = None,
+                 trapi_service: Optional["TrapiBuilderService"] = None,
+                 bte_service: Optional["BteExecutionService"] = None):
         """
         Initialize production GoT optimizer
         
         Args:
             config: Configuration object for the optimizer
+            entity_service: Optional service for entity extraction (decouples MCP)
+            trapi_service: Optional service for TRAPI building (decouples MCP)
+            bte_service: Optional service for BTE execution (decouples MCP)
         """
         self.config = config or ProductionConfig()
+        
+        # Optional decoupled services (may be MCP-backed or core-backed)
+        self.entity_service = entity_service
+        self.trapi_service = trapi_service
+        self.bte_service = bte_service
         
         # Initialize core components
         self.got_planner = GoTBiomedicalPlanner(max_iterations=self.config.max_iterations)
@@ -91,6 +105,8 @@ class ProductionGoTOptimizer:
         
         # Global entity cache to propagate IDs across subqueries
         self.global_entity_data: Dict[str, str] = {}
+        # Per-subquery collected results (for seeding later subqueries)
+        self.results_by_subquery: Dict[int, List[Dict[str, Any]]] = {}
         
         # Execution tracking
         self.execution_steps: List[QueryStep] = []
@@ -171,16 +187,16 @@ class ProductionGoTOptimizer:
             all_results = list(result_dedup_map.values())
             logger.info(f"After deduplication: {len(all_results)} unique results from {sum(len(step.output_data.get('results', [])) for step in got_execution_steps if step.step_type == 'api_execution' and step.success)} total")
             
+            # Step 3: Result Aggregation and Refinement (skip gracefully if no results)
             if not all_results:
-                return self._create_error_result(query, "No results found", "GoT framework execution produced no results")
+                logger.warning("No BTE results found; generating no-results final answer")
+                final_results = []
+            else:
+                aggregation_step = await self._execute_aggregation_refinement(all_results, entities)
+                self.execution_steps.append(aggregation_step)
+                final_results = aggregation_step.output_data.get('final_results', all_results)
             
-            # Step 3: Result Aggregation and Refinement
-            aggregation_step = await self._execute_aggregation_refinement(all_results, entities)
-            self.execution_steps.append(aggregation_step)
-            
-            final_results = aggregation_step.output_data.get('final_results', all_results)
-            
-            # Step 4: Generate LLM-based final answer
+            # Step 4: Generate LLM-based final answer (always generate, even with zero results)
             from .final_answer_llm import llm_generate_final_answer
             execution_context = {
                 'execution_steps': [{
@@ -245,8 +261,12 @@ class ProductionGoTOptimizer:
         logger.info("Executing entity extraction")
         
         try:
-            # Call MCP bio_ner tool
-            response = await call_mcp_tool("bio_ner", query=query)
+            # Call entity extraction via injected service if available; fallback to MCP tool
+            if getattr(self, 'entity_service', None) is not None:
+                entities, confidence, source = await self.entity_service.extract(query)
+                response = {"entities": entities, "confidence": confidence, "source": source}
+            else:
+                response = await call_mcp_tool("bio_ner", query=query)
             
             entities = response.get('entities', [])
             confidence = response.get('confidence', 0.0)
@@ -441,8 +461,15 @@ class ProductionGoTOptimizer:
                     print(f"→ Executing {node['id']}: {subquery}")
                 except Exception:
                     pass
+                # Use canonical subquery index from plan node ID (e.g., Q1 -> 0) to keep step IDs aligned with the original plan order
+                try:
+                    canonical_idx = int(str(node.get('id','')).lstrip('Q')) - 1
+                    if canonical_idx < 0:
+                        canonical_idx = len(completed)
+                except Exception:
+                    canonical_idx = len(completed)
                 subquery_steps = await self._execute_subquery_with_parallel_predicates(
-                    subquery, entities, len(completed)
+                    subquery, entities, canonical_idx
                 )
                 # Summarize node execution
                 try:
@@ -646,7 +673,27 @@ Example:
                 logger.info(f"    Types: {sq.get('subject_category')} -> {sq.get('object_category')}")
                 logger.info(f"    Rationale: {sq.get('rationale', 'N/A')}")
             
-            return subqueries
+            # FILTER: Keep only subqueries whose subject→object category pair is supported by the meta-KG
+            try:
+                supported, dropped = [], []
+                for sq in subqueries:
+                    sc = sq.get('subject_category'); oc = sq.get('object_category')
+                    if self._meta_pair_supported(sc, oc):
+                        supported.append(sq)
+                    else:
+                        dropped.append(sq)
+                if dropped:
+                    logger.warning(f"Filtered {len(dropped)} unsupported subqueries (no meta-KG coverage):")
+                    for d in dropped:
+                        logger.warning(f"  DROP: {d.get('subject_category')} -> {d.get('object_category')} | {d.get('query')}")
+                if not supported:
+                    logger.warning("All LLM subqueries lacked meta-KG support; using fallback generator")
+                    return self._fallback_subquery_generation(query, entities)
+                logger.info(f"Proceeding with {len(supported)} meta-KG-supported subqueries")
+                return supported
+            except Exception as _:
+                # If anything goes wrong, return original set (better to proceed than fail)
+                return subqueries
             
         except Exception as e:
             logger.error(f"Error in LLM-based subquery generation: {str(e)}")
@@ -762,6 +809,51 @@ Example:
         if isinstance(self.global_entity_data, dict) and self.global_entity_data:
             entity_data = {**self.global_entity_data, **(entity_data or {})}
         
+        # Limit SmallMolecule seeds for follow-up subqueries using top-N from previous results
+        try:
+            if subquery_index > 0 and self.results_by_subquery.get(subquery_index - 1):
+                prev_results = self.results_by_subquery[subquery_index - 1]
+                # Gather (name, id, score) for small molecules from previous results
+                preferred_prefixes = ("CHEBI:", "ChEMBL:", "DRUGBANK:", "UNII:", "PUBCHEM", "NCIT:")
+                triples = []
+                for r in prev_results:
+                    sid = r.get('subject_id')
+                    sname = r.get('subject')
+                    stype = (r.get('subject_type') or '').lower()
+                    score = r.get('score', 0.0)
+                    if sid and sname and (('smallmolecule' in stype) or any(str(sid).startswith(p) for p in preferred_prefixes)):
+                        triples.append((sname, sid, score))
+                # Sort by score desc and dedupe by id
+                triples.sort(key=lambda t: t[2] if isinstance(t[2], (int, float)) else 0.0, reverse=True)
+                seen_ids = set()
+                top = []
+                for name, cid, sc in triples:
+                    if cid not in seen_ids:
+                        seen_ids.add(cid)
+                        top.append((name, cid))
+                    if len(top) >= self.config.max_seed_drugs_for_followup:
+                        break
+                if top:
+                    # Rebuild entity_data so that only top drug IDs remain for SmallMolecule prefixes; keep all non-drug entries
+                    filtered = {}
+                    allow_ids = {cid for _, cid in top}
+                    for name, cid in (entity_data or {}).items():
+                        if not isinstance(cid, str):
+                            continue
+                        if any(cid.startswith(p) for p in preferred_prefixes):
+                            # drug-like id
+                            if cid in allow_ids:
+                                filtered[name] = cid
+                        else:
+                            filtered[name] = cid
+                    # Ensure we include names for selected top drugs even if name missing in entity_data
+                    for name, cid in top:
+                        filtered[name] = cid
+                    entity_data = filtered
+                    logger.info(f"Restricted SmallMolecule seeds to {len(allow_ids)} for subquery {subquery_index+1}")
+        except Exception as e:
+            logger.debug(f"Unable to restrict follow-up seeds: {e}")
+        
         logger.info(f"GoT Subquery {subquery_index + 1}: {subquery}")
         logger.info(f"Using original entities: {[e.get('name') for e in entities]}")
         logger.info(f"Total consolidated entities available: {len(entity_data)}")
@@ -775,6 +867,8 @@ Example:
             return steps
         
         base_trapi_query = base_query_step.output_data.get('query', {})
+        # Use pre-batched queries when available (hard cap at 50 IDs per batch)
+        base_trapi_queries = base_query_step.output_data.get('queries', [base_trapi_query] if base_trapi_query else [])
         
         # Determine query intent and categories for predicate selection
         if self.config.enable_parallel_predicates and self.predicate_selector:
@@ -823,21 +917,77 @@ Example:
                     selected_predicates = self.predicate_selector.select_predicates(
                         query_intent, subject_category, object_category
                     )
+                    # Enforce domain-preferred predicates where applicable
+                    try:
+                        preferred = []
+                        # SmallMolecule -> Gene: prefer targets/affects
+                        if subject_category == 'biolink:SmallMolecule' and object_category == 'biolink:Gene':
+                            preferred = ['biolink:targets', 'biolink:affects']
+                        # Gene -> BiologicalProcess: prefer participates_in
+                        if subject_category == 'biolink:Gene' and object_category == 'biolink:BiologicalProcess':
+                            preferred = ['biolink:participates_in']
+                        if preferred:
+                            # Keep only those with meta-KG support
+                            supported = []
+                            for p in preferred:
+                                try:
+                                    from ..knowledge.predicate_strategy import PredicateSelector
+                                except Exception:
+                                    pass
+                                # Use existing selector support check
+                                if self.predicate_selector.get_predicate_support(subject_category, p, object_category) > 0:
+                                    supported.append(p)
+                            # Bring supported preferred to the front if present in meta-KG
+                            if supported:
+                                # Dedup while maintaining priority order
+                                existing = [pred for pred, _ in selected_predicates]
+                                new_order = supported + [p for p in existing if p not in supported]
+                                # Rebuild with original priorities roughly preserved and enforce hard cap here
+                                selected_predicates = [(p, 1.0 - 0.05*i) for i, p in enumerate(new_order[:self.config.max_predicates_per_subquery])]
+                                logger.info(f"Applied preferred predicates for {subject_category}->{object_category}: {supported}")
+                    except Exception as e:
+                        logger.debug(f"Predicate preference application skipped: {e}")
+                    
+                    # Final cap: ensure we try at most max_predicates_per_subquery
+                    try:
+                        if selected_predicates:
+                            # Normalize shape to list[(pred, priority)] and trim
+                            norm = []
+                            for item in selected_predicates:
+                                if isinstance(item, (list, tuple)) and len(item) >= 1:
+                                    pred = item[0]
+                                    prio = float(item[1]) if len(item) > 1 and isinstance(item[1], (int, float)) else 1.0
+                                    norm.append((pred, prio))
+                                elif isinstance(item, str):
+                                    norm.append((item, 1.0))
+                            selected_predicates = norm[: self.config.max_predicates_per_subquery]
+                    except Exception:
+                        # On any issue, fall back to first N by naive slicing
+                        selected_predicates = selected_predicates[: self.config.max_predicates_per_subquery]
                     
                     logger.info(f"Selected {len(selected_predicates)} predicates for {subject_category} → {object_category}: {[p[0] for p in selected_predicates]}")
                     
                     # Execute TRAPI queries in parallel with different predicates, enforcing single-hop
                     parallel_steps = await self._execute_parallel_predicate_queries(
-                        base_trapi_query, selected_predicates, query_intent, subquery_index,
+                        base_trapi_queries, selected_predicates, query_intent, subquery_index,
                         subject_category, object_category
                     )
                     steps.extend(parallel_steps)
                 else:
                     logger.warning("Could not determine a valid subject/object category pair for predicate selection")
-                    # Fall back to single execution
-                    api_step = await self._execute_bte_api(base_trapi_query, base_query_step.step_id)
-                    api_step.step_id = f"{api_step.step_id}_subq_{subquery_index}"
-                    steps.append(api_step)
+                    # Fall back to single execution with batching support
+                    total_time = 0.0
+                    batch_results = []
+                    batch_mappings = {}
+                    for idx, tq in enumerate(base_trapi_queries):
+                        api_step = await self._execute_bte_api(tq, base_query_step.step_id)
+                        api_step.step_id = f"{api_step.step_id}_subq_{subquery_index}_batch_{idx+1}"
+                        steps.append(api_step)
+                        if api_step.success:
+                            res = api_step.output_data.get('results', [])
+                            batch_results.extend(res)
+                            batch_mappings.update(api_step.output_data.get('entity_mappings', {}))
+                            total_time += api_step.execution_time
                     
             except Exception as e:
                 logger.error(f"Error in parallel predicate execution: {e}")
@@ -846,10 +996,32 @@ Example:
                 api_step.step_id = f"{api_step.step_id}_subq_{subquery_index}"
                 steps.append(api_step)
         else:
-            # Standard single execution
-            api_step = await self._execute_bte_api(base_trapi_query, base_query_step.step_id)
-            api_step.step_id = f"{api_step.step_id}_subq_{subquery_index}"
-            steps.append(api_step)
+            # Standard single execution with batching support
+            total_time = 0.0
+            batch_results = []
+            batch_mappings = {}
+            if not base_trapi_queries:
+                base_trapi_queries = [base_trapi_query] if base_trapi_query else []
+            for idx, tq in enumerate(base_trapi_queries):
+                api_step = await self._execute_bte_api(tq, base_query_step.step_id)
+                api_step.step_id = f"{api_step.step_id}_subq_{subquery_index}_batch_{idx+1}"
+                steps.append(api_step)
+                if api_step.success:
+                    res = api_step.output_data.get('results', [])
+                    batch_results.extend(res)
+                    batch_mappings.update(api_step.output_data.get('entity_mappings', {}))
+                    total_time += api_step.execution_time
+        
+        # Persist results from this subquery for use by subsequent subqueries
+        try:
+            all_subq_results = []
+            for st in steps:
+                if getattr(st, 'step_type', '') == 'api_execution' and getattr(st, 'success', False):
+                    all_subq_results.extend((st.output_data or {}).get('results', []) or [])
+            self.results_by_subquery[subquery_index] = all_subq_results
+            logger.info(f"Stored {len(all_subq_results)} results from subquery {subquery_index+1} for follow-up seeding")
+        except Exception:
+            pass
         
         return steps
     
@@ -886,12 +1058,13 @@ Example:
                         return ids[0]
             return None
         
-        nodes_in_base = base_trapi_query.get('message', {}).get('query_graph', {}).get('nodes', {})
+        # Support list or dict for base query input
+        sample_query = (base_trapi_query[0] if isinstance(base_trapi_query, list) and base_trapi_query else base_trapi_query)
+        nodes_in_base = (sample_query.get('message', {}).get('query_graph', {}).get('nodes', {})
+                         if isinstance(sample_query, dict) else {})
         subj_id = extract_id_for_category(nodes_in_base, subject_category) if subject_category else None
         obj_id = extract_id_for_category(nodes_in_base, object_category) if object_category else None
         
-        from trapi_single_hop_validator import TRAPISingleHopValidator
-        validator = TRAPISingleHopValidator()
         
         # Helper: collect many IDs from global cache for batch execution
         def collect_ids_for_category(category: Optional[str], max_ids: int = 100) -> list[str]:
@@ -940,26 +1113,61 @@ Example:
         async def execute_single_predicate_query(query_predicate_priority):
             trapi_queries, predicate, priority = query_predicate_priority
             
+            # Queue log (outside semaphore)
+            try:
+                logger.info(f"[parallel] Queued predicate={predicate} batches={len(trapi_queries)} subq={subquery_index+1}")
+            except Exception:
+                pass
+            
             async with semaphore:
+                # Start log on acquire
+                try:
+                    logger.info(f"[parallel] Started predicate={predicate} with {len(trapi_queries)} batch(es) subq={subquery_index+1}")
+                except Exception:
+                    pass
                 try:
                     aggregated_results = []
                     aggregated_mappings = {}
                     messages = []
                     total_time = 0.0
-                    for tq in trapi_queries:
-                        response = await call_mcp_tool(
-                            "call_bte_api",
-                            json_query=tq,
-                            k=10,
-                            maxresults=100,
-                            predicate=predicate,
-                            query_intent=query_intent.value
-                        )
+                    for bidx, tq in enumerate(trapi_queries, start=1):
+                        t0 = time.time()
+                        try:
+                            logger.info(f"[parallel] → sending predicate={predicate} batch {bidx}/{len(trapi_queries)} subq={subquery_index+1}")
+                        except Exception:
+                            pass
+                        if getattr(self, 'bte_service', None) is not None:
+                            res_list, mappings, metadata = await self.bte_service.execute(
+                                trapi_query=tq,
+                                k=10,
+                                max_results=100,
+                                predicate=predicate,
+                                query_intent=getattr(query_intent, 'value', None)
+                            )
+                            response = {"results": res_list, "entity_mappings": mappings, "metadata": metadata}
+                        else:
+                            response = await call_mcp_tool(
+                                "call_bte_api",
+                                json_query=tq,
+                                k=10,
+                                maxresults=100,
+                                predicate=predicate,
+                                query_intent=query_intent.value
+                            )
+                        dt = time.time() - t0
                         res = response.get('results', [])
                         aggregated_results.extend(res)
                         aggregated_mappings.update(response.get('entity_mappings', {}))
-                        total_time += 0.0  # time not available here
+                        total_time += dt
                         messages.append(response.get('metadata', {}).get('message', 'ok'))
+                        try:
+                            logger.info(f"[parallel] ← completed predicate={predicate} batch {bidx}/{len(trapi_queries)} results={len(res)} time={dt:.2f}s subq={subquery_index+1}")
+                        except Exception:
+                            pass
+                    try:
+                        logger.info(f"[parallel] Finished predicate={predicate} total_results={len(aggregated_results)} total_time={total_time:.2f}s subq={subquery_index+1}")
+                    except Exception:
+                        pass
                     return predicate, priority, {
                         'results': aggregated_results,
                         'entity_mappings': aggregated_mappings,
@@ -970,7 +1178,7 @@ Example:
                     return predicate, priority, None, str(e)
         
         # Execute all predicate queries concurrently
-        logger.info(f"Executing {len(predicate_queries)} predicate queries concurrently")
+        logger.info(f"Executing {len(predicate_queries)} predicate queries concurrently (semaphore={self.config.max_concurrent_predicate_calls})")
         results = await asyncio.gather(*[execute_single_predicate_query(pq) for pq in predicate_queries])
         
         # Process results into QuerySteps
@@ -997,8 +1205,14 @@ Example:
                 original_results = response.get('results', [])
                 metadata = response.get('metadata', {})
                 entity_mappings = response.get('entity_mappings', {})
+                # Build quick ID->name map from name->id mappings we received
+                id_to_name = {}
+                try:
+                    id_to_name = {v: k for k, v in entity_mappings.items() if isinstance(k, str) and isinstance(v, str)}
+                except Exception:
+                    id_to_name = {}
                 
-                # Enhance results to include compact knowledge_graph nodes/edges (consistent with _execute_bte_api)
+# Enhance results to include compact knowledge_graph nodes/edges (consistent with _execute_bte_api)
                 results_data = []
                 for result in original_results:
                     enhanced = {
@@ -1006,17 +1220,23 @@ Example:
                         'knowledge_graph': {
                             'nodes': {},
                             'edges': {}
-                        }
+                        },
+                        'source_subquery': subquery_index + 1,
+                        'source_predicate': predicate
                     }
                     # Nodes
-                    if result.get('subject_id') and result.get('subject'):
-                        enhanced['knowledge_graph']['nodes'][result['subject_id']] = {
-                            'name': result['subject'],
+                    if result.get('subject_id'):
+                        subj_id = result.get('subject_id')
+                        subj_name = id_to_name.get(subj_id, result.get('subject'))
+                        enhanced['knowledge_graph']['nodes'][subj_id] = {
+                            'name': subj_name,
                             'categories': [result.get('subject_type', 'biolink:NamedThing')]
                         }
-                    if result.get('object_id') and result.get('object'):
-                        enhanced['knowledge_graph']['nodes'][result['object_id']] = {
-                            'name': result['object'],
+                    if result.get('object_id'):
+                        obj_id = result.get('object_id')
+                        obj_name = id_to_name.get(obj_id, result.get('object'))
+                        enhanced['knowledge_graph']['nodes'][obj_id] = {
+                            'name': obj_name,
                             'categories': [result.get('object_type', 'biolink:NamedThing')]
                         }
                     # Edge
@@ -1092,13 +1312,22 @@ Example:
         logger.info("Building TRAPI query")
         
         try:
-            # Call MCP build_trapi_query tool
-            response = await call_mcp_tool(
-                "build_trapi_query",
-                query=query,
-                entity_data=entity_data,
-                failed_trapis=[]
-            )
+            # Build TRAPI via injected service if available; fallback to MCP tool
+            # Use the global entity ID registry accumulated across steps (avoid lossy per-step filtering)
+            if getattr(self, 'trapi_service', None) is not None:
+                trapi_query, trapi_queries, confidence, source = await self.trapi_service.build(
+                    query=query,
+                    entity_data=self.global_entity_data or entity_data,
+                    failed_trapis=[]
+                )
+                response = {"query": trapi_query, "queries": trapi_queries, "confidence": confidence, "source": source}
+            else:
+                response = await call_mcp_tool(
+                    "build_trapi_query",
+                    query=query,
+                    entity_data=self.global_entity_data or entity_data,
+                    failed_trapis=[]
+                )
             
             trapi_query = response.get('query', {})
             trapi_queries = response.get('queries', [trapi_query] if trapi_query else [])
@@ -1152,17 +1381,31 @@ Example:
         logger.info("Executing BTE API call")
         
         try:
-            # Call MCP call_bte_api tool
-            response = await call_mcp_tool(
-                "call_bte_api",
-                json_query=trapi_query,
-                k=10,  # Request more results
-                maxresults=100
-            )
+            # Execute BTE via injected service if available; fallback to MCP tool
+            if getattr(self, 'bte_service', None) is not None:
+                results, entity_mappings, metadata = await self.bte_service.execute(
+                    trapi_query=trapi_query,
+                    k=10,
+                    max_results=100,
+                )
+                response = {"results": results, "entity_mappings": entity_mappings, "metadata": metadata}
+            else:
+                response = await call_mcp_tool(
+                    "call_bte_api",
+                    json_query=trapi_query,
+                    k=10,  # Request more results
+                    maxresults=100
+                )
             
             results = response.get('results', [])
             metadata = response.get('metadata', {})
             entity_mappings = response.get('entity_mappings', {})
+            # Build quick ID->name map from name->id mappings we received
+            id_to_name = {}
+            try:
+                id_to_name = {v: k for k, v in entity_mappings.items() if isinstance(k, str) and isinstance(v, str)}
+            except Exception:
+                id_to_name = {}
             total_results = metadata.get('total_results', len(results))
             
             step_time = time.time() - step_start
@@ -1180,15 +1423,19 @@ Example:
                 }
                 
                 # Add nodes to knowledge graph
-                if result.get('subject_id') and result.get('subject'):
-                    enhanced_result['knowledge_graph']['nodes'][result['subject_id']] = {
-                        'name': result['subject'],
+                if result.get('subject_id'):
+                    subj_id = result.get('subject_id')
+                    subj_name = id_to_name.get(subj_id, result.get('subject'))
+                    enhanced_result['knowledge_graph']['nodes'][subj_id] = {
+                        'name': subj_name,
                         'categories': [result.get('subject_type', 'biolink:NamedThing')]
                     }
                 
-                if result.get('object_id') and result.get('object'):
-                    enhanced_result['knowledge_graph']['nodes'][result['object_id']] = {
-                        'name': result['object'],
+                if result.get('object_id'):
+                    obj_id = result.get('object_id')
+                    obj_name = id_to_name.get(obj_id, result.get('object'))
+                    enhanced_result['knowledge_graph']['nodes'][obj_id] = {
+                        'name': obj_name,
                         'categories': [result.get('object_type', 'biolink:NamedThing')]
                     }
                 
@@ -1348,11 +1595,29 @@ Example:
         """
         consolidated_data = {}
         
+        # Helper to filter generic/noise names that should not seed TRAPI IDs
+        def _is_generic_noise(name: str) -> bool:
+            if not isinstance(name, str):
+                return True
+            n = name.strip().lower()
+            generic_terms = {
+                'drug', 'drugs', 'treat', 'treatment', 'target', 'targets', 'targeting', 'these', 'those',
+                'response', 'phrase', 'assessed', 'entity', 'entities', 'molecule', 'small molecule',
+                'enumerate 5 drugs'
+            }
+            if n in generic_terms:
+                return True
+            if '**' in n:
+                return True
+            if n.startswith('["**') or n.startswith('[\"**'):
+                return True
+            return False
+
         # Start with original entities
         for entity in original_entities:
             name = entity.get('name', '')
             entity_id = entity.get('id', '')
-            if name and entity_id:
+            if name and entity_id and not _is_generic_noise(name):
                 consolidated_data[name] = entity_id
         
         # Add entities from all previous API execution steps
@@ -1404,6 +1669,24 @@ Example:
             logger.debug(f"Available entities: {list(consolidated_data.keys())[:10]}...")  # Show first 10
         
         return consolidated_data
+    
+    def _meta_pair_supported(self, subject_category: Optional[str], object_category: Optional[str]) -> bool:
+        """Return True if meta-KG lists any edge for subject_category -> object_category."""
+        try:
+            if not subject_category or not object_category:
+                return False
+            # Prefer predicate_selector if available; otherwise scan meta-KG directly
+            try:
+                meta = self.bte_client.meta_kg or self.bte_client.get_meta_knowledge_graph()
+            except Exception:
+                return True  # Do not block if meta-KG unavailable
+            edges = meta.get('edges', []) if isinstance(meta, dict) else []
+            for e in edges:
+                if e.get('subject') == subject_category and e.get('object') == object_category:
+                    return True
+            return False
+        except Exception:
+            return True
     
     def _generate_placeholder_id(self, entity_name: str) -> str:
         """

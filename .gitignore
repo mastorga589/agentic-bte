@@ -71,3 +71,13 @@ tests/benchmarks/.cache/
 # Development scripts with personal paths
 compare_prototype_unified.py
 demo_got_functionality.py
+
+# R session history
+.Rhistory
+
+# Development logs
+DAILY_LOG*.md
+ENHANCED_DAILY_LOG*.md
+
+# JSON cache files (hash-named)
+[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*.json

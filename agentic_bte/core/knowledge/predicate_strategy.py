@@ -15,6 +15,8 @@ from typing import Dict, List, Set, Tuple, Optional
 from dataclasses import dataclass
 from enum import Enum
 
+from ...config.settings import get_settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -41,66 +43,57 @@ class PredicateSelector:
     Intelligent predicate selection based on query intent and meta-KG support
     """
     
-    # Predicate tiers by query intent - UPDATED for local BTE compatibility
-    # Based on diagnostic testing showing biolink:related_to and biolink:associated_with work well
+    # Predicate tiers by query intent - tuned for specificity and performance
     PREDICATE_TIERS = {
         QueryIntent.THERAPEUTIC: {
             'primary': [
-                'biolink:related_to',      # Proven to work with local BTE
-                'biolink:associated_with', # Proven to work with local BTE
                 'biolink:treats',
+                'biolink:applied_to_treat',
                 'biolink:treated_by'
             ],
             'secondary': [
-                'biolink:affects',
-                'biolink:applied_to_treat',
+                'biolink:in_clinical_trials_for',
                 'biolink:treats_or_applied_or_studied_to_treat',
-                'biolink:in_clinical_trials_for'
+                'biolink:affects'
             ]
         },
         QueryIntent.GENETIC: {
             'primary': [
-                'biolink:related_to',      # Proven to work with local BTE
-                'biolink:associated_with', # Proven to work with local BTE
                 'biolink:gene_associated_with_condition',
-                'biolink:condition_associated_with_gene'
+                'biolink:condition_associated_with_gene',
+                'biolink:genetically_associated_with'
             ],
             'secondary': [
-                'biolink:affects',
                 'biolink:causes',
                 'biolink:contributes_to',
-                'biolink:genetically_associated_with'
+                'biolink:affects'
             ]
         },
         QueryIntent.MECHANISM: {
             'primary': [
-                'biolink:related_to',      # Proven to work with local BTE
-                'biolink:associated_with', # Proven to work with local BTE
-                'biolink:affects',
-                'biolink:interacts_with'
+                'biolink:interacts_with',
+                'biolink:directly_physically_interacts_with',
+                'biolink:regulates'
             ],
             'secondary': [
-                'biolink:directly_physically_interacts_with',
-                'biolink:regulates',
                 'biolink:physically_interacts_with',
-                'biolink:modulates'
+                'biolink:modulates',
+                'biolink:affects'
             ]
         },
         QueryIntent.GENERAL: {
             'primary': [
-                'biolink:related_to',      # Proven to work with local BTE
-                'biolink:associated_with', # Proven to work with local BTE
-                'biolink:affects'
+                'biolink:affects',
+                'biolink:interacts_with'
             ],
             'secondary': [
-                'biolink:interacts_with',
                 'biolink:correlated_with',
                 'biolink:coexists_with'
             ]
         }
     }
     
-    # Universal fallback predicate - this works well with local BTE
+    # Universal fallback predicate (only used if allowed and supported)
     FALLBACK_PREDICATE = 'biolink:related_to'
     
     def __init__(self, meta_kg: Optional[Dict] = None, config: Optional[PredicateConfig] = None):
@@ -229,35 +222,56 @@ class PredicateSelector:
                 priority = 0.7 - (secondary_predicates.index(pred) * 0.1)  # 0.7, 0.6, etc.
                 selected_predicates.append((pred, priority))
         
-        # Fallback predicate - always add as last resort
-        if len(selected_predicates) < self.config.max_predicates_per_subquery:
+# Fallback predicate - add only if not excluded and supported
+        try:
+            settings = get_settings()
+            excluded: set[str] = set(settings.excluded_predicates or [])
+        except Exception:
+            excluded = set()
+        if len(selected_predicates) < self.config.max_predicates_per_subquery and self.FALLBACK_PREDICATE not in excluded:
             fallback_support = self.get_predicate_support(subject_category, self.FALLBACK_PREDICATE, object_category)
-            if fallback_support > 0:  # Only add if meta-KG supports it
+            if fallback_support > 0:
                 selected_predicates.append((self.FALLBACK_PREDICATE, 0.3))
         
-        # Sort by priority and limit total count
+        # Sort by priority, drop duplicates, and limit total count
         selected_predicates.sort(key=lambda x: x[1], reverse=True)
-        selected_predicates = selected_predicates[:self.config.max_predicates_per_subquery]
+        seen = set()
+        deduped: List[Tuple[str, float]] = []
+        for pred, pr in selected_predicates:
+            if pred in excluded or pred in seen:
+                continue
+            seen.add(pred)
+            deduped.append((pred, pr))
+        selected_predicates = deduped[:self.config.max_predicates_per_subquery]
         
         logger.info(f"Selected {len(selected_predicates)} predicates: {[p[0] for p in selected_predicates]}")
         return selected_predicates
     
     def _filter_supported_predicates(self, predicates: List[str], subject_category: str, 
                                    object_category: str) -> List[str]:
-        """Filter predicates based on meta-KG provider support"""
-        if not self.config.enable_meta_kg_filtering:
-            return predicates
+        """Filter predicates based on meta-KG provider support and user settings"""
+        # Load excluded predicates from settings
+        try:
+            settings = get_settings()
+            excluded: set[str] = set(settings.excluded_predicates or [])
+        except Exception:
+            excluded = set()
         
-        supported = []
+        # Respect meta-KG filtering if enabled
+        filtered: List[str] = []
         for predicate in predicates:
-            support_count = self.get_predicate_support(subject_category, predicate, object_category)
-            if support_count >= self.config.min_provider_support:
-                supported.append(predicate)
+            if predicate in excluded:
+                logger.debug(f"{predicate}: excluded by settings")
+                continue
+            if self.config.enable_meta_kg_filtering:
+                support_count = self.get_predicate_support(subject_category, predicate, object_category)
+                if support_count < self.config.min_provider_support:
+                    logger.debug(f"{predicate}: {support_count} providers (filtered out)")
+                    continue
                 logger.debug(f"{predicate}: {support_count} providers")
-            else:
-                logger.debug(f"{predicate}: {support_count} providers (filtered out)")
+            filtered.append(predicate)
         
-        return supported
+        return filtered
     
     def get_predicate_relevance_score(self, predicate: str, query_intent: QueryIntent) -> float:
         """

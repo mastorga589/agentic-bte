@@ -16,6 +16,8 @@ from langchain_openai import ChatOpenAI
 from ...config.settings import get_settings
 from ...exceptions.base import ExternalServiceError
 from .bte_client import BTEClient
+from .trapi_legacy_builder import LegacyTRAPIBuilder
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,8 @@ class TRAPIQueryBuilder:
         )
         self.bte_client = BTEClient()
         self._meta_kg = None
+        # Legacy builder (original LangGraph logic)
+        self.legacy_builder = LegacyTRAPIBuilder(openai_api_key=self.openai_api_key)
 
     @property
     def meta_kg(self) -> Dict[str, Any]:
@@ -115,95 +119,25 @@ class TRAPIQueryBuilder:
 
     def build_trapi_query(self, query: str, entity_data: Dict[str, str], failed_trapis: List[Dict] = None) -> Dict[str, Any]:
         """
-        Direct LangGraph/Prototype TRAPI batch/context builder (LLM-driven with all relevant prompt context).
-        Returns a single TRAPI query (first batch). Use build_trapi_query_batches for all batches.
+        Legacy-first TRAPI builder: delegate to original LangGraph implementation to avoid malformed queries.
+        Returns a single TRAPI query; batching is handled downstream.
         """
         failed_trapis = failed_trapis or []
-        trapi_example = {
-            "message": {
-                "query_graph": {
-                    "nodes": {
-                        "n0": {"categories": ["biolink:Disease"], "ids": ["MONDO:0005148"]},
-                        "n1": {"categories": ["biolink:SmallMolecule"]},
-                    },
-                    "edges": {
-                        "e01": {"subject": "n1", "object": "n0", "predicates": ["biolink:treats"]}
-                    }
-                }
-            }
-        }
-        # Important biolink category mappings for the LLM
-        category_guidance = """
-IMPORTANT BIOLINK CATEGORY MAPPINGS:
-- Drugs, medications, compounds, chemicals → biolink:SmallMolecule (NOT biolink:Drug!)
-- Diseases, disorders, conditions → biolink:Disease
-- Genes → biolink:Gene  
-- Proteins → biolink:Protein
-- Biological processes, pathways → biolink:BiologicalProcess
-- Phenotypes, symptoms → biolink:PhenotypicFeature
-"""
-        
-        # Compose full LLM prompt for prompt transparency
-        prompt = f"""
-You are a biomedical knowledge graph assistant and need to appropriately construct a TRAPI batch query.
+        # Delegate to legacy builder
+        trapi_query = self.legacy_builder.build(query, entity_data or {}, failed_trapis)
 
-{category_guidance}
-
-- Query: {query}
-- Entities and IDs: {json.dumps(entity_data, indent=2)}
-Example TRAPI: {json.dumps(trapi_example, indent=2)}
-
-Rules:
-1. Use biolink:SmallMolecule for drugs/chemicals, NOT biolink:Drug
-2. Only create one 'ids' field on one node
-3. Set IDs for the most informative/relevant node for this subquery
-4. Use correct subject-predicate-object direction
-
-Here are failed attempts: {failed_trapis}
-Output only a valid JSON TRAPI query (no surrounding text or explanations).
-"""
-        llm_result = self.llm.invoke(prompt).content.strip()
-        trapi_query = self.extract_dict(llm_result)
-        # Validate and repair with meta-KG coverage awareness
+        # Optional post-processing (off by default)
         try:
-            trapi_query = self._validate_and_repair_trapi(trapi_query, query, entity_data)
+            if getattr(self.settings, 'bp_prefilter_mode', 'off') == 'enforce':
+                trapi_query = self._apply_bp_gene_prefilter(trapi_query, entity_data, query)
         except Exception as e:
-            logger.warning(f"TRAPI validation/repair failed, using raw LLM output: {e}")
-        
-        # Sanitize categories and enforce single 'ids' node
+            logger.debug(f"BP prefilter skipped: {e}")
         try:
-            trapi_query = self._sanitize_trapi_categories_and_ids(trapi_query)
+            if getattr(self.settings, 'enforce_two_node', False):
+                trapi_query = self._enforce_two_node_single_edge(trapi_query, entity_data, query)
         except Exception as e:
-            logger.debug(f"Sanitization skipped: {e}")
-        
-        # Inject IDs from entity_data when possible (ensure at most one node has ids)
-        try:
-            self._inject_ids_from_entity_data(trapi_query, entity_data, query)
-        except Exception as e:
-            logger.debug(f"ID injection skipped: {e}")
-        
-        # Batching (Prototype pattern, >50 IDs)
-        key = None
-        if "n0" in trapi_query.get("message", {}).get("query_graph", {}).get("nodes", {}):
-            if "ids" in trapi_query["message"]["query_graph"]["nodes"]["n0"]:
-                key = "n0"
-            elif "ids" in trapi_query["message"]["query_graph"]["nodes"].get("n1", {}):
-                key = "n1"
-        batch_size = 50
-        batched_queries = []
-        if key:
-            all_ids = trapi_query["message"]["query_graph"]["nodes"][key]["ids"]
-            for i in range(0, len(all_ids), batch_size):
-                trapi_copy = deepcopy(trapi_query)
-                trapi_copy["message"]["query_graph"]["nodes"][key]["ids"] = all_ids[i:i + batch_size]
-                batched_queries.append(trapi_copy)
-        else:
-            batched_queries = [trapi_query]
-        logger.info(f"\n====== [TRAPI PROMPT CONTEXT] ======\n{prompt}\n======\n")
-        logger.info(f"LLM TRAPI output: {json.dumps(trapi_query,indent=2)}")
-        logger.info(f"Batch count: {len(batched_queries)}")
-        # Return the first batch; executor handles splitting into multiple requests when needed
-        return batched_queries[0] if batched_queries else trapi_query
+            logger.debug(f"Two-node enforcement (builder) skipped: {e}")
+        return trapi_query
 
     def build_trapi_query_batches(self, query: str, entity_data: Dict[str, str], failed_trapis: List[Dict] = None) -> List[Dict[str, Any]]:
         """Build TRAPI queries and return all batches (each <=50 ids on the ids-carrying node)."""
@@ -220,12 +154,13 @@ Output only a valid JSON TRAPI query (no surrounding text or explanations).
         if not key:
             return [trapi]
         all_ids = nodes[key].get("ids", [])
-        batch_size = 50
+        batch_size = self.settings.trapi_batch_limit
         batches = []
         for i in range(0, len(all_ids), batch_size):
             t = deepcopy(trapi)
             t["message"]["query_graph"]["nodes"][key]["ids"] = all_ids[i:i+batch_size]
             batches.append(t)
+        logger.info(f"TRAPI batching (all batches): node={key}, original_count={len(all_ids)}, batch_size={batch_size}, batches={len(batches)}")
         return batches
 
     def _validate_and_repair_trapi(self, trapi_query: Dict[str, Any], user_query: str, entity_data: Dict[str, str]) -> Dict[str, Any]:
@@ -260,19 +195,93 @@ Output only a valid JSON TRAPI query (no surrounding text or explanations).
             preds = self.find_predicates(scat, ocat)
             return preds
 
-        # If there are no predicates for the chosen category pair, attempt repairs
+        # Normalize current predicate list for inspection
+        current_preds = edge.get("predicates") or []
+        if not isinstance(current_preds, list):
+            current_preds = [current_preds] if current_preds else []
+
+        # If there are predicates for the chosen category pair, ensure they are supported; otherwise attempt repairs
         preds = has_coverage(subj_cat, obj_cat)
         if preds:
-            # Ensure predicates are set when missing or clearly unsupported
-            if not edge.get("predicates"):
-                edge["predicates"] = [preds[0]]
+            # Map common mis-directions to supported forms
+            try:
+                # Gene -> BiologicalProcess should use participates_in (not has_participant)
+                if subj_cat == 'biolink:Gene' and obj_cat == 'biolink:BiologicalProcess':
+                    # Prefer participates_in when supported
+                    preferred = [p for p in preds if p.endswith(':participates_in')]
+                    if preferred:
+                        edge["predicates"] = [preferred[0]]
+                    else:
+                        edge["predicates"] = [preds[0]]
+                # SmallMolecule -> Disease should use treats (highest specificity)
+                elif subj_cat == 'biolink:SmallMolecule' and obj_cat == 'biolink:Disease':
+                    preferred = [p for p in preds if p.endswith(':treats')]
+                    edge["predicates"] = [preferred[0] if preferred else preds[0]]
+                # SmallMolecule -> Gene should prefer targets if available
+                elif subj_cat == 'biolink:SmallMolecule' and obj_cat == 'biolink:Gene':
+                    preferred = [p for p in preds if p.endswith(':targets')]
+                    edge["predicates"] = [preferred[0] if preferred else preds[0]]
+                else:
+                    # If current preds are unsupported, set first supported
+                    if not any(p in preds for p in current_preds):
+                        edge["predicates"] = [preds[0]]
+                    elif not current_preds:
+                        edge["predicates"] = [preds[0]]
+            except Exception:
+                # Fallback to first supported predicate
+                if not current_preds:
+                    edge["predicates"] = [preds[0]]
             return trapi_query
 
-        # Repair strategies
+        # If both nodes share the same category, repair to a meaningful pair
         repaired = False
+        try:
+            def entity_data_has_prefix(prefixes: List[str]) -> bool:
+                for _, cid in (entity_data or {}).items():
+                    sc = str(cid)
+                    if any(sc.startswith(p) for p in prefixes):
+                        return True
+                return False
+            # Normalize identical category pairs
+            if subj_cat == obj_cat and isinstance(subj_cat, str):
+                # SmallMolecule→SmallMolecule is nonsensical; prefer SmallMolecule→Disease if disease IDs present
+                if subj_cat == 'biolink:SmallMolecule':
+                    # Clear object ids if they are chemical-like to avoid SM→SM
+                    try:
+                        if isinstance(obj_node.get('ids'), list) and obj_node.get('ids'):
+                            obj_node.pop('ids', None)
+                    except Exception:
+                        pass
+                    if entity_data_has_prefix(['MONDO:', 'DOID:', 'UMLS:']):
+                        obj_node['categories'] = ['biolink:Disease']
+                        cand = has_coverage('biolink:SmallMolecule', 'biolink:Disease')
+                        pref = [p for p in cand if p.endswith(':treats')]
+                        edge['predicates'] = [pref[0] if pref else (cand[0] if cand else 'biolink:treats')]
+                        repaired = True
+                    else:
+                        # Fallback: target genes of small molecules
+                        obj_node['categories'] = ['biolink:Gene']
+                        cand = has_coverage('biolink:SmallMolecule', 'biolink:Gene')
+                        pref = [p for p in cand if p.endswith(':targets')]
+                        edge['predicates'] = [pref[0] if pref else (cand[0] if cand else 'biolink:affects')]
+                        repaired = True
+                elif subj_cat == 'biolink:BiologicalProcess':
+                    # Standardize to Gene participates_in BiologicalProcess
+                    subj_node['categories'] = ['biolink:Gene']
+                    obj_node['categories'] = ['biolink:BiologicalProcess']
+                    cand = has_coverage('biolink:Gene', 'biolink:BiologicalProcess')
+                    pref = [p for p in cand if p.endswith(':participates_in')]
+                    edge['predicates'] = [pref[0] if pref else (cand[0] if cand else 'biolink:participates_in')]
+                    # Ensure direction Gene→Process
+                    edge['subject'], edge['object'] = subj_key, obj_key
+                    repaired = True
+        except Exception:
+            pass
+        
+        # Repair strategies
 
         # Strategy A: If the query involves a GO term (BiologicalProcess) on either side,
-        # prefer Gene ↔ BiologicalProcess with participates_in/related_to
+        # prefer Gene ↔ BiologicalProcess with participates_in (gene→process) or has_participant (process→gene)
         def is_biological_process(node):
             cats = node.get("categories", [])
             return any(c for c in cats if isinstance(c, str) and c.endswith(":BiologicalProcess"))
@@ -300,12 +309,12 @@ Output only a valid JSON TRAPI query (no surrounding text or explanations).
             if preferred:
                 edge["predicates"] = [preferred]
                 # Ensure subject/object alignment with the chosen direction
-                if proc_on_subject:
-                    # We want Gene (subject) -> BiologicalProcess (object)
-                    edge["subject"], edge["object"] = obj_key, subj_key
+                # We standardize to Gene (subject) -> BiologicalProcess (object) for participates_in
+                if preferred.endswith(':participates_in'):
+                    edge["subject"], edge["object"] = (obj_key, subj_key) if proc_on_subject else (subj_key, obj_key)
                 repaired = True
 
-        # Strategy B: If the query involves a Disease, prefer SmallMolecule ↔ Disease with treats
+        # Strategy B: If the query involves a Disease, prefer SmallMolecule ↔ Disease with treats (small_molecule→disease)
         def is_disease(node):
             cats = node.get("categories", [])
             return any(c for c in cats if isinstance(c, str) and c.endswith(":Disease"))
@@ -335,12 +344,21 @@ Output only a valid JSON TRAPI query (no surrounding text or explanations).
                 repaired = True
 
         # If still no coverage, try flipping direction or generic related_to
-        if not repaired:
-            flipped_preds = has_coverage(obj_cat, subj_cat)
-            if flipped_preds:
-                edge["predicates"] = [flipped_preds[0]]
-                edge["subject"], edge["object"] = obj_key, subj_key
-                repaired = True
+            if not repaired:
+                # Fix common misuses: gene→disease with therapeutic predicates → use genetic association
+                if subj_cat == 'biolink:Gene' and obj_cat == 'biolink:Disease':
+                    assoc_preds = self.find_predicates('biolink:Gene', 'biolink:Disease')
+                    preferred = [p for p in assoc_preds if p.endswith(':gene_associated_with_condition') or p.endswith(':genetically_associated_with')]
+                    if assoc_preds:
+                        edge["predicates"] = [preferred[0] if preferred else assoc_preds[0]]
+                        repaired = True
+                # Otherwise try flipping
+                if not repaired:
+                    flipped_preds = has_coverage(obj_cat, subj_cat)
+                    if flipped_preds:
+                        edge["predicates"] = [flipped_preds[0]]
+                        edge["subject"], edge["object"] = obj_key, subj_key
+                        repaired = True
 
         if not repaired:
             # Fallback: set predicate to related_to (if allowed), keep original direction
@@ -364,14 +382,15 @@ Output only a valid JSON TRAPI query (no surrounding text or explanations).
         def category_for_id(eid: str) -> Optional[str]:
             if not isinstance(eid, str):
                 return None
-            if eid.startswith('CHEBI:') or eid.startswith('ChEMBL:') or eid.startswith('DRUGBANK:'):
-                return 'biolink:SmallMolecule'
+            if eid.startswith('CHEBI:') or eid.startswith('ChEMBL:') or eid.startswith('DRUGBANK:') or eid.startswith('UNII:'):
+                return 'biolink:ChemicalSubstance'
             if eid.startswith('NCBIGene:') or eid.startswith('HGNC:') or eid.startswith('ENSEMBL:'):
                 return 'biolink:Gene'
             if eid.startswith('GO:'):
                 return 'biolink:BiologicalProcess'
-            if eid.startswith('MONDO:') or eid.startswith('DOID:') or eid.startswith('UMLS:'):
+            if eid.startswith('MONDO:') or eid.startswith('DOID:'):
                 return 'biolink:Disease'
+            # Do not force-map UMLS to a specific category; leave as-is for LLM/repairs to decide
             if eid.startswith('PR:') or eid.startswith('UniProtKB:'):
                 return 'biolink:Protein'
             return None
@@ -435,12 +454,199 @@ Output only a valid JSON TRAPI query (no surrounding text or explanations).
         
         return trapi_query
 
+    def _normalize_trapi_ids(self, trapi_query: Dict[str, Any]) -> None:
+        """Normalize node IDs using SRI Node Normalization to preferred prefixes per category.
+        - Disease: prefer MONDO, DOID, then UMLS
+        - BiologicalProcess: GO
+        - ChemicalSubstance/Drug: CHEBI, DRUGBANK, ChEMBL, UNII
+        - Gene: NCBIGene, HGNC, ENSEMBL
+        - Protein: UniProtKB, PR
+        """
+        qg = trapi_query.get("message", {}).get("query_graph", {})
+        nodes = qg.get("nodes", {}) if isinstance(qg.get("nodes"), dict) else {}
+        if not nodes:
+            return
+        # Gather all ids to normalize
+        all_ids = []
+        node_ids_map = {}
+        for nid, ndata in nodes.items():
+            ids = ndata.get("ids")
+            if isinstance(ids, list) and ids:
+                node_ids_map[nid] = [str(x) for x in ids]
+                all_ids.extend([str(x) for x in ids])
+        if not all_ids:
+            return
+        # Call Node Normalization in one request (best-effort)
+        try:
+            url = "https://nodenormalization-sri.renci.org/1.5/get_normalized_nodes"
+            payload = {"curies": list(dict.fromkeys(all_ids)), "conflate": True, "description": True}
+            r = requests.post(url, json=payload, timeout=15)
+            r.raise_for_status()
+            nn = r.json() or {}
+        except Exception:
+            nn = {}
+        # Preference order by category
+        pref = {
+            'biolink:Disease': ["MONDO:", "DOID:", "UMLS:"],
+            'biolink:BiologicalProcess': ["GO:"],
+            'biolink:ChemicalSubstance': ["CHEBI:", "DRUGBANK:", "ChEMBL", "UNII:"],
+            'biolink:Drug': ["CHEBI:", "DRUGBANK:", "ChEMBL", "UNII:"],
+            'biolink:Gene': ["NCBIGene:", "HGNC:", "ENSEMBL:"],
+            'biolink:Protein': ["UniProtKB:", "PR:"]
+        }
+        def choose(curie: str, category: str) -> str:
+            entry = nn.get(curie)
+            if not isinstance(entry, dict):
+                return curie
+            # Build candidate list: primary id + equivalents
+            cands = []
+            try:
+                main = (entry.get("id") or {}).get("identifier")
+                if main:
+                    cands.append(main)
+            except Exception:
+                pass
+            for eq in (entry.get("equivalent_identifiers", []) or []):
+                eid = eq.get("identifier")
+                if eid:
+                    cands.append(eid)
+            # Pick first matching preferred prefix
+            for pfx in pref.get(category, []):
+                for cid in cands:
+                    if str(cid).startswith(pfx):
+                        return cid
+            return cands[0] if cands else curie
+        # Rewrite node ids in place to normalized, de-duplicated lists
+        for nid, ids in node_ids_map.items():
+            category = (nodes.get(nid, {}).get("categories") or ["biolink:NamedThing"])[0]
+            new_ids = []
+            seen = set()
+            for cid in ids:
+                nc = choose(cid, category)
+                if nc not in seen:
+                    seen.add(nc)
+                    new_ids.append(nc)
+            nodes[nid]["ids"] = new_ids
+
+    def _edge_priority(self, subj_cat: Optional[str], obj_cat: Optional[str]) -> int:
+        """Heuristic priority for selecting the best edge to keep in a two-node graph."""
+        pair = (subj_cat or "", obj_cat or "")
+        if pair in (("biolink:ChemicalSubstance", "biolink:Disease"), ("biolink:SmallMolecule", "biolink:Disease")):
+            return 0
+        if pair in (("biolink:ChemicalSubstance", "biolink:Gene"), ("biolink:SmallMolecule", "biolink:Gene")):
+            return 1
+        if pair == ("biolink:Gene", "biolink:BiologicalProcess"):
+            return 2
+        return 10
+
+    def _enforce_two_node_single_edge(self, trapi_query: Dict[str, Any], entity_data: Dict[str, str], query_text: str) -> Dict[str, Any]:
+        """Reduce a TRAPI query to exactly one edge and its two referenced nodes using sensible edge selection.
+        If the remaining edge is SmallMolecule→SmallMolecule, try to coerce the object to Disease (if any disease ID in
+        entity_data) or to Gene as a fallback, and keep the predicates if possible."""
+        qg = trapi_query.get("message", {}).get("query_graph", {})
+        edges = qg.get("edges", {}) if isinstance(qg.get("edges"), dict) else {}
+        nodes = qg.get("nodes", {}) if isinstance(qg.get("nodes"), dict) else {}
+        if not edges or not nodes:
+            return trapi_query
+        # Choose best edge
+        best = None
+        best_score = 999
+        for eid, e in edges.items():
+            sj = e.get("subject"); ob = e.get("object")
+            sc = (nodes.get(sj, {}).get("categories") or [None])[0]
+            oc = (nodes.get(ob, {}).get("categories") or [None])[0]
+            score = self._edge_priority(sc, oc)
+            if score < best_score:
+                best = (eid, e, sj, ob, sc, oc)
+                best_score = score
+        if not best:
+            return trapi_query
+        _, edge, sj, ob, sc, oc = best
+        # Keep only the chosen edge (normalize edge id)
+        qg["edges"] = {"e01": {"subject": sj, "object": ob, "predicates": edge.get("predicates", [])}}
+        # Keep referenced nodes only
+        kept = {}
+        if sj in nodes: kept[sj] = nodes[sj]
+        if ob in nodes: kept[ob] = nodes[ob]
+        qg["nodes"] = kept
+        # Coerce SM→SM to a more useful pair
+        if (sc in ("biolink:SmallMolecule", "biolink:ChemicalSubstance")) and (oc in ("biolink:SmallMolecule", "biolink:ChemicalSubstance")):
+            # If entity_data contains a disease-like ID, coerce object to Disease
+            has_dis = any(str(v).startswith(("MONDO:", "DOID:", "UMLS:")) for v in (entity_data or {}).values())
+            if has_dis:
+                if ob in qg["nodes"]:
+                    qg["nodes"][ob]["categories"] = ["biolink:Disease"]
+            else:
+                if ob in qg["nodes"]:
+                    qg["nodes"][ob]["categories"] = ["biolink:Gene"]
+        return trapi_query
+
+    def _prefilter_genes_by_biological_process(self, go_ids: List[str], max_results: int = 1000) -> List[str]:
+        """Fetch Gene IDs that participate_in any of the provided GO BiologicalProcess IDs via BTE."""
+        if not go_ids:
+            return []
+        # Build a TRAPI: Gene --participates_in--> BiologicalProcess (ids = go_ids)
+        q = {
+            "message": {
+                "query_graph": {
+                    "nodes": {
+                        "n0": {"categories": ["biolink:Gene"]},
+                        "n1": {"categories": ["biolink:BiologicalProcess"], "ids": list(dict.fromkeys(go_ids))},
+                    },
+                    "edges": {
+                        "e01": {"subject": "n0", "object": "n1", "predicates": ["biolink:participates_in"]}
+                    }
+                }
+            }
+        }
+        try:
+            resp = self.bte_client.execute_trapi_with_batching(q, max_results=max_results, k=0)
+            results = resp[0] if isinstance(resp, tuple) else []
+            genes = []
+            for r in results:
+                if (r.get("subject_type") or "").endswith(":Gene"):
+                    gid = r.get("subject_id")
+                    if gid and gid not in genes:
+                        genes.append(gid)
+                elif (r.get("object_type") or "").endswith(":Gene"):
+                    gid = r.get("object_id")
+                    if gid and gid not in genes:
+                        genes.append(gid)
+            return genes
+        except Exception:
+            return []
+
+    def _apply_bp_gene_prefilter(self, trapi_query: Dict[str, Any], entity_data: Dict[str, str], query_text: str) -> Dict[str, Any]:
+        """If a GO BiologicalProcess is present in entity_data, prefilter genes participating in it and
+        rebuild the TRAPI as ChemicalSubstance→Gene with those gene IDs (predicate: targets if available)."""
+        try:
+            go_ids = [str(v) for v in (entity_data or {}).values() if isinstance(v, str) and v.startswith("GO:")]
+            if not go_ids:
+                return trapi_query
+            gene_ids = self._prefilter_genes_by_biological_process(go_ids)
+            if not gene_ids:
+                return trapi_query
+            # Rebuild graph to ChemicalSubstance -> Gene, ids on the Gene node
+            qg = trapi_query.get("message", {}).get("query_graph", {})
+            qg["nodes"] = {
+                "n0": {"categories": ["biolink:ChemicalSubstance"]},
+                "n1": {"categories": ["biolink:Gene"], "ids": gene_ids[:500]},
+            }
+            # Choose predicate with coverage
+            preds = self.find_predicates("biolink:ChemicalSubstance", "biolink:Gene")
+            preferred = next((p for p in preds if p.endswith(":targets")), None)
+            pred = preferred or (preds[0] if preds else "biolink:affects")
+            qg["edges"] = {"e01": {"subject": "n0", "object": "n1", "predicates": [pred]}}
+            return trapi_query
+        except Exception:
+            return trapi_query
+
     def identify_nodes(self, query: str) -> Dict[str, str]:
         """
         LLM-driven, context-sensitive determination of subject/object node types based on query (LangGraph Prototype logic)
         """
         node_types = [
-            "biolink:Disease", "biolink:Gene", "biolink:SmallMolecule", "biolink:PathologicalProcess",
+            "biolink:Disease", "biolink:Gene", "biolink:ChemicalSubstance", "biolink:Drug", "biolink:PathologicalProcess",
             "biolink:PhysiologicalProcess", "biolink:Polypeptide", "biolink:BiologicalEntity", "biolink:PhenotypicFeature"
         ]
         prompt = f"""
@@ -478,9 +684,7 @@ def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
         edges = qg.get("edges", {})
         if not isinstance(nodes, dict) or not isinstance(edges, dict):
             return False, "'nodes' or 'edges' is not a dict"
-        # Basic single-hop sanity: at most 1 edge
-        if len(edges) > 1:
-            return False, f"Multi-hop query detected: {len(edges)} edges found"
+        # Basic sanity: require at least one edge (multi-edge/multi-hop allowed)
         if len(edges) == 0:
             return False, "No edges specified"
         # Ensure referenced nodes exist and have categories
@@ -518,7 +722,9 @@ def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
 
         prefix_map = {
             'biolink:Disease': ['MONDO:', 'DOID:', 'UMLS:'],
-            'biolink:SmallMolecule': ['CHEBI:', 'ChEMBL:', 'DRUGBANK:'],
+            'biolink:ChemicalSubstance': ['CHEBI:', 'ChEMBL:', 'DRUGBANK:', 'UNII:'],
+            'biolink:Drug': ['CHEBI:', 'ChEMBL:', 'DRUGBANK:', 'UNII:'],
+            'biolink:SmallMolecule': ['CHEBI:', 'ChEMBL:', 'DRUGBANK:', 'UNII:'],
             'biolink:Gene': ['HGNC:', 'NCBIGene:', 'ENSEMBL:'],
             'biolink:Protein': ['PR:', 'UniProtKB:'],
             'biolink:BiologicalProcess': ['GO:']
@@ -534,10 +740,7 @@ def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
             matched_ids = []
 
         def collect_for(node_key: str, limit: int = 500) -> list:
-            cat = (nodes.get(node_key, {}).get('categories') or [None])[0]
-            if not cat:
-                return []
-            # First, use ids whose names appear in the query text
+            # Collect IDs without prefix filtering; prioritize those whose names appear in the query text
             out = []
             seen = set()
             for scid in matched_ids:
@@ -546,16 +749,14 @@ def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
                     out.append(scid)
                     if len(out) >= limit:
                         return out
-            # Fallback to category-consistent pool from entity_data (keeps autonomy but prevents mismatched namespaces)
-            prefixes = prefix_map.get(cat, [])
+            # Then include all IDs from the global entity registry
             for _, cid in (entity_data or {}).items():
                 scid = str(cid)
-                if any(scid.startswith(p) for p in prefixes):
-                    if scid not in seen:
-                        seen.add(scid)
-                        out.append(scid)
-                        if len(out) >= limit:
-                            break
+                if scid not in seen:
+                    seen.add(scid)
+                    out.append(scid)
+                    if len(out) >= limit:
+                        break
             return out
 
         # Identify subject/object from the single edge
@@ -583,7 +784,16 @@ def validate_trapi(trapi_query: Dict[str, Any]) -> Tuple[bool, str]:
 
         # Case 2: exactly one side has ids → inject on the other to enable chaining
         if subj_has != obj_has:
+            source = subj if subj_has else obj
             target = obj if subj_has else subj
+            # Avoid creating SmallMolecule→SmallMolecule by skipping injection when both categories are SmallMolecule
+            try:
+                src_cat = (nodes.get(source, {}).get('categories') or [None])[0]
+                tgt_cat = (nodes.get(target, {}).get('categories') or [None])[0]
+                if src_cat == tgt_cat == 'biolink:SmallMolecule':
+                    return
+            except Exception:
+                pass
             t_ids = collect_for(target)
             if t_ids:
                 nodes.setdefault(target, {})['ids'] = t_ids
