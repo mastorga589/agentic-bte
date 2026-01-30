@@ -18,8 +18,9 @@ class Settings:
 
     # BTE (BioThings Explorer)
     bte_api_base_url: str = os.getenv("BTE_API_BASE_URL", "https://bte.transltr.io/v1")
-    bte_query_endpoint: str = os.getenv("BTE_QUERY_ENDPOINT", "query")
+    bte_query_endpoint: str = os.getenv("BTE_QUERY_ENDPOINT", "asyncquery")
     bte_meta_kg_endpoint: str = os.getenv("BTE_META_KG_ENDPOINT", "meta_knowledge_graph")
+    trapi_batch_limit: int = int(os.getenv("TRAPI_BATCH_LIMIT", "10"))
 
     # Predicate / Meta-KG
     excluded_predicates: list[str] = None

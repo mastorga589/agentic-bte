@@ -201,25 +201,77 @@ class BTEClient:
             time.sleep(interval)
         raise TimeoutError(f"Timed out waiting for async result (last_status={last_status})")
 
+    def _fetch_async_result_from_url(self, job_url: str, poll_seconds: int = 90, interval: float = 1.5) -> Dict[str, Any]:
+        if not job_url:
+            raise RuntimeError("Missing async job URL")
+        # Normalize absolute URL if relative Location header provided
+        if job_url.startswith("/"):
+            job_url = f"{self.base_url}{job_url}"
+        deadline = time.time() + poll_seconds
+        last_status: Optional[str] = None
+        base = job_url.rstrip("/")
+        status_candidates = [
+            f"{base}",
+            f"{base}/status",
+        ]
+        while time.time() < deadline:
+            try:
+                r = self._request(job_url, method="GET")
+                if r.status_code in (200, 201):
+                    data = r.json()
+                    if isinstance(data, dict):
+                        if "message" in data:
+                            return data
+                        if isinstance(data.get("response"), dict) and "message" in data["response"]:
+                            return data["response"]
+                        if isinstance(data.get("data"), dict) and "message" in data["data"]:
+                            return data["data"]
+            except Exception:
+                pass
+            for su in status_candidates:
+                try:
+                    rs = self._request(su, method="GET")
+                    if rs.status_code in (200, 201):
+                        data = rs.json()
+                        status = str(data.get("status") or data.get("state") or "").lower()
+                        if status:
+                            last_status = status
+                            if status in ("succeeded", "success", "completed", "complete", "done"):
+                                break
+                            if status in ("failed", "error"):
+                                raise RuntimeError(f"BTE async job failed: {data}")
+                except Exception:
+                    continue
+            time.sleep(interval)
+        raise TimeoutError(f"Timed out waiting for async result (last_status={last_status})")
+
     def execute_trapi_query(self, trapi_query: Dict[str, Any]) -> Dict[str, Any]:
         resp = self._request(self.query_endpoint, method="POST", data=trapi_query)
-        # Async endpoints may return 202 or 200 with job id
+        # Async endpoints may return 202 with Location header or 200 with immediate message
         if resp.status_code in (200, 201, 202):
+            # Location header preferred by /asyncquery
+            loc = None
+            try:
+                loc = resp.headers.get("Location")
+            except Exception:
+                loc = None
             try:
                 data = resp.json()
             except Exception:
-                resp.raise_for_status()
-                return {}
-            # If direct TRAPI message returned
+                data = {}
+            # Immediate TRAPI message
             if isinstance(data, dict) and "message" in data:
                 return data
-            # If job id present, poll
+            # Poll via Location header when available
+            if loc:
+                return self._fetch_async_result_from_url(loc)
+            # If job id present in body, poll
             job_id = self._extract_job_id(data) if isinstance(data, dict) else None
             if job_id:
                 return self._fetch_async_result(job_id)
-            # Otherwise, raise for unexpected format
+            # Unexpected shape; raise
             resp.raise_for_status()
-            return data
+            return data if isinstance(data, dict) else {"message": data}
         # Other status codes
         resp.raise_for_status()
         return resp.json()
@@ -303,25 +355,29 @@ class BTEClient:
 
         return parsed, entity_map
 
-    def split_trapi_query(self, trapi_query: Dict[str, Any], batch_limit: int = 50) -> List[Dict[str, Any]]:
+    def split_trapi_query(self, trapi_query: Dict[str, Any], batch_limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        limit = batch_limit or getattr(self.settings, 'trapi_batch_limit', 10)
         qg = trapi_query.get("message", {}).get("query_graph", {})
         nodes = qg.get("nodes", {})
-        split_nodes = {k: v for k, v in nodes.items() if isinstance(v.get("ids"), list) and len(v["ids"]) > batch_limit}
+        split_nodes = {k: v for k, v in nodes.items() if isinstance(v.get("ids"), list) and len(v["ids"]) > limit}
         if not split_nodes:
             return [trapi_query]
         node_id, node_data = next(iter(split_nodes.items()))
-        id_chunks = [node_data["ids"][i:i + batch_limit] for i in range(0, len(node_data["ids"]), batch_limit)]
+        id_list = node_data.get("ids", [])
+        id_chunks = [id_list[i:i + limit] for i in range(0, len(id_list), limit)]
         queries: List[Dict[str, Any]] = []
         for chunk in id_chunks:
             q = json.loads(json.dumps(trapi_query))
             q["message"]["query_graph"]["nodes"][node_id]["ids"] = chunk
             queries.append(q)
+        logger.info(f"Split TRAPI query: node={node_id}, original_count={len(id_list)}, batch_size={limit}, batches={len(queries)}")
         return queries
 
     def execute_trapi_with_batching(self, trapi_query: Dict[str, Any], max_results: int = 50, k: int = 5,
-                                    batch_limit: int = 50, predicate: Optional[str] = None,
+                                    batch_limit: Optional[int] = None, predicate: Optional[str] = None,
                                     query_intent: Optional[str] = None) -> Tuple[List[Dict], Dict[str, str], Dict[str, Any]]:
-        queries = self.split_trapi_query(trapi_query, batch_limit)
+        limit = batch_limit or getattr(self.settings, 'trapi_batch_limit', 10)
+        queries = self.split_trapi_query(trapi_query, limit)
         all_results: List[Dict] = []
         all_maps: Dict[str, str] = {}
         messages: List[str] = []
@@ -338,11 +394,24 @@ class BTEClient:
             except Exception as e:
                 messages.append(f"Batch {i+1} failed: {e}")
                 continue
+        # Inspect original entity count for reporting
+        qg = trapi_query.get("message", {}).get("query_graph", {})
+        nodes = qg.get("nodes", {})
+        original_count = 0
+        id_node = None
+        for nid, ndata in nodes.items():
+            if isinstance(ndata.get("ids"), list) and ndata.get("ids"):
+                id_node = id_node or nid
+                original_count = max(original_count, len(ndata.get("ids", [])))
         meta = {
             "message": "; ".join(messages),
-            "total_batches": len(queries),
+            "total_batches": len(messages),
             "successful_batches": len([m for m in messages if "failed" not in m.lower()]),
             "total_results": len(all_results),
+            "planned_batch_count": len(queries),
+            "original_entity_count": original_count,
+            "batch_limit": limit,
+            "id_node": id_node,
         }
         return all_results, all_maps, meta
 
