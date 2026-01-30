@@ -173,7 +173,7 @@ agentic_bte/
 #### MCP Server
 ```mermaid
 graph LR
-    A[User Query] --> B[MCP Server Wrapper]
+    A[MCP Client] --> B[MCP Server Wrapper]
     B --> C[Core Processing Pipeline]
     C --> D[Entity Recognition]
     C --> E[Query Planning]
@@ -182,7 +182,7 @@ graph LR
     E --> G
     F --> G
     G --> B
-    B --> H[MCP Client]
+    B --> A
 ```
 
 The **MCP Server** acts as a lightweight wrapper that exposes the core biomedical processing pipeline as MCP-compatible tools. It provides a standardized interface for AI assistants (Claude, ChatGPT, etc.) to access the same entity recognition, query planning, and knowledge graph execution capabilities used by the LangGraph agents. This allows seamless integration with any MCP-compatible client while maintaining a single unified codebase.
