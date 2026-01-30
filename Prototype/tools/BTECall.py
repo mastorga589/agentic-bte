@@ -10,20 +10,8 @@ from pprint import pprint
 from time import sleep
 import json
 import requests
-import os
 
-# Load meta-knowledge graph with a timeout to avoid blocking on import
-try:
-    _meta_timeout = float(os.getenv("BTE_META_TIMEOUT", "15"))
-except Exception:
-    _meta_timeout = 15.0
-try:
-    metaKG = requests.get("https://bte.transltr.io/v1/meta_knowledge_graph", timeout=_meta_timeout)
-except Exception:
-    # Fallback to empty MKG if remote is slow/unavailable; TRAPI builder will still function, predicate selection will be limited
-    class _Resp:
-        content = json.dumps({"edges": []}).encode("utf-8")
-    metaKG = _Resp()
+metaKG = requests.get("https://bte.transltr.io/v1/meta_knowledge_graph")
 
 def extractDict(rawstring: str):
     # Finding positions of the brackets
@@ -336,12 +324,7 @@ def parseBTE(jsonr: dict, k: int, maxresults: int):
             break
 
     
-    # Optional debug print to avoid flooding console on large queries
-    try:
-        if os.getenv("DEBUG_BTE") == "1":
-            pprint(results_per_id, indent=4)
-    except Exception:
-        pass
+    pprint(results_per_id, indent=4)
     return parsed_results, results_id
 
 @tool("BTECall")
@@ -351,7 +334,7 @@ def BTECall(json_query: dict, maxresults: int, k: int):
     api_url = "https://bte.transltr.io/v1/query"
 
     if not isinstance(json_query, dict):
-            return None, None, {"error": "Invalid JSON format"}
+            return {"error": "Invalid JSON format"}
 
     headers = {
         "Content-Type": "application/json",
@@ -368,10 +351,7 @@ def BTECall(json_query: dict, maxresults: int, k: int):
             num_ids += len(ids)
     
     try:
-        # Apply configurable request timeouts to prevent hangs
-        conn_timeout = float(os.getenv("BTE_CONNECT_TIMEOUT", "10"))
-        read_timeout = float(os.getenv("BTE_HTTP_TIMEOUT", "60"))
-        response = requests.post(api_url, json=json_query, headers=headers, timeout=(conn_timeout, read_timeout))
+        response = requests.post(api_url, json=json_query, headers=headers)
         response.raise_for_status()  # Raise an error for non-200 responses
 
         results, ids = parseBTE(response.json(), k, maxresults)
@@ -382,12 +362,5 @@ def BTECall(json_query: dict, maxresults: int, k: int):
             return results, ids, message
         else:
             return None, None, {"error": message}
-    except requests.exceptions.Timeout as e:
-        return None, None, {"error": f"API request timed out: {str(e)}"}
     except requests.exceptions.RequestException as e:
-        desc = None
-        try:
-            desc = response.json().get("description")  # type: ignore[name-defined]
-        except Exception:
-            pass
-        return None, None, {"error": f"API request failed: {str(e)}", "description": desc}
+        return None, None, {"error": f"API request failed: {str(e)}, {response.json().get("description")}"}

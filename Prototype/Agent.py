@@ -10,13 +10,9 @@ from operator import add
 from copy import deepcopy
 import getpass
 import os
-import asyncio
-import json
-import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
-from .tools.BioNER import modifiedBioNERTool
-from .tools.BTECall import TRAPIQuery, BTECall
+from tools.BioNER import modifiedBioNERTool
+from tools.BTECall import TRAPIQuery, BTECall
 from rdflib import Graph, URIRef, Namespace
 from rdflib.namespace import RDF, RDFS
 
@@ -29,12 +25,12 @@ if not os.environ.get("OPENAI_API_KEY"): #field to ask for OpenAI API key
     os.environ["OPENAI_API_KEY"] = getpass.getpass("Please enter OpenAI API Key: ")
 
 # Create an LLM-based agent
-llm = ChatOpenAI(temperature=0, model=os.getenv("OPENAI_MODEL", "gpt-4o"))  # Change model if needed
+llm = ChatOpenAI(temperature=0, model="gpt-4.1")  # Change model if needed
 
 # Create an RDFlib graph where results will be stored
 resultGraph = Graph()
 
-members = ["annotator", "planner", "BTE_search", "got_planner"]
+members = ["annotator", "planner", "BTE_search"]
 options = members + ["FINISH"]
 
 class Router(TypedDict):
@@ -47,7 +43,6 @@ class State(MessagesState):
     query: str
     subQuery: Annotated[list[str], add]
     entity_data: Annotated[list[dict], add]
-    query_plan: dict
     maxresults: int
     k: int
     final_answer: str
@@ -98,7 +93,7 @@ def RDFgraphUpdater(triples: list):
     
     for triple in triples:
         subj = make_entity_uri(triple['subject'], triple.get("subject_type", ""))
-        pred = URIRef(BIOLINK + triple['predicate'].split(":")[1]) if ":" in triple['predicate'] else BIOLINK[triple['predicate']]
+        pred = URIRef(BIOLINK + triple['predicate'].split(":")[1])
         obj = make_entity_uri(triple['object'], triple.get("object_type", ""))
         resultGraph.add((subj, pred, obj))
 
@@ -157,10 +152,10 @@ def BTE_search(state: State) -> Command[Literal["orchestrator"]]:
         updates = {}
         msg_log = {}
 
-        trapi = TRAPIQuery.invoke({"query": subquery, "entity_data": entity_data, "failed_trapis": failed_trapis})
+        trapi = TRAPIQuery.invoke(input={"query": subquery, "entity_data": entity_data, "failed_trapis": failed_trapis})
         if trapi == "Invalid TRAPI":
             print("Retrying TRAPI generation...")
-            trapi = TRAPIQuery.invoke({"query": subquery, "entity_data": entity_data, "failed_trapis": failed_trapis})
+            trapi = TRAPIQuery.invoke(input={"query": subquery, "entity_data": entity_data, "failed_trapis": failed_trapis})
 
         trapi_list = split_trapi_query(trapi)
         print(f"\n\nNo. of TRAPI queries (batch size 50): {len(trapi_list)}")
@@ -168,7 +163,10 @@ def BTE_search(state: State) -> Command[Literal["orchestrator"]]:
         for index, trapi in enumerate(trapi_list):
             try:
                 print(f"\n\nTRAPI query #{index + 1}:\n{trapi}\n")
-                result, ids, update = BTECall.invoke({"json_query": trapi, "maxresults": maxresults, "k": k})
+                result, ids, update = BTECall.invoke(input={
+                    "json_query": trapi, 
+                    "maxresults": maxresults,
+                    "k": k})
 
                 if result:
                     results.extend(result)
@@ -222,7 +220,7 @@ def BTE_search(state: State) -> Command[Literal["orchestrator"]]:
     )
 
 def annotator_node(state: State) -> Command[Literal["orchestrator"]]:
-    response = modifiedBioNERTool.invoke({"query": state["query"]})
+    response = modifiedBioNERTool.invoke(state["query"])
     return Command(
         update={
             "messages": [
@@ -241,9 +239,9 @@ def planner_node(state: State) -> Command[Literal["orchestrator"]]:
 
     This will be an iterative process where answers to previous subqueries might be relevant in constructing future queries. 
     Initial subqueries should encompass the overall query path; each subsequent subquery should be more refined. A mechanistic approach should be used in developing the query plan.
-    For example, for \"Which drugs can treat Crohn's disease by targeting the inflammatory response?\", 
-    the first subquery might be \"Which drugs can treat Crohn's disease?\" followed by \"Which genes do these drugs target?\", 
-    then \"Which of these genes are related to the inflammatory response?\".
+    For example, for "Which drugs can treat Crohn's disease by targeting the inflammatory response?", 
+    the first subquery might be "Which drugs can treat Crohn's disease?" followed by "Which genes do these drugs target?", 
+    then "Which of these genes are related to the inflammatory response?".
     
     Here are the node types present in the knowledge graph: Disease, PhysiologicalProcess, BiologicalEntity, Gene, PathologicalProcess, Polypeptide, SmallMolecule, PhenotypicFeature
 
@@ -251,18 +249,18 @@ def planner_node(state: State) -> Command[Literal["orchestrator"]]:
     Restrict your queries to within these relationships.
 
     Here are the current results so far expressed in Turtle:
-{resultGraph.serialize(format="turtle")}
+    {resultGraph.serialize(format="turtle")}
 
     Make sure that each subquery interrogates discrete relationships between node types. 
-    For example, instead of directly asking \"What are the mechanisms of action of these drugs?\", 
-    you must create subqueries that can help form a reasoning chain to answer the question (\"What genes do these drugs interact with?\" and \"Which physiological processes are these genes involved in?)
+    For example, instead of directly asking "What are the mechanisms of action of these drugs?", 
+    you must create subqueries that can help form a reasoning chain to answer the question ("What genes do these drugs interact with?" and "Which physiological processes are these genes involved in?)
 
-    If a subquery results in \"No results found\", rephrase/reframe the question or explore the question from a different angle.
+    If a subquery results in "No results found", rephrase/reframe the question or explore the question from a different angle.
 
     Do NOT prescribe which nodes to use in your subquery, the nodes and predicates are only for your reference.
     You need to determine what the next single-hop subquery is and formulate it into a natural language subquestion. 
 
-    Your response MUST ONLY CONTAIN the single-hop natural language subquestion (for example, \"What genes does doxorubicin target?\"). 
+    Your response MUST ONLY CONTAIN the single-hop natural language subquestion (for example, "What genes does doxorubicin target?"). 
     Please DO NOT include your thoughts or anything else as it will interfere with downstream processes.
 """
 
@@ -282,202 +280,35 @@ def planner_node(state: State) -> Command[Literal["orchestrator"]]:
         goto="orchestrator"
     )
 
-def got_planner_node(state: State) -> Command[Literal["orchestrator"]]:
-    from .got_planner import GoTPlanner
-    from .tools.BTECall import TRAPIQuery, BTECall
-
-    # Merge entity_data list of dicts
-    entities: Dict[str, str] = {}
-    for d in state.get("entity_data", []):
-        entities.update(d)
-
-    # Helper to summarize a TRAPI query_graph
-    def _format_qg(qg: dict) -> str:
-        try:
-            nodes = qg.get("nodes", {})
-            edges = qg.get("edges", {})
-            parts = []
-            for ek, ev in edges.items():
-                s = nodes.get(ev.get("subject"), {})
-                o = nodes.get(ev.get("object"), {})
-                preds = ev.get("predicates", [])
-                parts.append(f"edge {ek}: {s.get('categories')} -{preds}-> {o.get('categories')}")
-            return " | ".join(parts) if parts else json.dumps(qg)[:500]
-        except Exception:
-            return json.dumps(qg)[:500]
-
-    planner = GoTPlanner(entity_data=entities)
-
-    # Initialize or read query_plan state
-    qp = state.get("query_plan") or {"plan": None, "subqueries": []}
-
-    # Iterative loop: plan-only, build TRAPI in LangGraph, call BTE, update RDF/IDs, refine plan
-    max_rounds = 3
-    batch_cap = 2
-
-    # If we already have a plan in state, load it to continue; else, create a fresh one
-    if qp.get("plan"):
-        try:
-            planner.set_plan(qp["plan"])  # continue from prior plan
-        except Exception:
-            pass
-    else:
-        plan = asyncio.run(planner.plan_only(state["query"]))
-        qp["plan"] = plan
-    plan = qp.get("plan") or planner.get_plan()
-
-    updates_lines = ["GoT planner iterations (LangGraph executes TRAPI/BTE):"]
-
-    failed_trapis: list = []
-
-    for round_no in range(1, max_rounds + 1):
-        # Determine ready nodes
-        ready_ids = planner.get_ready_node_ids()
-        if not ready_ids:
-            # Attempt a refinement with current evidence/IDs
-            relationships = []  # we derive below per round, but if no ready nodes, try with what we have
-            plan = asyncio.run(planner.refine_with_context(state["query"], entities, relationships))
-            ready_ids = planner.get_ready_node_ids()
-            if not ready_ids:
-                break
-
-        # Select a batch
-        batch = ready_ids[:batch_cap]
-        status_update: Dict[str, str] = {}
-        round_relationships: list[str] = []
-
-        updates_lines.append(f"- Iteration {round_no}:")
-
-        # Concurrently translate to TRAPI and call BTE for each subquery in batch
-        def worker(nid: str, subq_text: str, ent_snapshot: Dict[str, str]):
-            trapi = TRAPIQuery.invoke({"query": subq_text, "entity_data": ent_snapshot, "failed_trapis": failed_trapis})
-            if isinstance(trapi, str):
-                # Handle case where TRAPIQuery returns an error string
-                return (nid, subq_text, {}, [], {}, {"error": trapi}, {"id": nid, "text": subq_text, "error": trapi})
-            qg = trapi.get('message',{}).get('query_graph',{})
-            results, ent_update, meta = BTECall.invoke({"json_query": trapi, "maxresults": state["maxresults"], "k": state["k"]})
-            # Prepare subquery record
-            preds_tried = []
-            try:
-                ek = next(iter((qg.get("edges") or {}).keys()))
-                preds_tried = (qg.get("edges", {}).get(ek, {}).get("predicates") or [])
-            except Exception:
-                preds_tried = []
-            subq_record = {
-                "id": nid,
-                "text": subq_text,
-                "trapi": trapi,
-                "bte": {
-                    "endpoint": f"{os.getenv('BTE_API_BASE_URL', 'https://bte.transltr.io/v1')}/{os.getenv('BTE_QUERY_ENDPOINT','query')}",
-                    "request_id": (meta.get("request_id") if isinstance(meta, dict) else None),
-                    "description": (meta if isinstance(meta, str) else meta.get("description") if isinstance(meta, dict) else None),
-                    "predicates_tried": preds_tried,
-                    "result_stats": {"count": len(results or [])}
-                },
-            }
-            return (nid, subq_text, qg, results, ent_update, meta, subq_record)
-
-        # Prepare futures
-        futures = []
-        with ThreadPoolExecutor(max_workers=len(batch)) as executor:
-            for nid in batch:
-                subq = next((n.get("content") for n in plan.get("nodes", []) if n.get("id") == nid), None)
-                if not subq:
-                    status_update[nid] = "retired"
-                    continue
-                futures.append(executor.submit(worker, nid, subq, dict(entities)))
-
-            for fut in as_completed(futures):
-                nid, subq, qg, results, ent_update, meta, subq_record = fut.result()
-                updates_lines.append(f"  • Subquery: {subq}")
-                updates_lines.append(f"    TRAPI: {_format_qg(qg)}")
-                try:
-                    if os.getenv("VERBOSE_TRAPI") == "1":
-                        updates_lines.append("    TRAPI JSON:\n" + json.dumps(trapi, indent=2))
-                    else:
-                        # compact snapshot of the query_graph
-                        updates_lines.append("    TRAPI JSON (compact): " + json.dumps(trapi.get('message',{}).get('query_graph', {}))[:1000])
-                except Exception:
-                    pass
-                if results:
-                    RDFgraphUpdater(results)
-                    if isinstance(ent_update, dict):
-                        for k, v in ent_update.items():
-                            if isinstance(k, str) and isinstance(v, str):
-                                entities[k] = v
-                    for r in results[:20]:
-                        try:
-                            a = r.get("subject"); p = r.get("predicate"); b = r.get("object")
-                            round_relationships.append(f"{a} --{p}--> {b}")
-                        except Exception:
-                            continue
-                    status_update[nid] = "complete"
-                    updates_lines.append(f"    results: {len(results)} (sample: {results[:3]})")
-                    subq_record["results"] = results[:10]
-                    if isinstance(ent_update, dict) and ent_update:
-                        subq_record["entity_updates"] = ent_update
-                else:
-                    status_update[nid] = "retired"
-                    updates_lines.append("    results: 0")
-                    try:
-                        subq_record["bte"]["result_stats"] = {"count": 0}
-                    except Exception:
-                        pass
-                qp.setdefault("subqueries", []).append(subq_record)
-
-        # Apply status updates so dependencies can unlock
-        planner.update_statuses(status_update)
-
-        # Refine plan incorporating new IDs and relationships
-        plan = asyncio.run(planner.refine_with_context(state["query"], entities, round_relationships))
-        qp["plan"] = plan
-
-    # After iterations, prepare messages
-    updates_text = "\n".join(updates_lines)
-    final_plan = planner.get_plan()
-    qp["plan"] = final_plan
-
-    return Command(
-        update={
-            # no final_answer here; summary node remains responsible for final answer
-            "messages": [
-                HumanMessage(content=updates_text, name="got_planner_updates"),
-                HumanMessage(content=json.dumps(qp), name="query_plan"),
-            ],
-            "entity_data": [{k: v} for k, v in entities.items()],
-            "query_plan": qp,
-        },
-        goto="orchestrator"
-    )
-
 def summary_node(state: State) -> Command[Literal["orchestrator"]]:
-    summary_llm = ChatOpenAI(temperature=0, model=os.getenv("OPENAI_MODEL", "gpt-4o"))
+    summary_llm = ChatOpenAI(temperature=0, model="gpt-4.1")
 
-    qp = state.get("query_plan", {})
+    final_prompt = f""" You are an expert proficient in the pharmaceutical sciences, medicinal chemistry and biomedical research.
+        Your team has access to a biomedical knowledge graph, and have provided you with the following results based on the user's query.
+        However, the knowledge graph might not be perfect and have gaps in its data, and some relationships between the entities might be implicit.
+        Your job is to answer the user's query using your team's results and your own biomedical expertise.
+        Your summary of the results MUST be comprehensive while still avoiding redundancy.
+        Expound on the logical steps you took to form your final answer.
 
-    final_prompt = f""" You are an expert proficient in biomedical research.
-        Your team executed a multi-iteration query plan and gathered evidence in an RDF graph.
-
-        User query:
+        Make sure to organize your answer around the user query:
         {state["query"]}
 
-        Query plan (JSON):
-        {json.dumps(qp, indent=2)}
+        Here are the findings of your team expressed in Turtle:
+        {resultGraph.serialize(format="turtle")}
 
-        Findings in Turtle (RDF):
-{resultGraph.serialize(format="turtle")}
+        Here are the entities each ID corresponds to:
+        {state["entity_data"]}
 
-        Entities and IDs:
-        {state.get("entity_data", [])}
-
-        Instructions:
-        - Ground every claim in the evidence above (RDF relationships and/or subquery results from the plan).
-        - Be explicit when evidence is missing or weak.
-        - Prefer mechanistic chains (e.g., compound -> interacts_with -> gene -> participates_in -> pathway -> related_to -> disease) when supported.
-        - Avoid listing every entity; focus on the most explanatory ones.
-        - Be concise and transparent about your reasoning.
+        You MUST base your answer on the evidence/context included in the prompt; 
+        however, you can use your expertise to contextualize the results. 
+        For example, if the results only show target genes for dirithromycin, knowing that dirithromycin and erythromycin are part of the same drug class, you can infer that they are likely to share similar properties and targets.
+        
+        Maintain complete transparency about your problem-solving process; the relationships between each entity should be clear in your answer.
+        Do NOT list down all entities; rather, choose to most important ones to illustrate your point (for example, "the BRCA family of proteins is involved in breast cancer").
+        Remember, prioritize accuracy, explainability, and user understanding.
+        Only include relevant results in the final answer.
         """
-
+    
     summarize = [
         {"role": "system", "content": final_prompt},
     ]
@@ -525,37 +356,16 @@ CORE PRINCIPLES:
 """
 
 def orchestrator(state: State) -> Command[Literal[*members, "__end__"]]:
-    # Hard gate: always run annotator first if we have no entity_data yet.
-    try:
-        ed = state.get("entity_data", [])
-        if not ed:
-            return Command(goto="annotator", update={"next": "annotator"})
-    except Exception:
-        # If state is not fully initialized, be conservative and annotate
-        return Command(goto="annotator", update={"next": "annotator"})
+    messages = [
+        {"role": "system", "content": system_prompt},
+    ] + state["messages"]
 
-    # Decision policy based on query_plan state
-    qp = state.get("query_plan") or {}
-    plan = qp.get("plan") or {}
-    nodes = plan.get("nodes") or []
-    pending = [n for n in nodes if isinstance(n, dict) and n.get("status") == "pending"]
-    subqs = qp.get("subqueries") or []
-    total_results = 0
-    try:
-        for s in subqs:
-            cnt = (((s.get("bte") or {}).get("result_stats") or {}).get("count") or 0)
-            total_results += int(cnt)
-    except Exception:
-        pass
+    next = llm.with_structured_output(Router).invoke(messages)
+    goto = next["next"]
+    if goto == "FINISH":
+        goto = "summary"
 
-    # Heuristic: if there are pending nodes, keep running got_planner; otherwise, if we have any results or no more pending nodes at all, go to summary.
-    if pending:
-        return Command(goto="got_planner", update={"next": "got_planner"})
-    if total_results > 0 or (nodes and not pending):
-        return Command(goto="summary", update={"next": "summary"})
-
-    # Fallback to got_planner to try refinement
-    return Command(goto="got_planner", update={"next": "got_planner"})
+    return Command(goto=goto, update={"next": goto})
 
 def main(query, maxresults: int = 50, k: int = 5):
     builder = StateGraph(State)
@@ -563,12 +373,9 @@ def main(query, maxresults: int = 50, k: int = 5):
     builder.add_node("planner", planner_node)
     builder.add_node("annotator", annotator_node)
     builder.add_node("BTE_search", BTE_search)
-    builder.add_node("got_planner", got_planner_node)
     builder.add_node("summary", summary_node)
 
     builder.add_edge(START, "orchestrator")
-
-    graph = builder.compile()
 
     graph = builder.compile()
 
@@ -601,9 +408,9 @@ def main(query, maxresults: int = 50, k: int = 5):
     except:
         return None
     
-
 def BTEx(query, maxresults: int = 50, k: int = 5):
     return main(query, maxresults, k)
 
 if __name__ == "__main__":
     main()
+    

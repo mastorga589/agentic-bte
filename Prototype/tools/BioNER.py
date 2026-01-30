@@ -70,7 +70,7 @@ def modifiedBioNERTool(query: str):
         class entType(TypedDict):
             """The most appropriate entity type given a specific entity"""
             entType: Literal[*supportedEntTypes] # type: ignore
-        
+
         classify_prompt = f"""
         Classify the following biomedical entity into one of: 
         {supportedEntTypes}
