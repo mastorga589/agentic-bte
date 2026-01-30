@@ -11,16 +11,27 @@ import sys
 import os
 from typing import Dict, List, Any, Optional
 
-# Add the project root to Python path
-sys.path.append('/Users/mastorga/Documents/agentic-bte')
-
 from .interfaces import (
     BaseOptimizer, OptimizationStrategy, OptimizationResult, 
     OptimizationMetrics, OptimizerConfig
 )
 
 # Import the real MCP tool function
-from call_mcp_tool import call_mcp_tool
+try:
+    from call_mcp_tool import call_mcp_tool
+except ImportError:
+    # Fallback if running from different context
+    import importlib.util
+    import pathlib
+    project_root = pathlib.Path(__file__).parent.parent.parent.parent
+    mcp_tool_path = project_root / "call_mcp_tool.py"
+    if mcp_tool_path.exists():
+        spec = importlib.util.spec_from_file_location("call_mcp_tool", mcp_tool_path)
+        call_mcp_tool_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(call_mcp_tool_module)
+        call_mcp_tool = call_mcp_tool_module.call_mcp_tool
+    else:
+        raise ImportError("Could not find call_mcp_tool.py")
 
 logger = logging.getLogger(__name__)
 
